@@ -74,23 +74,40 @@ If you cannot find them, keep looking. There are tutorials on Youtube which help
 
 ## Changelog
 
-From 1.0.0 onwards, there will be changelogs for every update.
+The mod's Github is now the only place to view the full changelog.
 
-## 1.0.0
+### 1.0.3
 
- - Added a new Egypt faction including seven units (Guard, Sand Mage, Architect, Beastmaster, Scribe, Sun Chariot, and Nile Queen).
- - Added five new Egypt secret units (Boomerang, Pot Thrower, Mummy, Selket, and Warrior of Ra).
- - Added new Egypt map, Egypt 1.
- - Added new Egypt map, Egypt 2.
- - Added new Egypt campaign.
- - Added two new Battle and Placement Egypt tracks for the maps.
- - Added localization to all units (languages supported include English, French, Spanish, Russian, Chinese, and Japanese).
- - Revamped numerous existing units (Hades, Dread King, Rune Mage, Trojan Chicken, Ignislasher, Apollo, Odin, The Emperor, Centaur, Mayhem Gunner, Shaman, Angel, The Reaver, Flail Master, and Spider Mage).
- - Made minor changes to numerous existing units (Templar, Witch Doctor, etc.)
- - Changed Hades and Trojan Chicken's unlocks.
- - Changed all unlocks to have different glow colors depending on the unit's faction.
- - The mod's sounds are now affected by in-game sound settings.
- - Improved accuracy of numerous existing units (Mathematician, Philosopher, and Angel).
+ - Added all of the mod's projectiles to the debug tools menu.
+ - Added all abilities built into weapons as separate abilities in the Unit Creator.
+ - Added squires as a launchable projectile in the Unit Creator.
+ - Fixed invisible wall on Egypt 2.
+ - Fixed Cerberus having no eyes.
+ - Fixed units with revives reviving when zombified.
+ - Fixed Boomerang's throw animation being weak.
+ - Fixed Rune Mage's werewolves' swing animation being weak.
+ - Fixed Warrior of Ra's beam not being in the Unit Creator.
+ - Fixed Nile Queen's inaccurate aim at close ranges.
+ - Fixed Tower having erratic rotation.
+ - Fixed the Blessed Staff weapon in the Unit Creator having the incorrect model.
+ - Fixed the Trumpet weapon in the Unit Creator not being able to properly swap projectiles.
+ - Updated the Mjolnir weapon in the Unit Creator to match the one used on the unit.
+ - Updated the Sun parry ability in the Unit Creator to match the one used on the unit.
+ - Buffed Scribe range.
+ - Buffed Scribe health.
+ - Reworked Nile Queen's sun effects.
+ - Reworked Nile Queen's fire effects.
+
+### 1.0.2
+
+ - Fixed Hades not spawning altars or summoning Cerberus.
+ - Fixed Warrior of Ra not spawning the circle of swords before dying after being revived.
+ - Fixed Warrior of Ra being difficult to unlock.
+ - Fixed projectiles floating after hitting One Punch Man.
+ - Fixed Guard's whip being unable to be swung at long ranges.
+ - Fixed Dread King's revive not saving correctly in the Unit Creator.
+ - Fixed The Reaver's halberd not saving correctly in the Unit Creator.
+ - Fixed Trojan Chicken not being unlockable.
 
 ### 1.0.1
 
@@ -119,38 +136,21 @@ From 1.0.0 onwards, there will be changelogs for every update.
  - Improved Egypt 1's pathfinding around bridge.
  - Improved accuracy of Odin, Apollo, and Centaur.
 
-### 1.0.2
+## 1.0.0
 
- - Fixed Hades not spawning altars or summoning Cerberus.
- - Fixed Warrior of Ra not spawning the circle of swords before dying after being revived.
- - Fixed Warrior of Ra being difficult to unlock.
- - Fixed projectiles floating after hitting One Punch Man.
- - Fixed Guard's whip being unable to be swung at long ranges.
- - Fixed Dread King's revive not saving correctly in the Unit Creator.
- - Fixed The Reaver's halberd not saving correctly in the Unit Creator.
- - Fixed Trojan Chicken not being unlockable.
-
-### 1.0.3
-
- - Added all of the mod's projectiles to the debug tools menu.
- - Added all abilities built into weapons as separate abilities in the Unit Creator.
- - Added squires as a launchable projectile in the Unit Creator.
- - Fixed invisible wall on Egypt 2.
- - Fixed Cerberus having no eyes.
- - Fixed units with revives reviving when zombified.
- - Fixed Boomerang's throw animation being weak.
- - Fixed Rune Mage's werewolves' swing animation being weak.
- - Fixed Warrior of Ra's beam not being in the Unit Creator.
- - Fixed Nile Queen's inaccurate aim at close ranges.
- - Fixed Tower having erratic rotation.
- - Fixed the Blessed Staff weapon in the Unit Creator having the incorrect model.
- - Fixed the Trumpet weapon in the Unit Creator not being able to properly swap projectiles.
- - Updated the Mjolnir weapon in the Unit Creator to match the one used on the unit.
- - Updated the Sun parry ability in the Unit Creator to match the one used on the unit.
- - Buffed Scribe range.
- - Buffed Scribe health.
- - Reworked Nile Queen's sun effects.
- - Reworked Nile Queen's fire effects.
+ - Added a new Egypt faction including seven units (Guard, Sand Mage, Architect, Beastmaster, Scribe, Sun Chariot, and Nile Queen).
+ - Added five new Egypt secret units (Boomerang, Pot Thrower, Mummy, Selket, and Warrior of Ra).
+ - Added new Egypt map, Egypt 1.
+ - Added new Egypt map, Egypt 2.
+ - Added new Egypt campaign.
+ - Added two new Battle and Placement Egypt tracks for the maps.
+ - Added localization to all units (languages supported include English, French, Spanish, Russian, Chinese, and Japanese).
+ - Revamped numerous existing units (Hades, Dread King, Rune Mage, Trojan Chicken, Ignislasher, Apollo, Odin, The Emperor, Centaur, Mayhem Gunner, Shaman, Angel, The Reaver, Flail Master, and Spider Mage).
+ - Made minor changes to numerous existing units (Templar, Witch Doctor, etc.)
+ - Changed Hades and Trojan Chicken's unlocks.
+ - Changed all unlocks to have different glow colors depending on the unit's faction.
+ - The mod's sounds are now affected by in-game sound settings.
+ - Improved accuracy of numerous existing units (Mathematician, Philosopher, and Angel).
 
 ## Credits
 
