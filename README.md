@@ -74,7 +74,7 @@ If you cannot find them, keep looking. There are tutorials on Youtube which help
 
 ## Changelog
 
-The mod's Github is now the only place to view the full changelog.
+The mod's [**Github**](https://github.com/donkeyrat/HiddenUnits) is now the only place to view the full changelog.
 
 ### 1.0.3
 
@@ -177,6 +177,8 @@ The new music for the mod was composed by *Voup*, a talented musician. You can v
 [**Egypt Placement**](https://www.youtube.com/watch?v=sq79L46WuAw)
 
 [**Egypt Battle**](https://www.youtube.com/watch?v=iYm2xraBMj4)
+
+## Gallery
 
 ![enter image description here](https://cdn.discordapp.com/attachments/651812532746584085/999419368905658378/unknown.png)
 
