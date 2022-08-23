@@ -9,7 +9,9 @@ __ALL OF THE CLOTHING, WEAPONS, AND ABILITIES ARE AVAILABLE IN THE UNIT CREATOR.
 
 __IF YOU HAVE ARACHNOPHOBIA, DO NOT USE SELKET.__
 
-### If you have trouble with the mod, or if you just want to chat, you can join my discord server: [https://discord.gg/JU26hKxZgc](https://discord.gg/JU26hKxZgc)
+### If you have trouble with the mod, or if you just want to chat, you can join the [TABS Mod Center](https://discord.gg/zrs44qyp7S).
+
+### This mod is [**open source**](https://github.com/donkeyrat/SummonerCreator).
 
 ## How To Use
 
