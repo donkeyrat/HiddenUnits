@@ -13,6 +13,8 @@ __IF YOU HAVE ARACHNOPHOBIA, DO NOT USE SELKET.__
 
 ### This mod is [**open source**](https://github.com/donkeyrat/SummonerCreator).
 
+### The Egypt Update has an [official trailer](https://www.youtube.com/watch?v=GaDh8GREJ8U).
+
 ## How To Use
 
 *The Egypt faction and maps are unlocked upon loading the game with the mod for the first time.*
