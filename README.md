@@ -1,5 +1,5 @@
 
-# Hidden Units Mod
+# Hidden Units
 
 __FOURTY FOUR__ different unique units are added by this mod, a majority of which can be found in the Secret faction. *HOWEVER*, all units added to the Secret faction must be unlocked, just like ordinary secret units!
 As for the other seven units, they can be found in a new faction, the **Egypt faction**! This faction includes **seven high-quality units**, just like any other faction, and **comes with TWO NEW MAPS**, complete with two amazing music tracks composed by the legendary Voup! 
