@@ -4,3 +4,7 @@ obj/
 riderModule.iml
 /_ReSharper.Caches/
 .idea/
+Resources/
+Properties/Resources.resx
+HiddenUnits.sln.DotSettings.user
+Properties/Resources.Designer.cs

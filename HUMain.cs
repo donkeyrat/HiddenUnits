@@ -14,9 +14,9 @@ namespace HiddenUnits {
         public HUMain()
         {
 
-            //AssetBundle.LoadFromMemory(Properties.Resources.egyptmap);
-            //AssetBundle.LoadFromMemory(Properties.Resources.egyptmap2);
-            AssetBundle huMaps = null;//AssetBundle.LoadFromMemory(Properties.Resources.humaps);
+            AssetBundle.LoadFromMemory(Properties.Resources.egyptmap);
+            AssetBundle.LoadFromMemory(Properties.Resources.egyptmap2);
+            AssetBundle huMaps = AssetBundle.LoadFromMemory(Properties.Resources.humaps);
             var list = new List<MapAsset>();
             foreach (var map in huMaps.LoadAllAssets<MapAsset>()) {
 
@@ -25,8 +25,11 @@ namespace HiddenUnits {
                     list.Add(map);
                 }
             }
-                List<MapAsset> maps = (List<MapAsset>)typeof(LandfallUnitDatabase).GetField("Maps", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(LandfallUnitDatabase.GetDatabase());
-            list.Add(maps[0]); list.Add(maps[1]); list.Add(maps[2]); list.Add(maps[3]); list.Add(maps[4]); list.Add(maps[5]); list.Add(maps[6]); list.Add(maps[7]); list.Add(maps[8]); list.Add(maps[9]); list.Add(maps[10]); list.Add(maps[11]); list.Add(maps[12]); list.Add(maps[13]); list.Add(maps[14]); list.Add(maps[15]); list.Add(maps[16]); list.Add(maps[17]); list.Add(maps[18]); list.Add(maps[19]); list.Add(maps[20]); list.Add(maps[21]); list.Add(maps[22]); list.Add(maps[23]); list.Add(maps[24]); list.Add(maps[25]); list.Add(maps[26]); list.Add(maps[27]); list.Add(maps[28]);
+            List<MapAsset> maps = (List<MapAsset>)typeof(LandfallUnitDatabase).GetField("Maps", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(LandfallUnitDatabase.GetDatabase());
+            for (int i = 0; i < 29; i++)
+            {
+                list.Add(maps[i]);
+            }
             list.Add(huMaps.LoadAsset<MapAsset>("Egypt1"));
             list.Add(huMaps.LoadAsset<MapAsset>("Egypt2"));
             maps.RemoveRange(0, 29);
@@ -296,7 +299,7 @@ namespace HiddenUnits {
             ServiceLocator.GetService<CustomContentLoaderModIO>().QuickRefresh(WorkshopContentType.Unit, null);
         }
 
-        public static AssetBundle hiddenUnits;// = AssetBundle.LoadFromMemory(Properties.Resources.hiddenunits);
+        public static AssetBundle hiddenUnits = AssetBundle.LoadFromMemory(Properties.Resources.hiddenunits);
 
         public static Material wet;
     }
