@@ -16,7 +16,7 @@ namespace HiddenUnits
             }
             hitList.Add(hitTransform.root.GetComponent<Unit>());
             oldTarget = hitTransform.root.GetComponent<Unit>();
-            hitTransform.root.GetComponent<Unit>().data.healthHandler.TakeDamage(damage, new Vector3(0f, 0f, 0f), transform.root.GetComponent<Unit>(), DamageType.Magic);
+            oldTarget.data.healthHandler.TakeDamage(damage, new Vector3(0f, 0f, 0f), transform.root.GetComponent<Unit>(), DamageType.Magic);
             SetTarget(transform);
             StartCoroutine(Lightning());
         }
@@ -42,19 +42,25 @@ namespace HiddenUnits
         {
             for (int i = 0; i < chainCount; i++)
             {
-                if (target != null)
+                for (int j = 0; j < consecutiveChains; j++)
                 {
-                    var line = Instantiate(lineObject, oldTarget.transform, true);
-                    line.transform.FindChildRecursive("T1").position = oldTarget.data.mainRig.position;
-                    line.transform.FindChildRecursive("T2").position = target.data.mainRig.position;
-                    target.data.healthHandler.TakeDamage(damage, new Vector3(0f, 0f, 0f), transform.root.GetComponent<Unit>(), DamageType.Magic);
-                    hitList.Add(target);
-                    oldTarget = target;
-                    SetTarget(target.data.mainRig.transform);
-                    yield return new WaitForSeconds(0.1f);
+                    if (target != null && target.data && target.data.healthHandler && lineObject && oldTarget)
+                    {
+                        var line = Instantiate(lineObject, oldTarget.transform, true);
+                        line.transform.FindChildRecursive("T1").position = oldTarget.data.mainRig.position;
+                        line.transform.FindChildRecursive("T2").position = target.data.mainRig.position;
+                        target.data.healthHandler.TakeDamage(damage, new Vector3(0f, 0f, 0f), transform.root.GetComponent<Unit>(), DamageType.Magic);
+                        hitList.Add(target);
+                        oldTarget = target;
+                    }
+                    if (oldTarget != null)
+                    {
+                        SetTarget(oldTarget.data.mainRig.transform);
+                    }
                 }
+
+                yield return new WaitForSeconds(0.1f);
             }
-            yield break;
         }
 
         private Unit target;
@@ -70,5 +76,7 @@ namespace HiddenUnits
         public float damage = 1000f;
 
         public GameObject lineObject;
+
+        public int consecutiveChains = 1;
     }
 }

@@ -1,14 +1,29 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Landfall.TABS;
-using System.Linq;
 
 namespace HiddenUnits {
-    public class MaterialEvent : MonoBehaviour {
+    public class TeamColorMaterialEvent : MonoBehaviour {
 
         public void Start()
         {
             originalMat = Instantiate(rend.materials[index]);
+            if (GetComponent<TeamHolder>())
+            {
+                team = GetComponent<TeamHolder>().team;
+            }
+            else if (GetComponentInChildren<TeamHolder>())
+            {
+                team = GetComponentInChildren<TeamHolder>().team;
+            }
+            else if (GetComponentInParent<TeamHolder>())
+            {
+                team = GetComponentInParent<TeamHolder>().team;
+            }
+            else if (transform.root.GetComponent<Unit>())
+            {
+                team = transform.root.GetComponent<Unit>().Team;
+            }
         }
         
         public void ChangeMaterial() {
@@ -23,7 +38,7 @@ namespace HiddenUnits {
         }
 
         void Update() {
-            if (transform.root.GetComponentsInChildren<UnitEffectBase>().ToList().Find(x => x.effectID == 1987)) { Reset(); }
+            if (transform.root.GetComponentInChildren<Effect_Apollo>()) { Reset(); }
             if (changing && t < lerpTime && Time.timeScale != 0f) {
                 t += Mathf.Clamp(Time.deltaTime / lerpTime, 0f, 1f);
                 if (useOriginalMat)
@@ -32,7 +47,7 @@ namespace HiddenUnits {
                 }
                 else
                 {
-                    rend.materials[index].Lerp(rend.materials[index], newMat, t);
+                    rend.materials[index].Lerp(rend.materials[index], team == Team.Red ? newMatRed : newMatBlue, t);
                 }
             }
             else if (t > lerpTime) { changing = false;
@@ -46,6 +61,8 @@ namespace HiddenUnits {
             useOriginalMat = false;
         }
 
+        private Team team;
+
         private bool changing;
 
         private bool useOriginalMat;
@@ -56,7 +73,9 @@ namespace HiddenUnits {
 
         public int index;
 
-        public Material newMat;
+        public Material newMatRed;
+        
+        public Material newMatBlue;
 
         private Material originalMat;
 

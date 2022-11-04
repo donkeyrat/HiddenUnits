@@ -11,7 +11,8 @@ namespace HiddenUnits {
         public void Start() 
         {
             target = GetComponent<TeamHolder>().spawner.GetComponent<Unit>().data.targetData.unit.data.mainRig.transform;
-            weapon = transform.root.GetComponent<Unit>().WeaponHandler.rightWeapon;
+            weapon = transform.GetComponentInParent<Weapon>() ? transform.GetComponentInParent<Weapon>() : transform.root.GetComponent<Unit>().WeaponHandler.rightWeapon;
+            returnObject = weapon.transform.FindChildRecursive(objectToReturnTo);
         }
         
         public void Update()
@@ -24,11 +25,20 @@ namespace HiddenUnits {
                 transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(transform.forward, target.position - transform.position, Time.deltaTime * rotationSpeed, 0f));
             }
 
-            if (returning && target && Vector3.Distance(transform.position, target.position) <= returnDistance)
+            if (returning)
             {
-                weapon.GetComponent<DelayEvent>().Go();
-                if (transform.root.GetComponent<Unit>().data.Dead && weapon.GetComponent<DeathEvent>()) weapon.GetComponent<DeathEvent>().Die();
-                Destroy(gameObject);
+                if (returnCounter >= 1f)
+                {
+                    weapon.GetComponent<DelayEvent>().Go();
+                    Destroy(gameObject);
+                    returning = false;
+                    return;
+                }
+                transform.position = Vector3.Lerp(returnPosition,
+                    returnObject.position, returnCounter);
+                transform.rotation = Quaternion.Lerp(returnRotation,
+                    returnObject.rotation, returnCounter);
+                returnCounter += Time.deltaTime * returnSpeed;
             }
         }
 
@@ -37,17 +47,19 @@ namespace HiddenUnits {
             var enemyUnit = col.transform.root.GetComponent<Unit>();
             if (counter < cooldown || !enemyUnit || !col.rigidbody || (enemyUnit && hitList.Contains(enemyUnit)) || (enemyUnit && enemyUnit.Team == GetComponent<TeamHolder>().team)) return;
             counter = 0f;
+
+            var flag = col.transform.IsChildOf(enemyUnit.data.transform);
             
-            enemyUnit.data.healthHandler.TakeDamage(damage, Vector3.zero);
+            enemyUnit.data.healthHandler.TakeDamage(damage * (flag ? 1f : 0f), Vector3.zero);
 
             var goldenNumber = Mathf.Clamp(col.impulse.magnitude / (GetComponent<Rigidbody>().mass + 10f) * 0.3f * impactMultiplier, 0f, 2f);
             if (ScreenShake.Instance) ScreenShake.Instance.AddForce(transform.forward * Mathf.Sqrt(goldenNumber * 0.5f) * 0.5f * impactScreenShake, col.contacts[0].point);
-            WilhelmPhysicsFunctions.AddForceWithMinWeight(enemyUnit.data.mainRig, Mathf.Sqrt(goldenNumber * 50f) * transform.forward * impactForce, ForceMode.Impulse, massCap);
+            WilhelmPhysicsFunctions.AddForceWithMinWeight(enemyUnit.data.mainRig, Mathf.Sqrt(goldenNumber * 50f) * transform.forward * impactForce * (flag ? 1f : 0f), ForceMode.Impulse, massCap);
             WilhelmPhysicsFunctions.AddForceWithMinWeight(col.rigidbody, Mathf.Sqrt(goldenNumber * 50f) * transform.forward * impactForce, ForceMode.Impulse, massCap);
             
             foreach (var effect in GetComponents<CollisionWeaponEffect>()) effect.DoEffect(col.transform, col);
 
-            hitCount += 1;
+            hitCount += 1 * (!col.transform.name.Contains("Mjolnir") ? 1 : 100);
             hitList.Add(enemyUnit);
             SetTarget();
             if (hitCount >= hitLimit)
@@ -79,26 +91,44 @@ namespace HiddenUnits {
 
         public void Return()
         {
-            target = weapon.transform;
             returning = true;
+            returnPosition = transform.position;
+            returnRotation = transform.rotation;
+        }
+
+        public void TriggerFinish()
+        {
+            finishEvent.Invoke();
         }
         
         private float counter;
-
-        [Header("Projectile Settings")] 
         private Transform target;
         private List<Unit> hitList = new List<Unit>();
         private int hitCount;
         private bool returning;
-        private Weapon weapon;
+        
+        [Header("Projectile Settings")] 
         
         public int hitLimit = 10;
         public float maxRange = 50f;
         
         public float flightSpeed = 1f;
         public float rotationSpeed = 30f;
+
+
+        [Header("Return Settings")] 
         
-        public float returnDistance = 0.2f;
+        public float returnSpeed = 0.5f;
+        public string objectToReturnTo;
+
+        private float returnCounter;
+        
+        
+        private Transform returnObject;
+        private Weapon weapon;
+        
+        private Vector3 returnPosition;
+        private Quaternion returnRotation;
         
         public UnityEvent finishEvent = new UnityEvent();
         

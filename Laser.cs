@@ -59,7 +59,7 @@ public class Laser : MonoBehaviour
     {
         line.SetPosition(0, p2.transform.position);
         RaycastHit hit;
-        if (Physics.Raycast(p2.transform.position, p2.transform.forward, out hit, maxDistance, LayerMask.GetMask(new string[] { layer })))
+        if (Physics.Raycast(p2.transform.position, p2.transform.forward, out hit, maxDistance, layer))
         {
             if (hit.collider)
             {
@@ -94,5 +94,5 @@ public class Laser : MonoBehaviour
 
     private bool hasDeactivated;
 
-    public string layer = "MainRig";
+    public LayerMask layer;
 }

@@ -1,4 +1,5 @@
-﻿using Landfall.TABS;
+﻿using System;
+using Landfall.TABS;
 using UnityEngine;
 using Landfall.TABS.UnitEditor;
 using Landfall.TABS.Workshop;
@@ -6,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using System.Reflection;
+using Object = UnityEngine.Object;
+using DM;
 
 namespace HiddenUnits {
 
@@ -13,35 +16,44 @@ namespace HiddenUnits {
 
         public HUMain()
         {
+            var db = ContentDatabase.Instance();
+
 
             AssetBundle.LoadFromMemory(Properties.Resources.egyptmap);
             AssetBundle.LoadFromMemory(Properties.Resources.egyptmap2);
-            AssetBundle huMaps = AssetBundle.LoadFromMemory(Properties.Resources.humaps);
-            var list = new List<MapAsset>();
-            foreach (var map in huMaps.LoadAllAssets<MapAsset>()) {
+            var newMapList = new List<MapAsset>();
+            var newMapDict = new Dictionary<DatabaseID, int>();
+            
+            var maps = ((MapAsset[])typeof(LandfallContentDatabase).GetField("m_orderedMapAssets", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db.LandfallContentDatabase)).ToList();
 
-                LandfallUnitDatabase.GetDatabase().MapList.AddItem(map);
-                if (!map.name.Contains("Egypt")) {
-                    list.Add(map);
-                }
-            }
-            List<MapAsset> maps = (List<MapAsset>)typeof(LandfallUnitDatabase).GetField("Maps", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(LandfallUnitDatabase.GetDatabase());
             for (int i = 0; i < 29; i++)
             {
-                list.Add(maps[i]);
+                newMapList.Add(maps[i]);
             }
-            list.Add(huMaps.LoadAsset<MapAsset>("Egypt1"));
-            list.Add(huMaps.LoadAsset<MapAsset>("Egypt2"));
+            newMapList.Add(huMaps.LoadAsset<MapAsset>("Egypt1"));
+            newMapList.Add(huMaps.LoadAsset<MapAsset>("Egypt2"));
             maps.RemoveRange(0, 29);
-            list.AddRange(maps);
+            newMapList.AddRange(maps);
+            
+            foreach (var map in huMaps.LoadAllAssets<MapAsset>()) 
+            {
+                if (!map.name.Contains("Egypt")) {
+                    newMapList.Add(map);
+                }
+            }
 
-            typeof(LandfallUnitDatabase).GetField("Maps", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(LandfallUnitDatabase.GetDatabase(), list);
+            foreach (var map in newMapList)
+            {
+                newMapDict.Add(map.Entity.GUID, newMapList.IndexOf(map));
+            }
 
-            var db = LandfallUnitDatabase.GetDatabase();
-            List<Faction> factions = (List<Faction>)typeof(LandfallUnitDatabase).GetField("Factions", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
-            foreach (var fac in hiddenUnits.LoadAllAssets<Faction>()) {
-
-                var theNew = new List<UnitBlueprint>(fac.Units);
+            typeof(LandfallContentDatabase).GetField("m_orderedMapAssets", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db.LandfallContentDatabase, newMapList.ToArray());
+            typeof(LandfallContentDatabase).GetField("m_mapAssetIndexLookup", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db.LandfallContentDatabase, newMapDict);
+            
+            
+            var factions = db.LandfallContentDatabase.GetFactions().ToList();
+            foreach (var fac in hiddenUnits.LoadAllAssets<Faction>()) 
+            {
                 var veryNewUnits = (
                     from UnitBlueprint unit
                     in fac.Units
@@ -65,7 +77,8 @@ namespace HiddenUnits {
                 }
             }
 
-            foreach (var sb in hiddenUnits.LoadAllAssets<SoundBank>()) {
+            foreach (var sb in hiddenUnits.LoadAllAssets<SoundBank>()) 
+            {
                 if (sb.name.Contains("Sound")) {
                     var vsb = ServiceLocator.GetService<SoundPlayer>().soundBank;
                     foreach (var sound in sb.Categories) { sound.categoryMixerGroup = vsb.Categories[0].categoryMixerGroup; }
@@ -90,73 +103,85 @@ namespace HiddenUnits {
                 }
             }
 
-            List<Faction> hbFactions = (List<Faction>)typeof(LandfallUnitDatabase).GetField("DefaultHotbarFactions", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
-            foreach (var fac in hiddenUnits.LoadAllAssets<Faction>()) {
+            new GameObject {
+                name = "Bullshit",
+                hideFlags = HideFlags.HideAndDontSave
+            }.AddComponent<HUSceneManager>();
 
-                db.FactionList.AddItem(fac);
-                db.AddFactionWithID(fac);
-                hbFactions.Add(fac);
+            var cringer = new GameObject  {
+                name = "Bullshit: The Trilogy",
+                hideFlags = HideFlags.HideAndDontSave
+            }.AddComponent<LanguageReader>();
+            cringer.localizerCH = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerCH;
+            cringer.localizerEN = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerEN;
+            cringer.localizerES = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerES;
+            cringer.localizerFR = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerFR;
+            cringer.localizerDE = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerDE;
+            cringer.localizerIT = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerIT;
+            cringer.localizerJA = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerJA;
+            cringer.localizerRU = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerRU;
+            cringer.localizerPT_BR = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerPT_BR;
 
-                foreach (var unit in fac.Units) { if (!db.UnitList.Contains(unit)) { db.UnitList.AddItem(unit); db.AddUnitWithID(unit); } }
+            new Harmony("SussingtonBaka").PatchAll();
+
+            var allConditions = new List<SecretUnlockCondition>(Resources.FindObjectsOfTypeAll<SecretUnlockConditions>()[0].m_unlockConditions);
+            foreach (var condition in hiddenUnits.LoadAsset<SecretUnlockConditions>("HUUnlockConditions").m_unlockConditions) 
+            {
+                allConditions.Add(condition);
+            }
+            Resources.FindObjectsOfTypeAll<SecretUnlockConditions>()[0].m_unlockConditions = allConditions.ToArray();
+
+            var allMats = Resources.FindObjectsOfTypeAll<Material>().ToList();
+            foreach (var mat in hiddenUnits.LoadAllAssets<Material>()) if (Shader.Find(mat.shader.name)) mat.shader = Shader.Find(mat.shader.name);
+            
+            foreach (var unit in hiddenUnits.LoadAllAssets<UnitBlueprint>())
+            {
+                newUnits.Add(unit);
+                foreach (var b in db.LandfallContentDatabase.GetUnitBases().ToList()) { if (unit.UnitBase != null) { if (b.name == unit.UnitBase.name) { unit.UnitBase = b; } } }
+                foreach (var b in db.LandfallContentDatabase.GetWeapons().ToList()) { if (unit.RightWeapon != null && b.name == unit.RightWeapon.name) unit.RightWeapon = b; if (unit.LeftWeapon != null && b.name == unit.LeftWeapon.name) unit.LeftWeapon = b; }
+            }
+            
+            foreach (var fac in hiddenUnits.LoadAllAssets<Faction>()) newFactions.Add(fac);
+            
+            foreach (var campaign in hiddenUnits.LoadAllAssets<TABSCampaignAsset>()) newCampaigns.Add(campaign);
+            
+            foreach (var lvl in hiddenUnits.LoadAllAssets<TABSCampaignLevelAsset>())
+            {
+                newCampaignLevels.Add(lvl);
             }
 
-            typeof(LandfallUnitDatabase).GetField("DefaultHotbarFactions", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, (from Faction fac in hbFactions orderby fac.index select fac).ToList());
-
-            foreach (var unit in hiddenUnits.LoadAllAssets<UnitBlueprint>()) {
-
-                if (!db.UnitList.Contains(unit)) { db.UnitList.AddItem(unit); db.AddUnitWithID(unit); }
-                foreach (var b in db.UnitBaseList) { if (unit.UnitBase != null) { if (b.name == unit.UnitBase.name) { unit.UnitBase = b; } } }
-                foreach (var b in db.WeaponList) { if (unit.RightWeapon != null && b.name == unit.RightWeapon.name) unit.RightWeapon = b; if (unit.LeftWeapon != null && b.name == unit.LeftWeapon.name) unit.LeftWeapon = b; }
-            }
-
-            List<VoiceBundle> vbList = (List<VoiceBundle>)typeof(LandfallUnitDatabase).GetField("VoiceBundles", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
-            foreach (var vb in hiddenUnits.LoadAllAssets<VoiceBundle>()) {
-
-                db.VoiceBundlesList.AddItem(vb);
-                vbList.Add(vb);
-            }
-            typeof(LandfallUnitDatabase).GetField("VoiceBundles", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, vbList);
-
+            foreach (var vb in hiddenUnits.LoadAllAssets<VoiceBundle>()) newVoiceBundles.Add(vb);
+            
             int startID = 122436;
-            List<FactionIcon> iconList = (List<FactionIcon>)typeof(LandfallUnitDatabase).GetField("FactionIcons", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
             foreach (var sprite in hiddenUnits.LoadAllAssets<Sprite>()) {
 
                 if (sprite.name.Contains("Icons_128x128")) {
 
-                    var icon = Object.Instantiate(db.FactionIconsList[0]);
+                    var icon = Object.Instantiate(db.GetFactionIcon(db.LandfallContentDatabase.GetFactionIconIds().ToList()[0]));
                     icon.name = sprite.name;
-                    icon.Entity.SpriteIcon = sprite;
+                    icon.Entity.SetSpriteIcon(sprite);
                     icon.Entity.GUID = new DatabaseID(-2, startID);
                     startID++;
-                    db.FactionIconsList.AddItem(icon);
-                    iconList.Add(icon);
+                    newFactionIcons.Add(icon);
                 }
             }
-            typeof(LandfallUnitDatabase).GetField("FactionIcons", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, iconList);
 
-            List<GameObject> stuff = (List<GameObject>)typeof(LandfallUnitDatabase).GetField("UnitBases", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
-            List<GameObject> stuff2 = (List<GameObject>)typeof(LandfallUnitDatabase).GetField("Weapons", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
-            List<GameObject> stuff3 = (List<GameObject>)typeof(LandfallUnitDatabase).GetField("Projectiles", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
-            List<GameObject> stuff4 = (List<GameObject>)typeof(LandfallUnitDatabase).GetField("CombatMoves", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
-            List<GameObject> stuff5 = (List<GameObject>)typeof(LandfallUnitDatabase).GetField("CharacterProps", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
-            foreach (var objecting in hiddenUnits.LoadAllAssets<GameObject>()) {
-
+            foreach (var objecting in hiddenUnits.LoadAllAssets<GameObject>()) 
+            {
                 if (objecting != null) {
 
-                    if (objecting.GetComponent<Unit>()) {
-                        stuff.Add(objecting);
-                    }
+                    if (objecting.GetComponent<Unit>()) newBases.Add(objecting);
                     else if (objecting.GetComponent<WeaponItem>()) {
-                        stuff2.Add(objecting);
+                        newWeapons.Add(objecting);
                         int totalSubmeshes = 0;
                         foreach (var rend in objecting.GetComponentsInChildren<MeshFilter>()) {
-                            if (rend.gameObject.activeSelf && rend.mesh.subMeshCount > 0 && rend.GetComponent<MeshRenderer>() && rend.GetComponent<MeshRenderer>().enabled == true) {
+                            if (rend.gameObject.activeSelf && rend.gameObject.activeInHierarchy && rend.mesh.subMeshCount > 0 && rend.GetComponent<MeshRenderer>() && rend.GetComponent<MeshRenderer>().enabled == true) {
 
                                 totalSubmeshes += rend.mesh.subMeshCount;
                             }
                         }
                         foreach (var rend in objecting.GetComponentsInChildren<SkinnedMeshRenderer>()) {
-                            if (rend.gameObject.activeSelf == true && rend.sharedMesh.subMeshCount > 0 && rend.enabled) {
+                            if (rend.gameObject.activeSelf && rend.sharedMesh.subMeshCount > 0 && rend.enabled) {
 
                                 totalSubmeshes += rend.sharedMesh.subMeshCount;
                             }
@@ -169,23 +194,19 @@ namespace HiddenUnits {
                             objecting.GetComponent<WeaponItem>().SubmeshArea = averageList.ToArray();
                         }
                     }
-                    else if (objecting.GetComponent<ProjectileEntity>()) {
-                        stuff3.Add(objecting);
-                    }
-                    else if (objecting.GetComponent<SpecialAbility>()) {
-                        stuff4.Add(objecting);
-                    }
+                    else if (objecting.GetComponent<ProjectileEntity>()) newProjectiles.Add(objecting);
+                    else if (objecting.GetComponent<SpecialAbility>()) newAbilities.Add(objecting);
                     else if (objecting.GetComponent<PropItem>()) {
-                        stuff5.Add(objecting);
+                        newProps.Add(objecting);
                         int totalSubmeshes = 0;
                         foreach (var rend in objecting.GetComponentsInChildren<MeshFilter>()) {
-                            if (rend.gameObject.activeSelf == true && rend.mesh.subMeshCount > 0 && rend.GetComponent<MeshRenderer>() && rend.GetComponent<MeshRenderer>().enabled == true) {
+                            if (rend.gameObject.activeSelf && rend.gameObject.activeInHierarchy && rend.mesh.subMeshCount > 0 && rend.GetComponent<MeshRenderer>() && rend.GetComponent<MeshRenderer>().enabled == true) {
 
                                 totalSubmeshes += rend.mesh.subMeshCount;
                             }
                         }
                         foreach (var rend in objecting.GetComponentsInChildren<SkinnedMeshRenderer>()) {
-                            if (rend.gameObject.activeSelf == true && rend.sharedMesh.subMeshCount > 0 && rend.enabled) {
+                            if (rend.gameObject.activeSelf && rend.sharedMesh.subMeshCount > 0 && rend.enabled) {
 
                                 totalSubmeshes += rend.sharedMesh.subMeshCount;
                             }
@@ -200,107 +221,159 @@ namespace HiddenUnits {
                     }
                 }
             }
-            typeof(LandfallUnitDatabase).GetField("UnitBases", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, stuff);
-            typeof(LandfallUnitDatabase).GetField("Weapons", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, stuff2);
-            typeof(LandfallUnitDatabase).GetField("Projectiles", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, stuff3);
-            typeof(LandfallUnitDatabase).GetField("CombatMoves", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, stuff4);
-            typeof(LandfallUnitDatabase).GetField("CharacterProps", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, stuff5);
-
-            new GameObject() {
-                name = "Bullshit",
-                hideFlags = HideFlags.HideAndDontSave
-            }.AddComponent<HUSecretManager>();
-            new GameObject() {
-                name = "Bullshit: The Sequel",
-                hideFlags = HideFlags.HideAndDontSave
-            }.AddComponent<HUUnlockConditionsChecker>();
-
-            var cringer = new GameObject()  {
-                name = "Bullshit: The Trilogy",
-                hideFlags = HideFlags.HideAndDontSave
-            }.AddComponent<LanguageReader>();
-            cringer.localizerCH = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerCH;
-            cringer.localizerEN = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerEN;
-            cringer.localizerES = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerES;
-            cringer.localizerFR = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerFR;
-            cringer.localizerDE = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerDE;
-            cringer.localizerIT = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerIT;
-            cringer.localizerJA = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerJA;
-            cringer.localizerRU = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerRU;
-            cringer.localizerPT_BR = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerPT_BR;
-
-
-            var harmony = new Harmony("SussingtonBaka");
-            harmony.PatchAll();
-
-            foreach (var condition in hiddenUnits.LoadAsset<SecretUnlockConditions>("HUUnlockConditions").m_unlockConditions) {
-
-                var allConditions = new List<SecretUnlockCondition>(Resources.FindObjectsOfTypeAll<SecretUnlockConditions>()[0].m_unlockConditions);
-                allConditions.Add(condition);
-                Resources.FindObjectsOfTypeAll<SecretUnlockConditions>()[0].m_unlockConditions = allConditions.ToArray();
-            }
-
-            var allMats = Resources.FindObjectsOfTypeAll<Material>().ToList();
-            foreach (var mat in hiddenUnits.LoadAllAssets<Material>()) {
-
-                if (Shader.Find(mat.shader.name)) { mat.shader = Shader.Find(mat.shader.name); }
-                if (mat.name.Contains("Shield")) { mat.shader = Shader.Find("Landfall/Shield"); }
-            }
-
-            foreach (var camp in hiddenUnits.LoadAllAssets<TABSCampaignAsset>()) {
-                db.AddCampaignWithID(camp);
-                db.LandfallCampaignList.Add(camp);
-            }
-
-            foreach (var lvl in hiddenUnits.LoadAllAssets<TABSCampaignLevelAsset>()) {
-
+            
+            AddContentToDatabase();
+            
+            foreach (var lvl in hiddenUnits.LoadAllAssets<TABSCampaignLevelAsset>())
+            {
                 var allowedU = new List<UnitBlueprint>();
                 var allowed = new List<Faction>();
-                allowed.AddRange(hbFactions);
-                allowed.Remove(hbFactions.Find(x => x.name.Contains("Secret")));
+                allowed.AddRange(ContentDatabase.Instance().LandfallContentDatabase.GetFactions().ToList());
+                allowed.Remove(allowed.Find(x => x.name.Contains("Secret")));
+                var sub = allowed.Find(x => x.name.Contains("Subunits"));
+                if (sub) allowed.Remove(sub);
                 if (lvl.name.Contains("Egypt") && !lvl.name.Contains("Misc")) { 
                     allowed.Remove(allowed.Find(x => x.name.Contains("Egypt"))); 
                 }
                 else if (lvl.name.Contains("Egypt") && lvl.name.Contains("Misc")) { 
-                    var egypt = hbFactions.Find(x => x.name.Contains("Egypt"));
-                    var legacy = hbFactions.Find(x => x.name.Contains("Legacy"));
-                    var secret = hbFactions.Find(x => x.name.Contains("Secret"));
+                    var egypt = ContentDatabase.Instance().LandfallContentDatabase.GetFactions().ToList().Find(x => x.name.Contains("Egypt"));
+                    var legacy = ContentDatabase.Instance().LandfallContentDatabase.GetFactions().ToList().Find(x => x.name.Contains("Legacy"));
+                    var secret = ContentDatabase.Instance().LandfallContentDatabase.GetFactions().ToList().Find(x => x.name.Contains("Secret"));
                     allowed.Clear();
                     allowed.Add(egypt);
                     allowed.Add(legacy);
                     allowed.Add(secret);
                     foreach (var unit in egypt.Units) { allowedU.Add(unit); }
-                    allowedU.Add(hbFactions.Find(x => x.name.Contains("Secret")).Units.ToList().Find(x => x.name.Contains("Pot")));
-                    allowedU.Add(hbFactions.Find(x => x.name.Contains("Secret")).Units.ToList().Find(x => x.name.Contains("Boomerang")));
-                    allowedU.Add(hbFactions.Find(x => x.name.Contains("Secret")).Units.ToList().Find(x => x.name.Contains("Warrior")));
-                    allowedU.Add(hbFactions.Find(x => x.name.Contains("Secret")).Units.ToList().Find(x => x.name.Contains("Sarcophagus")));
-                    allowedU.Add(hbFactions.Find(x => x.name.Contains("Secret")).Units.ToList().Find(x => x.name.Contains("Selket")));
-                    allowedU.Add(hbFactions.Find(x => x.name.Contains("Legacy")).Units.ToList().Find(x => x.name.Contains("Pharaoh")));
+                    allowedU.Add(ContentDatabase.Instance().LandfallContentDatabase.GetFactions().ToList().Find(x => x.name.Contains("Secret")).Units.ToList().Find(x => x.name.Contains("Pot")));
+                    allowedU.Add(ContentDatabase.Instance().LandfallContentDatabase.GetFactions().ToList().Find(x => x.name.Contains("Secret")).Units.ToList().Find(x => x.name.Contains("Boomerang")));
+                    allowedU.Add(ContentDatabase.Instance().LandfallContentDatabase.GetFactions().ToList().Find(x => x.name.Contains("Secret")).Units.ToList().Find(x => x.name.Contains("Warrior")));
+                    allowedU.Add(ContentDatabase.Instance().LandfallContentDatabase.GetFactions().ToList().Find(x => x.name.Contains("Secret")).Units.ToList().Find(x => x.name.Contains("Sarcophagus")));
+                    allowedU.Add(ContentDatabase.Instance().LandfallContentDatabase.GetFactions().ToList().Find(x => x.name.Contains("Secret")).Units.ToList().Find(x => x.name.Contains("Selket")));
+                    allowedU.Add(ContentDatabase.Instance().LandfallContentDatabase.GetFactions().ToList().Find(x => x.name.Contains("Legacy")).Units.ToList().Find(x => x.name.Contains("Pharaoh")));
                 }
-                if (lvl.name.Contains("MapEquals")) {
-
-                    if (lvl.name.Contains("MapEqualsSimulation")) { lvl.MapAsset = db.MapList.Find(x => x.name.Contains("Simulation_Day")); }
-                    if (lvl.name.Contains("MapEqualsSimulationArcherTower")) { lvl.MapAsset = db.MapList.Find(x => x.name.Contains("Simulation_11_CastlewithArchertowers")); }
-                    if (lvl.name.Contains("MapEqualsViking2")) { lvl.MapAsset = db.MapList.Find(x => x.name.Contains("Viking2")); }
-                    if (lvl.name.Contains("MapEqualsAncient2")) { lvl.MapAsset = db.MapList.Find(x => x.name.Contains("Ancient2")); }
-                    if (lvl.name.Contains("MapEqualsAncient3")) { lvl.MapAsset = db.MapList.Find(x => x.name.Contains("Ancient3")); }
-                    if (lvl.name.Contains("MapEqualsTribal3")) { lvl.MapAsset = db.MapList.Find(x => x.name.Contains("Tribal3")); }
+                if (lvl.name.Contains("MapEquals"))
+                {
+                    var find = ContentDatabase.Instance().LandfallContentDatabase.GetMapAssetsOrdered().ToList().Find(x => x.name.Contains(lvl.name.Split(new string[] { "MapEquals_" }, StringSplitOptions.RemoveEmptyEntries).Last()));
+                    if (find) lvl.MapAsset = find;
                 }
                 lvl.AllowedFactions = allowed.ToArray();
                 lvl.AllowedUnits = allowedU.ToArray();
-
-                db.AddCampaignLevelWithID(lvl);
-                db.LandfallCampaignLevelList.Add(lvl);
             }
-
-            var sarissaSpear = db.WeaponList.ToList().Find(x => x.name.Contains("Spear_Greek"));
-            if (sarissaSpear) { sarissaSpear.GetComponent<Holdable>().holdableData.setRotation = false; }
-
-            ServiceLocator.GetService<CustomContentLoaderModIO>().QuickRefresh(WorkshopContentType.Unit, null);
         }
 
-        public static AssetBundle hiddenUnits = AssetBundle.LoadFromMemory(Properties.Resources.hiddenunits);
+        public void AddContentToDatabase()
+        {
+            var db = ContentDatabase.Instance().LandfallContentDatabase;
+            
+            Dictionary<DatabaseID, UnitBlueprint> units = (Dictionary<DatabaseID, UnitBlueprint>)typeof(LandfallContentDatabase).GetField("m_unitBlueprints", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
+            foreach (var unit in newUnits)
+            {
+                units.Add(unit.Entity.GUID, unit);
+            }
+            typeof(LandfallContentDatabase).GetField("m_unitBlueprints", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, units);
+            
+            Dictionary<DatabaseID, Faction> factions = (Dictionary<DatabaseID, Faction>)typeof(LandfallContentDatabase).GetField("m_factions", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
+            List<DatabaseID> defaultHotbarFactions = (List<DatabaseID>)typeof(LandfallContentDatabase).GetField("m_defaultHotbarFactionIds", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
+            foreach (var faction in newFactions)
+            {
+                factions.Add(faction.Entity.GUID, faction);
+                defaultHotbarFactions.Add(faction.Entity.GUID);
+            }
+            typeof(LandfallContentDatabase).GetField("m_factions", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, factions);
+            //typeof(LandfallContentDatabase).GetField("m_defaultHotbarFactionIds", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, (from DatabaseID fac in defaultHotbarFactions orderby factions[fac].index select fac).ToList());
+            
+            Dictionary<DatabaseID, TABSCampaignAsset> campaigns = (Dictionary<DatabaseID, TABSCampaignAsset>)typeof(LandfallContentDatabase).GetField("m_campaigns", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
+            foreach (var campaign in newCampaigns)
+            {
+                if (!campaigns.ContainsKey(campaign.Entity.GUID)) campaigns.Add(campaign.Entity.GUID, campaign);
+            }
+            typeof(LandfallContentDatabase).GetField("m_campaigns", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, campaigns);
+            
+            Dictionary<DatabaseID, TABSCampaignLevelAsset> campaignLevels = (Dictionary<DatabaseID, TABSCampaignLevelAsset>)typeof(LandfallContentDatabase).GetField("m_campaignLevels", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
+            foreach (var campaignLevel in newCampaignLevels)
+            {
+                if (!campaignLevels.ContainsKey(campaignLevel.Entity.GUID)) campaignLevels.Add(campaignLevel.Entity.GUID, campaignLevel);
+            }
+            typeof(LandfallContentDatabase).GetField("m_campaignLevels", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, campaignLevels);
+            
+            Dictionary<DatabaseID, VoiceBundle> voiceBundles = (Dictionary<DatabaseID, VoiceBundle>)typeof(LandfallContentDatabase).GetField("m_voiceBundles", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
+            foreach (var voiceBundle in newVoiceBundles)
+            {
+                if (!voiceBundles.ContainsKey(voiceBundle.Entity.GUID)) voiceBundles.Add(voiceBundle.Entity.GUID, voiceBundle);
+            }
+            typeof(LandfallContentDatabase).GetField("m_voiceBundles", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, voiceBundles);
+            
+            List<DatabaseID> factionIcons = (List<DatabaseID>)typeof(LandfallContentDatabase).GetField("m_factionIconIds", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
+            foreach (var factionIcon in newFactionIcons)
+            {
+                if (!factionIcons.Contains(factionIcon.Entity.GUID)) factionIcons.Add(factionIcon.Entity.GUID);
+            }
+            typeof(LandfallContentDatabase).GetField("m_factionIconIds", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, factionIcons);
+            
+            Dictionary<DatabaseID, GameObject> unitBases = (Dictionary<DatabaseID, GameObject>)typeof(LandfallContentDatabase).GetField("m_unitBases", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
+            foreach (var unitBase in newBases)
+            {
+                if (!unitBases.ContainsKey(unitBase.GetComponent<Unit>().Entity.GUID)) unitBases.Add(unitBase.GetComponent<Unit>().Entity.GUID, unitBase);
+            }
+            typeof(LandfallContentDatabase).GetField("m_unitBases", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, unitBases);
+            
+            Dictionary<DatabaseID, GameObject> props = (Dictionary<DatabaseID, GameObject>)typeof(LandfallContentDatabase).GetField("m_characterProps", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
+            foreach (var prop in newProps)
+            {
+                if (!props.ContainsKey(prop.GetComponent<PropItem>().Entity.GUID)) props.Add(prop.GetComponent<PropItem>().Entity.GUID, prop);
+            }
+            typeof(LandfallContentDatabase).GetField("m_characterProps", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, props);
+            
+            Dictionary<DatabaseID, GameObject> abilities = (Dictionary<DatabaseID, GameObject>)typeof(LandfallContentDatabase).GetField("m_combatMoves", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
+            foreach (var ability in newAbilities)
+            {
+                if (!abilities.ContainsKey(ability.GetComponent<SpecialAbility>().Entity.GUID)) abilities.Add(ability.GetComponent<SpecialAbility>().Entity.GUID, ability);
+            }
+            typeof(LandfallContentDatabase).GetField("m_combatMoves", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, abilities);
+            
+            Dictionary<DatabaseID, GameObject> weapons = (Dictionary<DatabaseID, GameObject>)typeof(LandfallContentDatabase).GetField("m_weapons", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
+            foreach (var weapon in newWeapons)
+            {
+                if (!weapons.ContainsKey(weapon.GetComponent<WeaponItem>().Entity.GUID)) weapons.Add(weapon.GetComponent<WeaponItem>().Entity.GUID, weapon);
+            }
+            typeof(LandfallContentDatabase).GetField("m_weapons", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, weapons);
+            
+            Dictionary<DatabaseID, GameObject> projectiles = (Dictionary<DatabaseID, GameObject>)typeof(LandfallContentDatabase).GetField("m_projectiles", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
+            foreach (var proj in newProjectiles)
+            {
+                if (!projectiles.ContainsKey(proj.GetComponent<ProjectileEntity>().Entity.GUID)) projectiles.Add(proj.GetComponent<ProjectileEntity>().Entity.GUID, proj);
+            }
+            typeof(LandfallContentDatabase).GetField("m_projectiles", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, projectiles);
 
-        public static Material wet;
+
+            
+            ServiceLocator.GetService<CustomContentLoaderModIO>().QuickRefresh(WorkshopContentType.Unit, null);
+        }
+        
+        public List<UnitBlueprint> newUnits = new List<UnitBlueprint>();
+
+        public List<Faction> newFactions = new List<Faction>();
+        
+        public List<TABSCampaignAsset> newCampaigns = new List<TABSCampaignAsset>();
+        
+        public List<TABSCampaignLevelAsset> newCampaignLevels = new List<TABSCampaignLevelAsset>();
+        
+        public List<VoiceBundle> newVoiceBundles = new List<VoiceBundle>();
+        
+        public List<FactionIcon> newFactionIcons = new List<FactionIcon>();
+        
+        public List<GameObject> newBases = new List<GameObject>();
+
+        public List<GameObject> newProps = new List<GameObject>();
+        
+        public List<GameObject> newAbilities = new List<GameObject>();
+
+        public List<GameObject> newWeapons = new List<GameObject>();
+        
+        public List<GameObject> newProjectiles = new List<GameObject>();
+
+        public static AssetBundle hiddenUnits = AssetBundle.LoadFromMemory(Properties.Resources.hiddenunits);
+        
+        public static AssetBundle huMaps = AssetBundle.LoadFromMemory(Properties.Resources.humaps);
     }
 }

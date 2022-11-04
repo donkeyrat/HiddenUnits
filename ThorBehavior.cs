@@ -94,7 +94,7 @@ public class ThorBehavior : MonoBehaviour
 			MultipleWeaponHandler componentInChildren2 = unit.GetComponentInChildren<MultipleWeaponHandler>();
 			if ((bool)componentInChildren2)
 			{
-				componentInChildren2.SetWeapon(weaponObject, handType);
+				componentInChildren2.SetWeapon(weaponObject, handType, false);
 			}
 			return null;
 		}

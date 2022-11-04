@@ -7,6 +7,7 @@ using Unity.Entities;
 using Landfall.TABS.AI;
 using System.Reflection;
 using Landfall.TABS.GameMode;
+using System.Linq;
 
 namespace HiddenUnits
 {
@@ -37,7 +38,8 @@ namespace HiddenUnits
 
         public IEnumerator Revival()
         {
-            if (unit.data.health > 0f || unit.GetComponentInChildren<Effect_Apollo>() || unit.GetComponentInChildren<Effect_Zombie>())
+            var effect = unit.GetComponentsInChildren<UnitEffectBase>().ToList().Find(x => x.effectID == 1984 || x.effectID == 1987);
+            if (unit.data.health > 0f || effect)
             {
                 unit.data.healthHandler.willBeRewived = false;
                 ServiceLocator.GetService<GameModeService>().CurrentGameMode.OnUnitDied(unit);

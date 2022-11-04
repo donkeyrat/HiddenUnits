@@ -59,7 +59,7 @@ namespace HiddenUnits {
             
             if (GetComponent<CollisionSound>().onlySoundOnRig && !col.attachedRigidbody) { return; }
             
-            if (meleeWeapon) { ServiceLocator.GetService<SoundPlayer>().PlaySoundEffect(GetComponent<CollisionSound>().soundEffectRef, impact * 0.5f, transform.position, SoundEffectVariations.GetMaterialType(col.gameObject, col.attachedRigidbody), null, 1f); }
+            if (meleeWeapon) { ServiceLocator.GetService<SoundPlayer>().PlaySoundEffect(GetComponent<CollisionSound>().SoundEffectRef, impact * 0.5f, transform.position, SoundEffectVariations.GetMaterialType(col.gameObject, col.attachedRigidbody), null, 1f); }
         }
 
         public float damage = 100f;

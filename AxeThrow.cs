@@ -1,24 +1,20 @@
 ﻿using Landfall.TABS;
 using System.Collections;
 using UnityEngine;
-using System.Linq;
-using Landfall.TABS.AI.Components;
-using System.Collections.Generic;
-using Sirenix.Utilities;
 
 namespace HiddenUnits
 {
     public class AxeThrow : MonoBehaviour
     {
 		void Awake() {
-			if (GetComponent<RangeWeapon>().ObjectToSpawn) { var dummy = objectToSpawn; objectToSpawn = GetComponent<RangeWeapon>().ObjectToSpawn; GetComponent<RangeWeapon>().ObjectToSpawn = dummy; }
+			if (GetComponent<RangeWeapon>() && GetComponent<RangeWeapon>().ObjectToSpawn) { var dummy = objectToSpawn; objectToSpawn = GetComponent<RangeWeapon>().ObjectToSpawn; GetComponent<RangeWeapon>().ObjectToSpawn = dummy; }
 		}
 
 		void Start() {
 
 			hammerEffects = GetComponents<AxeAttackEffect>();
 			myLevel = GetComponent<Level>();
-			if (GetComponentInChildren<ShootPosition>()) { shootPosition = GetComponentInChildren<ShootPosition>().transform; }
+			shootPosition = GetComponentInChildren<ShootPosition>() ? GetComponentInChildren<ShootPosition>().transform : transform;
         }
 
         public void Throw()
@@ -44,7 +40,7 @@ namespace HiddenUnits
 
 			if (GetComponent<AxeShowProjectile>()) { GetComponent<AxeShowProjectile>().pivot.gameObject.SetActive(false); }
 
-			spawnedObject = Instantiate(objectToSpawn, shootPosition.position, shootPosition.rotation);
+			spawnedObject = Instantiate(objectToSpawn, shootPosition.position, shootPosition.rotation, parentToMe ? transform : null);
 			spawnedObject.GetComponent<MoveTransform>().velocity = (target.data.mainRig.position - transform.position).normalized * spawnedObject.GetComponent<MoveTransform>().selfImpulse.magnitude;
 			SetProjectileStats(spawnedObject, GetSpawnDirection((target.data.mainRig.position - shootPosition.position).normalized, target.data.mainRig, new Vector3(0f, 0f, 0f)), (target.data.mainRig.position - shootPosition.position).normalized, target.data.mainRig, shootPosition.forward, target.data.mainRig.position, target.data.mainRig.velocity);
 			
@@ -66,16 +62,13 @@ namespace HiddenUnits
 			Transform[] componentsInChildren = spawnedObject.GetComponentsInChildren<Transform>();
 			for (int i = 0; i < componentsInChildren.Length; i++)
 			{
-				if (1f != 0f)
+				Rigidbody component = componentsInChildren[i].GetComponent<Rigidbody>();
+				if (component)
 				{
-					Rigidbody component = componentsInChildren[i].GetComponent<Rigidbody>();
-					if (component)
+					component.AddForce(spawnDir * 1f, ForceMode.VelocityChange);
+					if (myLevel)
 					{
-						component.AddForce(spawnDir * 1f, ForceMode.VelocityChange);
-						if (myLevel)
-						{
-							component.mass *= Mathf.Pow((float)myLevel.level, 1.5f);
-						}
+						component.mass *= Mathf.Pow((float)myLevel.level, 1.5f);
 					}
 				}
 				Compensation componentInChildren = componentsInChildren[i].GetComponentInChildren<Compensation>();
@@ -116,18 +109,15 @@ namespace HiddenUnits
 				{
 					componentInChildren4.damage *= levelMultiplier;
 				}
-				if (1f != 0f)
+				if (componentInChildren2)
 				{
-					if (componentInChildren2)
-					{
-						componentInChildren2.selfImpulse *= 1f;
-						componentInChildren2.worldImpulse.y = 0f;
-					}
-					if (componentInChildren3)
-					{
-						componentInChildren3.damage *= 1f;
-						componentInChildren3.force *= 1f;
-					}
+					componentInChildren2.selfImpulse *= 1f;
+					componentInChildren2.worldImpulse.y = 0f;
+				}
+				if (componentInChildren3)
+				{
+					componentInChildren3.damage *= 1f;
+					componentInChildren3.force *= 1f;
 				}
 			}
 			Level level = spawnedObject.GetComponent<Level>();
@@ -174,5 +164,7 @@ namespace HiddenUnits
 		private float levelMultiplier = 1f;
 
 		private AnimationCurve shootHelpAngleCurve = new AnimationCurve();
-	}
+
+		public bool parentToMe;
+    }
 }

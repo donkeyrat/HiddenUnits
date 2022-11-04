@@ -6,25 +6,21 @@ using System.Collections;
 using System.Linq;
 using Landfall.TABS.UnitEditor;
 using System.Collections.Generic;
+using InControl;
 using Pathfinding;
 
 namespace HiddenUnits
 {
-    public class HUSecretManager : MonoBehaviour
+    public class HUSceneManager : MonoBehaviour
     {
-        public HUSecretManager()
+        public HUSceneManager()
         {
             SceneManager.sceneLoaded += SceneLoaded;
         }
 
         public void SceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
         {
-            if (scene.path == "Assets/11 Scenes/MainMenu.unity" && !doneStealing)
-            {
-                doneStealing = true;
-                StartCoroutine(LoadAsync());
-            }
-            if (scene.path == "Assets/11 Scenes/MainMenu.unity" && doneStealing) {
+            if (scene.path == "Assets/11 Scenes/MainMenu.unity") {
 
                 if (!ServiceLocator.GetService<ISaveLoaderService>().HasUnlockedSecret("SECRET_EGYPT")) {
 
@@ -36,7 +32,6 @@ namespace HiddenUnits
             {
                 GameObject astar = null;
                 GameObject map = null;
-                GameObject water = null;
                 foreach (var obj in scene.GetRootGameObjects())
                 {
                     if (obj.name == "AStar_Lvl1_Grid")
@@ -46,15 +41,27 @@ namespace HiddenUnits
                     if (obj.name == "Map")
                     {
                         map = obj;
+                        var shadersToReplace = new List<MeshRenderer>(obj.GetComponentsInChildren<MeshRenderer>(true)
+                            .ToList().FindAll(x => x.name.Contains("_ReplaceMe")));
+                        foreach (var rend in shadersToReplace)
+                        {
+                            rend.material.shader = Shader.Find(rend.material.shader.name) ?? rend.material.shader;
+                            if (rend.GetComponent<PiratePlacementTransparency>())
+                            {
+                                rend.GetComponent<PiratePlacementTransparency>().Materials[0].m_oldMaterial.shader =
+                                    Shader.Find(rend.GetComponent<PiratePlacementTransparency>().Materials[0]
+                                        .m_oldMaterial.shader.name) ?? rend.GetComponent<PiratePlacementTransparency>().Materials[0].m_oldMaterial.shader;
+                            }
+                        }
                     }
-                    if (obj.name == "Water")
+                    if (obj.name.Contains("_ReplaceMe"))
                     {
-                        water = obj;
-                        obj.GetComponent<MeshRenderer>().material = HUMain.wet;
+                        obj.GetComponent<MeshRenderer>().material.shader =
+                            Shader.Find(obj.GetComponent<MeshRenderer>().material.shader.name) ?? Shader.Find(obj.GetComponent<MeshRenderer>().material.shader.name);
                     }
-                    if (obj.name == "WaterManager" && water)
+                    if (obj.name == "WaterManager")
                     {
-                        obj.GetComponent<PirateWaterManager>().WaterMaterial = water.GetComponent<MeshRenderer>().material;
+                        obj.GetComponent<PirateWaterManager>().WaterMaterial = obj.GetComponent<MeshRenderer>().material;
                     }
                 }
                 if (astar != null && map != null)
@@ -235,24 +242,5 @@ namespace HiddenUnits
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Pegasus_Unlock"), secrets.transform, true);
             }
         }
-        public IEnumerator LoadAsync()
-        {
-            var async = SceneManager.LoadSceneAsync("05_Lvl2_Medieval_VC", LoadSceneMode.Additive);
-            yield return new WaitUntil(() => async.isDone);
-            foreach (var obj in SceneManager.GetSceneByName("05_Lvl2_Medieval_VC").GetRootGameObjects())
-            {
-                if (obj.name == "Map")
-                {
-                    HUMain.wet = obj.GetComponentInChildren<Water>(true).GetComponent<MeshRenderer>().material;
-                }
-            }
-            async = SceneManager.UnloadSceneAsync("05_Lvl2_Medieval_VC");
-            yield return new WaitUntil(() => async.isDone);
-            SceneManager.LoadScene("Assets/11 Scenes/MainMenu.unity");
-            doneStealing = true;
-            yield break;
-        }
-
-        public bool doneStealing;
     }
 }

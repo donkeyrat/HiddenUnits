@@ -30,6 +30,8 @@ public class RaycastTrailSussy : MonoBehaviour, GameObjectPooling.IPoolable
 	public LayerMask groundMask;
 
 	public bool ignoreArmor;
+	
+	public bool IsManagedByPool { get; set; }
 
 	public Action ReleaseSelf
 	{
