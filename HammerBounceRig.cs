@@ -85,8 +85,8 @@ namespace HiddenUnits {
                     select unit
                 ).ToArray();
             
-            if (query.Length > 0) { target = query[0].data.mainRig.transform; }
-            else { finishEvent.Invoke(); }
+            if (query.Length > 0) target = query[0].data.mainRig.transform;
+            else finishEvent.Invoke();
         }
 
         public void Return()

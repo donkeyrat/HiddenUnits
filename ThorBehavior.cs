@@ -98,10 +98,10 @@ public class ThorBehavior : MonoBehaviour
 			}
 			return null;
 		}
-		if (unit.unitBlueprint.fistRef)
-		{
-			componentInChildren.fistRefernce = unit.unitBlueprint.fistRef;
-		}
+		//if (unit.unitBlueprint.fistRef)
+		//{
+		//	componentInChildren.fistRefernce = unit.unitBlueprint.fistRef;
+		//}
 		Torso componentInChildren3 = unit.GetComponentInChildren<Torso>();
 		if ((bool)weaponObject)
 		{

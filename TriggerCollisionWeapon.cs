@@ -24,8 +24,18 @@ namespace HiddenUnits {
             }
         }
 
+        public void OnTriggerStay(Collider col) {
+            
+            DoDamage(col);
+        }
+        
         public void OnTriggerEnter(Collider col) {
             
+            DoDamage(col);
+        }
+
+        public void DoDamage(Collider col)
+        {
             if (!col.attachedRigidbody || !col.attachedRigidbody.transform.root.GetComponent<Unit>() || !canDealDamage || (col.attachedRigidbody.transform.root.GetComponent<Unit>().Team == transform.root.GetComponent<Unit>().Team && !canDealDamageToTeammates) || col.attachedRigidbody.transform.root == transform.root) {
                 return;
             }
@@ -49,7 +59,7 @@ namespace HiddenUnits {
 
         public void AddForceToTarget(Rigidbody rig, float m = 1f) {
             
-            WilhelmPhysicsFunctions.AddForceWithMinWeight(rig, transform.forward * knockback * m, ForceMode.Impulse, 10f);
+            WilhelmPhysicsFunctions.AddForceWithMinWeight(rig, transform.forward * knockback * m, ForceMode.Impulse, minMassCap);
             rig.velocity *= 0.7f;
         }
 
@@ -65,6 +75,8 @@ namespace HiddenUnits {
         public float damage = 100f;
 
         public float knockback = 100f;
+
+        public float minMassCap = 10f;
 
         public float cooldown;
 
