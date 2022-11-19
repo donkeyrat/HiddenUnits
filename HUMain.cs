@@ -9,6 +9,7 @@ using HarmonyLib;
 using System.Reflection;
 using Object = UnityEngine.Object;
 using DM;
+using Landfall.TABS.AI.Components.Modifiers;
 
 namespace HiddenUnits {
 
@@ -137,6 +138,16 @@ namespace HiddenUnits {
             foreach (var unit in hiddenUnits.LoadAllAssets<UnitBlueprint>())
             {
                 newUnits.Add(unit);
+                if (unit.name == "Helicopter")
+                {
+                    unit.MovementComponents = new List<IMovementComponent>
+                    {
+                        new CircleTarget
+                        {
+                            CircleDistance = 1f
+                        }
+                    };
+                }
                 foreach (var b in db.LandfallContentDatabase.GetUnitBases().ToList()) { if (unit.UnitBase != null) { if (b.name == unit.UnitBase.name) { unit.UnitBase = b; } } }
                 foreach (var b in db.LandfallContentDatabase.GetWeapons().ToList()) { if (unit.RightWeapon != null && b.name == unit.RightWeapon.name) unit.RightWeapon = b; if (unit.LeftWeapon != null && b.name == unit.LeftWeapon.name) unit.LeftWeapon = b; }
             }

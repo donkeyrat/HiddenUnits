@@ -15,6 +15,7 @@ namespace HiddenUnits
             base.OnEnterNewScene();
             mainCam = ServiceLocator.GetService<PlayerCamerasManager>()?.GetMainCam(TFBGames.Player.One).transform;
             save = ServiceLocator.GetService<ISaveLoaderService>();
+            if (keys.Count <= 0) return;
             for (int i = 0; i < keys.Count; i++)
             {
                 isUnlocking.Add(false);
@@ -42,13 +43,12 @@ namespace HiddenUnits
 
         public void Update()
         {
+            var num = Vector3.Distance(transform.position, mainCam.position);
+            float num2 = Vector3.Angle(mainCam.forward, transform.position - mainCam.position);
+            var lookValue = 1000f / (num * num2);
             for (int i = 0; i < keys.Count; i++)
             {
                 if (!save.HasUnlockedSecret(alreadyUnlocked[i]) || save.HasUnlockedSecret(toBeUnlocked[i]) || isUnlocking[i]) continue;
-                
-                var num = Vector3.Distance(keys[i].transform.position, mainCam.position);
-                float num2 = Vector3.Angle(mainCam.forward, keys[i].transform.position - mainCam.position);
-                var lookValue = 1000f / (num * num2);
                 if (lookValue > 8f)
                 {
                     StartCoroutine(UnlockKey(i));
@@ -78,8 +78,7 @@ namespace HiddenUnits
 
         public void DoFinalUnlock()
         {
-            save.UnlockSecret(finalUnlock);
-            List<SecretUnlockCondition> list = ServiceLocator.GetService<ISaveLoaderService>().UnlockSecret(finalUnlock);
+            List<SecretUnlockCondition> list = save.UnlockSecret(finalUnlock);
             if (list != null && list.Count > 0)
             {
                 foreach (SecretUnlockCondition item in list)
