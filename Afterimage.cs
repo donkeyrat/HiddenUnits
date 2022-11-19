@@ -1,64 +1,59 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
 using Landfall.TABS;
 using Landfall.TABS.AI;
 using System.Collections;
 
-namespace HiddenUnits {
+namespace HiddenUnits 
+{
 
-    public class Afterimage : MonoBehaviour {
+    public class Afterimage : MonoBehaviour 
+    {
 
         public void Start() { GetComponent<UnitSpawner>().unitBlueprint = transform.root.GetComponent<Unit>().unitBlueprint; }
 
         public void SpawnAfterimage() { StartCoroutine(Spawn()); }
 
-        public IEnumerator Spawn() {
+        public IEnumerator Spawn() 
+        {
 
             transform.position = transform.root.GetComponent<Unit>().data.mainRig.position;
+            
             var u = GetComponent<UnitSpawner>().Spawn();
             u.name = "AFTERIMAGE";
             u.transform.position = new Vector3(transform.root.GetComponent<Unit>().data.mainRig.position.x, transform.root.GetComponent<Unit>().data.mainRig.position.y - 1.353508f, transform.root.GetComponent<Unit>().data.mainRig.position.z);
-            
-            if (GetComponent<UnitSpawner>().poofEffect) { Instantiate(GetComponent<UnitSpawner>().poofEffect, u.data.mainRig.position, GetComponent<UnitSpawner>().poofEffect.transform.rotation); }
-            foreach (var rend in u.GetComponentsInChildren<Renderer>()) {
-                if (!rend.GetComponent<ParticleSystemRenderer>()) {
-                    var list = new List<Material>();
-                    foreach (var mat in rend.materials) { list.Add(Instantiate(imgMaterial)); }
-                    rend.materials = list.ToArray();
-                }
-            }
+            u.data.GetComponent<UnitColorHandler>().SetMaterial(imgMaterial);
             u.GetComponent<UnitAPI>().forceSupressFromWinCondition = true;
-            u.targetingPriorityMultiplier = 0f;
-            foreach (var ai in u.GetComponentsInChildren<ConditionalEvent>()) { Destroy(ai.gameObject); }
+            u.targetingPriorityMultiplier = 0.1f;
+            foreach (var move in u.GetComponentsInChildren<ConditionalEvent>()) Destroy(move.gameObject);
 
-            yield return new WaitForSeconds(0.05f);
-            foreach (var rend in u.GetComponentsInChildren<Renderer>()) {
-                if (!rend.GetComponent<ParticleSystemRenderer>()) {
-                    var list = new List<Material>();
-                    foreach (var mat in rend.materials) { list.Add(Instantiate(imgMaterial)); }
-                    rend.materials = list.ToArray();
-                }
-            }
+            Instantiate(poofEffect, u.data.mainRig.position, poofEffect.transform.rotation);
 
-            yield return new WaitForSeconds(0.05f);
-            if (GetComponent<UnitSpawner>().poofEffect) {
-
-                Instantiate(GetComponent<UnitSpawner>().poofEffect, transform.root.GetComponent<Unit>().data.mainRig.position, GetComponent<UnitSpawner>().poofEffect.transform.rotation);
-            }
+            yield return new WaitForSeconds(0.1f);
+            
+            Instantiate(poofEffect, transform.root.GetComponent<Unit>().data.mainRig.position, poofEffect.transform.rotation);
 
             yield return new WaitForSeconds(fadeTime - 0.1f);
-            if (GetComponent<UnitSpawner>().poofEffect) {
+            
+            Instantiate(poofEffect, u.data.mainRig.position, poofEffect.transform.rotation);
 
-                Instantiate(GetComponent<UnitSpawner>().poofEffect, u.data.mainRig.position, GetComponent<UnitSpawner>().poofEffect.transform.rotation);
+            yield return new WaitForSeconds(destroyDelay);
+            
+            foreach (var trail in u.GetComponentsInChildren<TrailRenderer>())
+            {
+                trail.transform.SetParent(null);
+                trail.emitting = false;
+                trail.gameObject.AddComponent<RemoveAfterSeconds>().seconds = trail.time * 1.5f;
             }
-
-            yield return new WaitForSeconds(0.2f);
-            u.transform.position = Vector3.down * 1000f;
-            yield break;
+            
+            u.DestroyUnit();
         }
 
         public Material imgMaterial;
 
-        public float fadeTime;
+        public GameObject poofEffect;
+
+        public float fadeTime = 5f;
+        
+        public float destroyDelay = 0.2f;
     }
 }

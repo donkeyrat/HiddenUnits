@@ -1,70 +1,61 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Landfall.TABS;
+using UnityEngine.Events;
 
 public class Laser : MonoBehaviour
 {
-    public void Start()
+    public void Awake()
     {
         line = GetComponent<LineRenderer>();
     }
 
     public void Activate()
     {
-        if (!hasActivated)
-        {
-            hasActivated = true;
-            activating = true;
-            StartCoroutine(Animate());
-        }
+        StartCoroutine(Animate(true));
     }
 
     public void Deactivate()
     {
-        if (!hasDeactivated)
-        {
-            hasDeactivated = true;
-            deactivating = true;
-            StartCoroutine(Animate());
-        }
+        StartCoroutine(Animate(false));
     }
 
-    public IEnumerator Animate()
+    public IEnumerator Animate(bool activating)
     {
+        if (!line) line = GetComponent<LineRenderer>();
         var t = 0f;
         if (activating)
         {
-            while (t < 1f)
+            while (t < 1f && line)
             {
                 t += Time.deltaTime;
-                line.widthMultiplier += activateMultiplier * Time.deltaTime;
+                line.widthMultiplier = Mathf.Lerp(0f, scaleMultiplier, Mathf.Clamp(t, 0f, 1f));
                 yield return null;
             }
-            activating = false;
         }
-        else if (deactivating)
+        else
         {
-            while (t < 1f)
+            while (t < 1f && line)
             {
                 t += Time.deltaTime;
-                line.widthMultiplier -= deactivateMultiplier * Time.deltaTime;
+                line.widthMultiplier = Mathf.Lerp(scaleMultiplier, 0f, Mathf.Clamp(t, 0f, 1f));
                 yield return null;
             }
-            deactivating = false;
         }
-        yield break;
     }
 
 
     public void Update()
     {
+        if (!line) line = GetComponent<LineRenderer>();
         line.SetPosition(0, p2.transform.position);
-        RaycastHit hit;
-        if (Physics.Raycast(p2.transform.position, p2.transform.forward, out hit, maxDistance, layer))
+        if (Physics.Raycast(p2.transform.position, p2.transform.forward, out var hit, maxDistance, layer))
         {
             if (hit.collider)
             {
                 line.SetPosition(1, hit.point);
                 p1.transform.position = hit.point;
+                hitEvent.Invoke();
             }
         }
         else
@@ -74,25 +65,23 @@ public class Laser : MonoBehaviour
         }
     }
 
+    private LineRenderer line;
+    
+    [Header("Line Settings")]
+    
     public GameObject p1;
 
     public GameObject p2;
 
     public float maxDistance = 10f;
+    
+    [Header("Animation")]
 
-    public LineRenderer line;
+    public float scaleMultiplier = 1f;
 
-    private bool activating;
-
-    private bool deactivating;
-
-    public float activateMultiplier;
-
-    public float deactivateMultiplier;
-
-    private bool hasActivated;
-
-    private bool hasDeactivated;
+    [Header("Hit")]
+    
+    public UnityEvent hitEvent = new UnityEvent();
 
     public LayerMask layer;
 }

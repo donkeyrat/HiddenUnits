@@ -10,68 +10,30 @@ namespace HiddenUnits
 		void Start()
 		{
 			rig = GetComponent<Rigidbody>();
-			if (transform.root.GetComponent<Unit>()) { SetTargetUnit(); }
-			else { SetTargetNormal(); }
+			if (transform.root.GetComponent<Unit>()) SetTarget(true);
+			else SetTarget(false);
 		}
 
 		void Update()
 		{
 			if (target && !target.data.Dead) { rig.AddForce((target.data.mainRig.position - transform.position).normalized * forwardForce * Time.deltaTime); }
 			else {
-				if (transform.root.GetComponent<Unit>()) { SetTargetUnit(); }
-				else { SetTargetNormal(); }
+				if (transform.root.GetComponent<Unit>()) { SetTarget(true); }
+				else { SetTarget(false); }
 			}
 		}
 
 		
-		void SetTargetUnit()
+		void SetTarget(bool doTeamCheck)
 		{
 			var hits = Physics.SphereCastAll(transform.position, 80f, Vector3.up, 0.1f, LayerMask.GetMask(new string[] { "MainRig" }));
-			List<Unit> foundUnits = new List<Unit>();
-			foreach (var hit in hits)
-			{
-				if (hit.transform.root.GetComponent<Unit>() && !foundUnits.Contains(hit.transform.root.GetComponent<Unit>()))
-				{
-					foundUnits.Add(hit.rigidbody.transform.root.GetComponent<Unit>());
-				}
-			}
-			Unit[] query
-			= (
-			  from Unit unit
-			  in foundUnits
-			  where !unit.data.Dead && unit.Team != transform.root.GetComponent<Unit>().Team
-			  orderby (unit.data.mainRig.transform.position - transform.position).magnitude
-			  select unit
-			).ToArray();
-			if (query.Length != 0)
-			{
-				target = query[0];
-			}
-		}
-
-		void SetTargetNormal()
-		{
-			var hits = Physics.SphereCastAll(transform.position, 80f, Vector3.up, 0.1f, LayerMask.GetMask(new string[] { "MainRig" }));
-			List<Unit> foundUnits = new List<Unit>();
-			foreach (var hit in hits)
-			{
-				if (hit.transform.root.GetComponent<Unit>() && !foundUnits.Contains(hit.transform.root.GetComponent<Unit>()))
-				{
-					foundUnits.Add(hit.rigidbody.transform.root.GetComponent<Unit>());
-				}
-			}
-			Unit[] query
-			= (
-			  from Unit unit
-			  in foundUnits
-			  where !unit.data.Dead
-			  orderby (unit.data.mainRig.transform.position - transform.position).magnitude
-			  select unit
-			).ToArray();
-			if (query.Length != 0)
-			{
-				target = query[0];
-			}
+			var foundUnits = hits
+				.Select(hit => hit.transform.root.GetComponent<Unit>())
+				.Where(x => x && !x.data.Dead && (doTeamCheck && x.Team != transform.root.GetComponent<Unit>().Team || !doTeamCheck))
+				.OrderBy(x => (x.data.mainRig.transform.position - transform.position).magnitude)
+				.Distinct()
+				.ToArray();
+			if (foundUnits.Length != 0) target = foundUnits[0];
 		}
 
 		public float forwardForce = 20000f;

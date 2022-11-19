@@ -3,61 +3,59 @@ using System.Collections.Generic;
 using System.Linq;
 using Landfall.TABS;
 using UnityEngine;
+using UnityEngine.Events;
 
-public class Volley : MonoBehaviour {
+public class Volley : MonoBehaviour 
+{
 	
-	private void Start() {
+	private void Start() 
+	{
 		
 		spawn = GetComponent<SpawnObject>();
 		SetTarget();
 		StartCoroutine(SpawnArrows());
 	}
 	
-	private IEnumerator SpawnArrows() {
-		
+	private IEnumerator SpawnArrows() 
+	{
 		yield return new WaitForSeconds(spawnDelay);
+		
 		int num;
-		for (int l = 0; l < totalSpawns; l = num + 1) {
-			
+		for (int l = 0; l < totalSpawns; l = num + 1) 
+		{
 			SetTarget();
-			for (int m = 0; m < arrowsPerSpawn; m = num + 1) {
-				
+			for (int m = 0; m < arrowsPerSpawn; m = num + 1) 
+			{
 				Vector3 vector = transform.position + Vector3.up * metersAboveToSpawwnAt + Random.insideUnitSphere * radius;
 				Vector3 direction = transform.position - vector + Random.insideUnitSphere * 1f;
-				if (Random.value > 0.1f && m_NearbyUnits.Count > 0) {
-					
-					int index = Random.Range(0, m_NearbyUnits.Count);
-					if (m_NearbyUnits[index] != null && m_NearbyUnits[index].data != null && m_NearbyUnits[index].data.mainRig != null) { direction = m_NearbyUnits[index].data.mainRig.position + m_NearbyUnits[index].data.mainRig.velocity * 0.25f - vector; }
+				if (Random.value > 0.1f && nearbyUnits.Count > 0) 
+				{
+					int index = Random.Range(0, nearbyUnits.Count);
+					if (nearbyUnits[index] != null && nearbyUnits[index].data != null && nearbyUnits[index].data.mainRig != null) { direction = nearbyUnits[index].data.mainRig.position + nearbyUnits[index].data.mainRig.velocity * 0.25f - vector; }
 				}
+				
 				spawn.Spawn(vector, direction);
 				num = m;
 			}
 			yield return new WaitForSeconds(timeBetweenSpawns);
 			num = l;
 		}
-		yield break;
 	}
 
-	public void SetTarget() {
+	public void SetTarget() 
+	{
 		
 		var hits = Physics.SphereCastAll(transform.position, 8f, Vector3.up, 0.1f, LayerMask.GetMask(new string[] { "MainRig" }));
-		List<Unit> foundUnits = new List<Unit>();
-		foreach (var hit in hits) {
-			
-			if (hit.transform.root.GetComponent<Unit>() && !foundUnits.Contains(hit.transform.root.GetComponent<Unit>())) { foundUnits.Add(hit.rigidbody.transform.root.GetComponent<Unit>()); }
-		}
-		Unit[] query
-		= (
-		  from Unit unit
-		  in foundUnits
-		  where !unit.data.Dead && unit.Team != GetComponent<TeamHolder>().team
-		  orderby (unit.data.mainRig.transform.position - transform.position).magnitude
-		  select unit
-		).ToArray();
-		
-		if (query.Length != 0) { m_NearbyUnits = query.ToList(); }
+		nearbyUnits = hits
+			.Select(hit => hit.transform.root.GetComponent<Unit>())
+			.Where(x => GetComponent<TeamHolder>() && x && !x.data.Dead && x.Team != GetComponent<TeamHolder>().team)
+			.OrderBy(x => (x.data.mainRig.transform.position - transform.position).magnitude)
+			.Distinct()
+			.ToList();
 	}
 
+	private List<Unit> nearbyUnits = new List<Unit>();
+	
 	public float metersAboveToSpawwnAt = 10f;
 
 	public float radius = 3f;
@@ -71,6 +69,4 @@ public class Volley : MonoBehaviour {
 	private SpawnObject spawn;
 
 	public float spawnDelay = 0.3f;
-
-	private List<Unit> m_NearbyUnits = new List<Unit>();
 }

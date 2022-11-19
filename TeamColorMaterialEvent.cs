@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Landfall.TABS;
+using System.Linq;
 
 namespace HiddenUnits {
     public class TeamColorMaterialEvent : MonoBehaviour {
@@ -38,7 +39,7 @@ namespace HiddenUnits {
         }
 
         void Update() {
-            if (transform.root.GetComponentInChildren<Effect_Apollo>()) { Reset(); }
+            if (transform.root.GetComponentsInChildren<UnitEffectBase>().ToList().Find(x => x.effectID == 1987)) { Reset(); }
             if (changing && t < lerpTime && Time.timeScale != 0f) {
                 t += Mathf.Clamp(Time.deltaTime / lerpTime, 0f, 1f);
                 if (useOriginalMat)

@@ -21,23 +21,6 @@ namespace HiddenUnits
             StartCoroutine(Lightning());
         }
 
-        public void SetTarget(Transform source)
-        {
-            target = null;
-            Unit[] query
-            = (
-              from Unit unit
-              in FindObjectsOfType<Unit>()
-              where (!unit.data.Dead && unit.Team != transform.root.GetComponent<Unit>().Team && !hitList.Contains(unit) && (unit.data.mainRig.transform.position - source.position).magnitude <= maxTargetRange)
-              orderby (unit.data.mainRig.transform.position - transform.position).magnitude
-              select unit
-            ).ToArray();
-            if (query.Length > 0)
-            {
-                target = query[0];
-            }
-        }
-
         public IEnumerator Lightning()
         {
             for (int i = 0; i < chainCount; i++)
@@ -61,6 +44,19 @@ namespace HiddenUnits
 
                 yield return new WaitForSeconds(0.1f);
             }
+        }
+        
+        public void SetTarget(Transform source)
+        {
+            target = null;
+            var hits = Physics.SphereCastAll(transform.position, maxTargetRange, Vector3.up, 0.1f, LayerMask.GetMask(new string[] { "MainRig" }));
+            var foundUnits = hits
+                .Select(hit => hit.transform.root.GetComponent<Unit>())
+                .Where(x => x && !x.data.Dead && x.Team != transform.root.GetComponent<Unit>().Team && !hitList.Contains(x))
+                .OrderBy(x => (x.data.mainRig.transform.position - transform.position).magnitude)
+                .Distinct()
+                .ToArray();
+            if (foundUnits.Length > 0) target = foundUnits[0];
         }
 
         private Unit target;

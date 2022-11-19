@@ -58,21 +58,14 @@ namespace HiddenUnits {
         public void SetTarget() {
             
             var hits = Physics.SphereCastAll(transform.position, maxRange, Vector3.up, 0.1f, LayerMask.GetMask(new string[] { "MainRig" }));
-            List<Unit> foundUnits = new List<Unit>();
-            foreach (var hit in hits) {
-                
-                if (hit.transform.root.GetComponent<Unit>() && !foundUnits.Contains(hit.transform.root.GetComponent<Unit>())) foundUnits.Add(hit.rigidbody.transform.root.GetComponent<Unit>());
-            }
-            Unit[] query
-            = (
-              from Unit unit
-              in foundUnits
-              where !unit.data.Dead && unit.Team != transform.root.GetComponent<Unit>().Team && !hitList.Contains(unit)
-              orderby (unit.data.mainRig.transform.position - transform.position).magnitude
-              select unit
-            ).ToArray();
+            var foundUnits = hits
+                .Select(hit => hit.transform.root.GetComponent<Unit>())
+                .Where(x => x && !x.data.Dead && x.Team != transform.root.GetComponent<Unit>().Team && !hitList.Contains(x))
+                .OrderBy(x => (x.data.mainRig.transform.position - transform.position).magnitude)
+                .Distinct()
+                .ToArray();
             
-            if (query.Length > 0) { target = query[0]; }
+            if (foundUnits.Length > 0) { target = foundUnits[0]; }
             else { finishEvent.Invoke(); }
         }
 

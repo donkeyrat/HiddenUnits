@@ -67,13 +67,20 @@ namespace HiddenUnits {
         public void SetTarget() {
     
             var hits = Physics.SphereCastAll(tip.position, targetDistance, Vector3.up, 0.1f, LayerMask.GetMask(new string[] { "MainRig" }));
-            List<Unit> foundUnits = new List<Unit>();
-            foreach (var hit in hits) {
-                if (hit.transform.root.GetComponent<Unit>() && hit.transform.root.GetComponent<Unit>().Team != team) {
-                    foundUnits.Add(hit.rigidbody.transform.root.GetComponent<Unit>());
-                }
+            var foundUnits = hits
+                .Select(hit => hit.transform.root.GetComponent<Unit>())
+                .Where(x => x && !x.data.Dead && x.Team != team)
+                .OrderBy(x => (x.data.mainRig.transform.position - transform.position).magnitude)
+                .Distinct()
+                .ToArray();
+
+            if (foundUnits.Length > 0)
+            {
+                target = foundUnits[0]; 
+                DoSpike(); 
+                foreach (var rig in target.GetComponentsInChildren<Rigidbody>()) 
+                    rig.velocity *= 0f;
             }
-            if (foundUnits.Count > 0) { target = foundUnits[0]; DoSpike(); foreach (var rig in target.GetComponentsInChildren<Rigidbody>()) rig.velocity *= 0f; }
         }
     
         public enum SpikeType

@@ -47,23 +47,17 @@ namespace HiddenUnits {
                     }
                 }
             }
-            yield break;
         }
 
         public Unit[] SetTargets() {
 
             var hits = Physics.SphereCastAll(transform.position, radius, Vector3.up, 0.1f, layerMask);
-            List<Unit> foundUnits = new List<Unit>();
-            foreach (var hit in hits) { if (hit.transform.root.GetComponent<Unit>() && !foundUnits.Contains(hit.transform.root.GetComponent<Unit>())) { foundUnits.Add(hit.rigidbody.transform.root.GetComponent<Unit>()); }
-            }
-            Unit[] query = (
-              from Unit unit
-              in foundUnits
-              where !unit.data.Dead && unit.Team != GetComponentInParent<TeamHolder>().team
-              orderby (unit.data.mainRig.transform.position - transform.position).magnitude
-              select unit
-            ).ToArray();
-            return query;
+            return hits
+                .Select(hit => hit.transform.root.GetComponent<Unit>())
+                .Where(x => GetComponentInParent<TeamHolder>() && x && !x.data.Dead && x.Team != GetComponentInParent<TeamHolder>().team)
+                .OrderBy(x => (x.data.mainRig.transform.position - transform.position).magnitude)
+                .Distinct()
+                .ToArray();
         }
 
         public IEnumerator RemoveUnitFromList(Unit unit) {

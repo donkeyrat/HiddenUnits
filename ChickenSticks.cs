@@ -112,20 +112,14 @@ namespace HiddenUnits
         public void SetTarget(float range) {
             
             var hits = Physics.SphereCastAll(transform.position, range, Vector3.up, 0.1f, LayerMask.GetMask(new string[] { "MainRig" }));
-            List<Unit> foundUnits = new List<Unit>();
-            foreach (var hit in hits) {
-                
-                if (hit.transform.root.GetComponent<Unit>() && !foundUnits.Contains(hit.transform.root.GetComponent<Unit>())) foundUnits.Add(hit.rigidbody.transform.root.GetComponent<Unit>());
-            }
-            Unit[] query
-                = (
-                    from Unit unit
-                        in foundUnits
-                    where !unit.data.Dead && unit.Team != transform.root.GetComponent<Unit>().Team && !hitList.Contains(unit)
-                    select unit
-                ).ToArray();
+            var foundUnits = hits
+                .Select(hit => hit.transform.root.GetComponent<Unit>())
+                .Where(x => x && !x.data.Dead && x.Team != transform.root.GetComponent<Unit>().Team && !hitList.Contains(x))
+                .OrderBy(x => (x.data.mainRig.transform.position - transform.position).magnitude)
+                .Distinct()
+                .ToArray();
 
-            if (query.Length > 0) roamingTarget = query[Random.Range(0, query.Length - 1)];
+            if (foundUnits.Length > 0) roamingTarget = foundUnits[Random.Range(0, foundUnits.Length - 1)];
         }
         
         private Rigidbody rig;

@@ -5,12 +5,14 @@ using HarmonyLib;
 using TFBGames;
 using System.Collections.Generic;
 
-namespace HiddenUnits {
+namespace HiddenUnits 
+{
     [HarmonyPatch(typeof(CameraSpawnObject), "Start")]
-    class ArargdCouldveJustDoneThis {
+    class ArargdCouldveJustDoneThis 
+    {
         [HarmonyPrefix]
-        public static bool Start(CameraSpawnObject __instance, InputService ___inputService, int ___currentSelectedIndex) {
-
+        public static bool Start(CameraSpawnObject __instance, InputService ___inputService, int ___currentSelectedIndex) 
+        {
             var newObjectsToSpawn = new List<GameObject>();
             var newSounds = new List<string>();
             foreach (var proj in (List<GameObject>)typeof(Landfall.TABS.LandfallUnitDatabase).GetField("Projectiles", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(Landfall.TABS.LandfallUnitDatabase.GetDatabase())) { 

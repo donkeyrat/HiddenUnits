@@ -270,8 +270,11 @@ namespace HiddenUnits {
             Dictionary<DatabaseID, UnitBlueprint> units = (Dictionary<DatabaseID, UnitBlueprint>)typeof(LandfallContentDatabase).GetField("m_unitBlueprints", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
             foreach (var unit in newUnits)
             {
-                units.Add(unit.Entity.GUID, unit);
-                nonStreamableAssets.Add(unit.Entity.GUID, unit);
+	            if (!units.ContainsKey(unit.Entity.GUID))
+	            {
+		            units.Add(unit.Entity.GUID, unit);
+		            nonStreamableAssets.Add(unit.Entity.GUID, unit);
+	            }
             }
             typeof(LandfallContentDatabase).GetField("m_unitBlueprints", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, units);
             
@@ -279,7 +282,7 @@ namespace HiddenUnits {
             List<DatabaseID> defaultHotbarFactions = (List<DatabaseID>)typeof(LandfallContentDatabase).GetField("m_defaultHotbarFactionIds", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
             foreach (var faction in newFactions)
             {
-	            if (faction != null)
+	            if (!factions.ContainsKey(faction.Entity.GUID))
 	            {
 		            factions.Add(faction.Entity.GUID, faction);
 		            nonStreamableAssets.Add(faction.Entity.GUID, faction);
@@ -288,14 +291,7 @@ namespace HiddenUnits {
             }
             typeof(LandfallContentDatabase).GetField("m_factions", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, factions);
             typeof(LandfallContentDatabase).GetField("m_defaultHotbarFactionIds", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, defaultHotbarFactions.OrderBy(x => factions[x].index).ToList());
-            foreach (var fac in ContentDatabase.Instance().GetDefaultHotbarFactions())
-            {
-	            if (fac != null)
-	            {
-		            Debug.Log(fac.Entity.Name);
-	            }
-            }
-            
+
             Dictionary<DatabaseID, TABSCampaignAsset> campaigns = (Dictionary<DatabaseID, TABSCampaignAsset>)typeof(LandfallContentDatabase).GetField("m_campaigns", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(db);
             foreach (var campaign in newCampaigns)
             {

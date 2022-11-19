@@ -17,18 +17,16 @@ namespace HiddenUnits
         {
             unit = transform.root.GetComponent<Unit>();
             unit.data.healthHandler.willBeRewived = true;
-            if (unit.data.weaponHandler.rightWeapon != null && unit.data.weaponHandler.rightWeapon.GetComponent<Holdable>() && !unit.data.weaponHandler.rightWeapon.GetComponent<Holdable>().ignoreDissarm)
+            if (unit.data.weaponHandler.rightWeapon != null && unit.data.weaponHandler.rightWeapon.GetComponent<Holdable>())
             {
-                spawnedWeapon1 = unit.data.weaponHandler.rightWeapon.gameObject;
-                spawnedWeapon1.GetComponent<Holdable>().ignoreDissarm = false;
+                rightWeaponOriginal = unit.data.weaponHandler.rightWeapon.gameObject;
+                if (!letGoOfWeapons) unit.data.weaponHandler.rightWeapon.GetComponent<Holdable>().ignoreDissarm = true;
             }
-            if (unit.data.weaponHandler.leftWeapon != null && unit.data.weaponHandler.leftWeapon.GetComponent<Holdable>() && !unit.data.weaponHandler.leftWeapon.GetComponent<Holdable>().ignoreDissarm)
+            if (unit.data.weaponHandler.leftWeapon != null && unit.data.weaponHandler.leftWeapon.GetComponent<Holdable>())
             {
-                spawnedWeapon2 = unit.data.weaponHandler.leftWeapon.gameObject;
-                spawnedWeapon2.GetComponent<Holdable>().ignoreDissarm = false;
+                leftWeaponOriginal = unit.data.weaponHandler.leftWeapon.gameObject;
+                if (!letGoOfWeapons) unit.data.weaponHandler.leftWeapon.GetComponent<Holdable>().ignoreDissarm = true;
             }
-            if (weaponToSpawn1) { weaponToUse1 = weaponToSpawn1; } else { weaponToUse1 = spawnedWeapon1; }
-            if (weaponToSpawn2) { weaponToUse2 = weaponToSpawn2; } else { weaponToUse2 = spawnedWeapon2; }
         }
 
         public void DoRevive()
@@ -42,75 +40,100 @@ namespace HiddenUnits
             if (unit.data.health > 0f || effect)
             {
                 unit.data.healthHandler.willBeRewived = false;
+                yield return new WaitForSeconds(0.01f);
                 ServiceLocator.GetService<GameModeService>().CurrentGameMode.OnUnitDied(unit);
                 yield break;
             }
-            beforeReviveEvent.Invoke();
+            
+            preReviveEvent.Invoke();
+            
             yield return new WaitForSeconds(reviveDelay);
+            
             unit.data.Dead = false;
             unit.dead = false;
             unit.data.hasBeenRevived = true;
-            reviveEvent.Invoke();
+            unit.data.healthHandler.willBeRewived = false;
+            
             unit.data.ragdollControl = 1f;
             unit.data.muscleControl = 1f;
-            unit.data.health = unit.data.maxHealth * healthPercentage;
-            if (weaponToUse1)
+            
+            unit.data.health = unit.data.maxHealth * reviveHealthMultiplier;
+
+            if (letGoOfWeapons)
             {
-                var w = unit.unitBlueprint.SetWeapon(unit, unit.Team, weaponToUse1, new PropItemData(), HoldingHandler.HandType.Right, unit.data.mainRig.rotation, new List<GameObject>());
-                w.GetComponent<Holdable>().ignoreDissarm = false;
-                if (weaponToUse1 == weaponToSpawn1) { w.GetComponent<Rigidbody>().mass *= unit.unitBlueprint.massMultiplier; }
-                if (unit.unitBlueprint.holdinigWithTwoHands)
+                if (rightWeaponToSpawn)
                 {
-                    unit.holdingHandler.leftHandActivity = HoldingHandler.HandActivity.HoldingRightObject;
-                    weaponToUse2 = null;
+                    var weapon = unit.unitBlueprint.SetWeapon(unit, unit.Team, rightWeaponToSpawn, new PropItemData(), HoldingHandler.HandType.Right, unit.data.mainRig.rotation, new List<GameObject>());
+                    weapon.rigidbody.mass *= unit.unitBlueprint.massMultiplier;
+                    if (holdWithTwoHands)
+                    {
+                        unit.holdingHandler.leftHandActivity = HoldingHandler.HandActivity.HoldingRightObject;
+                    }
+                }
+                else if (useWeaponsAfterRevive && rightWeaponOriginal)
+                {
+                    var weapon = unit.unitBlueprint.SetWeapon(unit, unit.Team, rightWeaponOriginal, new PropItemData(), HoldingHandler.HandType.Right, unit.data.mainRig.rotation, new List<GameObject>());
+                    weapon.rigidbody.mass *= unit.unitBlueprint.massMultiplier;
+                }
+                if (!holdWithTwoHands)
+                {
+                    if (leftWeaponToSpawn)
+                    {
+                        var weapon = unit.unitBlueprint.SetWeapon(unit, unit.Team, leftWeaponToSpawn, new PropItemData(), HoldingHandler.HandType.Left, unit.data.mainRig.rotation, new List<GameObject>());
+                        weapon.rigidbody.mass *= unit.unitBlueprint.massMultiplier;
+                    }
+                    else if (useWeaponsAfterRevive && leftWeaponOriginal)
+                    {
+                        var weapon = unit.unitBlueprint.SetWeapon(unit, unit.Team, leftWeaponOriginal, new PropItemData(), HoldingHandler.HandType.Left, unit.data.mainRig.rotation, new List<GameObject>());
+                        weapon.rigidbody.mass *= unit.unitBlueprint.massMultiplier;
+                    }
+                }
+
+                if (rightWeaponOriginal)
+                {
+                    rightWeaponOriginal.transform.SetParent(null);
+                    if (removeWeaponsAfterSeconds > 0f)
+                    {
+                        var sec = rightWeaponOriginal.AddComponent<RemoveAfterSeconds>();
+                        sec.shrink = true;
+                        sec.seconds = removeWeaponsAfterSeconds;
+                    }
+                    else if (removeWeaponsAfterSeconds < 0f) Destroy(rightWeaponOriginal);
+                }
+                if (leftWeaponOriginal)
+                {
+                    leftWeaponOriginal.transform.SetParent(null);
+                    if (removeWeaponsAfterSeconds > 0f)
+                    {
+                        var sec = leftWeaponOriginal.AddComponent<RemoveAfterSeconds>();
+                        sec.shrink = true;
+                        sec.seconds = removeWeaponsAfterSeconds;
+                    }
+                    else if (removeWeaponsAfterSeconds < 0f) Destroy(leftWeaponOriginal);
                 }
             }
-            if (spawnedWeapon1 && removeWeapons) { 
-                Destroy(spawnedWeapon1); 
-            } 
-            else if (spawnedWeapon1 && removeWeaponsAfterSeconds) {
-                spawnedWeapon1.transform.SetParent(null); 
-                var sec = spawnedWeapon1.AddComponent<RemoveAfterSeconds>(); 
-                sec.shrink = true; 
-                sec.seconds = 1f; 
-            }
-            if (weaponToUse2)
+            
+            
+            if (openEyes && unit.GetComponentInChildren<EyeSpawner>() && unit.GetComponentInChildren<EyeSpawner>().spawnedEyes != null) 
             {
-                var w = unit.unitBlueprint.SetWeapon(unit, unit.Team, weaponToUse2, new PropItemData(), HoldingHandler.HandType.Left, unit.data.mainRig.rotation, new List<GameObject>());
-                w.GetComponent<Holdable>().ignoreDissarm = false;
-                if (weaponToUse2 == weaponToSpawn2) { w.GetComponent<Rigidbody>().mass *= unit.unitBlueprint.massMultiplier; }
-            }
-            if (spawnedWeapon2 && removeWeapons) { 
-                Destroy(spawnedWeapon2); 
-            } 
-            else if (spawnedWeapon2 && removeWeaponsAfterSeconds) {
-                spawnedWeapon2.transform.SetParent(null); 
-                var sec = spawnedWeapon2.AddComponent<RemoveAfterSeconds>(); 
-                sec.shrink = true; 
-                sec.seconds = 1f; 
-            }
-            if (unit.GetComponentInChildren<EyeSpawner>() && unit.GetComponentInChildren<EyeSpawner>().spawnedEyes != null) {
-                foreach (var eye in unit.GetComponentInChildren<EyeSpawner>().spawnedEyes) {
+                foreach (var eye in unit.GetComponentInChildren<EyeSpawner>().spawnedEyes) 
+                {
                     eye.dead.SetActive(false);
                     eye.currentEyeState = GooglyEye.EyeState.Open;
                     eye.SetState(GooglyEye.EyeState.Open);
                     GooglyEyes.instance.AddEye(eye);
                 }
             }
-            var goe = unit.GetComponent<GameObjectEntity>();
+            
             if (unit.unitBlueprint.MovementComponents != null && unit.unitBlueprint.MovementComponents.Count > 0)
             {
                 foreach (var mov in unit.unitBlueprint.MovementComponents)
                 {
                     var mi = (MethodInfo)typeof(UnitAPI).GetMethod("CreateGenericRemoveComponentData", (BindingFlags)(-1)).Invoke(unit.api, new object[] { mov.GetType() });
-                    mi.Invoke(goe.EntityManager, new object[] { goe.Entity });
+                    mi.Invoke(unit.GetComponent<GameObjectEntity>().EntityManager, new object[] { unit.GetComponent<GameObjectEntity>().Entity });
                 }
             }
-            unit.data.healthHandler.willBeRewived = false;
-            ServiceLocator.GetService<UnitHealthbars>().HandleUnitSpawned(unit);
-            unit.api.SetTargetingType(unit.unitBlueprint.TargetingComponent);
-            unit.api.UpdateECSValues();
-            unit.InitializeUnit(unit.Team);
+            
             unit.data.healthHandler.deathEvent.RemoveAllListeners();
             foreach (var rigidbodyOnDeath in unit.GetComponentsInChildren<AddRigidbodyOnDeath>()) {
 
@@ -120,37 +143,46 @@ namespace HiddenUnits
 
                 unit.data.healthHandler.RemoveDieAction(deathEvent.Die);
             }
-            afterReviveEvent.Invoke();
-            yield break;
+            
+            ServiceLocator.GetService<UnitHealthbars>().HandleUnitSpawned(unit);
+            unit.api.SetTargetingType(unit.unitBlueprint.TargetingComponent);
+            unit.api.UpdateECSValues();
+            unit.InitializeUnit(unit.Team);
+
+            reviveEvent.Invoke();
         }
 
         private Unit unit;
+        
+        [Header("Revive Settings")]
 
-        public UnityEvent beforeReviveEvent = new UnityEvent();
+        public UnityEvent preReviveEvent = new UnityEvent();
 
         public UnityEvent reviveEvent = new UnityEvent();
 
-        public UnityEvent afterReviveEvent = new UnityEvent();
-
         public float reviveDelay = 4f;
-
-        public GameObject weaponToSpawn1;
-
-        public GameObject weaponToSpawn2;
-
-        private GameObject spawnedWeapon1;
-
-        private GameObject spawnedWeapon2;
-
-        private GameObject weaponToUse1;
-
-        private GameObject weaponToUse2;
-
-        public bool removeWeapons = true;
-
-        public bool removeWeaponsAfterSeconds;
-
+        
         [Range(0f, 1f)]
-        public float healthPercentage = 0.5f;
+        public float reviveHealthMultiplier = 0.5f;
+
+        public bool openEyes = true;
+
+        [Header("Weapon Settings")] 
+        
+        public bool letGoOfWeapons;
+
+        public bool useWeaponsAfterRevive = true;
+        
+        public GameObject rightWeaponToSpawn;
+        
+        public GameObject leftWeaponToSpawn;
+
+        private GameObject rightWeaponOriginal;
+        
+        private GameObject leftWeaponOriginal;
+
+        public bool holdWithTwoHands;
+
+        public float removeWeaponsAfterSeconds;
     }
 }
