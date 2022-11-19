@@ -30,6 +30,9 @@ namespace HiddenUnits
             }
             else if (scene.name.Contains("SG_"))
             {
+                if (scene.name == "SG_Egypt" && ServiceLocator.GetService<ISaveLoaderService>().HasUnlockedSecret("BILLY_DIALOGUE1"))
+                    Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("BillyKey_Unlock1"), null, true);
+                
                 GameObject astar = null;
                 GameObject map = null;
                 foreach (var obj in scene.GetRootGameObjects())
