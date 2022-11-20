@@ -5,6 +5,7 @@ using Landfall.TABS;
 using System.Linq;
 using BitCode.Debug.Commands;
 using RootMotion.FinalIK;
+using UnityEngine.Events;
 
 namespace HiddenUnits
 {
@@ -13,9 +14,13 @@ namespace HiddenUnits
         public void Update()
         {
             counter += Time.deltaTime;
-            if (unitTarget && !joint && Vector3.Distance(tip.transform.position, unitTarget.data.mainRig.position) < attachDistance && unitTarget.data.mainRig.GetComponents<ConfigurableJoint>().Length < 3)
+            if (unitTarget && !joint && Vector3.Distance(tip.position, unitTarget.data.mainRig.position) < attachDistance && unitTarget.data.mainRig.GetComponents<ConfigurableJoint>().Length < 3)
             {
                 StartCoroutine(AttachJoint());
+            }
+            else if (unitTarget && joint && doConstantDamage)
+            {
+                unitTarget.data.healthHandler.TakeDamage(damage * Time.deltaTime, Vector3.zero);
             }
         }
         
@@ -56,6 +61,9 @@ namespace HiddenUnits
             joint.breakTorque = breakForce;
             
             if (lerpToCenterOfTip) StartCoroutine(LerpJoint());
+            
+            if (!doConstantDamage) unitTarget.data.healthHandler.TakeDamage(damage, Vector3.zero);
+            hitEvent.Invoke();
 
             var seconds = GetComponent<RemoveAfterSeconds>();
             yield return new WaitUntil(() => counter >= seconds.seconds - 1f);
@@ -96,26 +104,37 @@ namespace HiddenUnits
         private float counter;
         
         private Unit unitTarget;
+        
+        private FixedJoint joint;
+        
+        [Header("Root Settings")]
 
         public List<Rigidbody> rigs = new List<Rigidbody>();
-
-        [HideInInspector] 
-        public FixedJoint joint;
         
         public Transform moveTarget;
 
-        public RootBehaviorTip tip;
-
-        public float breakForce = 100000f;
+        public Transform tip;
 
         public float targetRange = 3f;
 
         public float followSpeed = 1f;
+        
+        [Header("Joint Settings")]
 
         public float adjustTime = 1f;
 
         public float attachDistance = 1f;
+        
+        public float breakForce = 100000f;
 
-        public bool lerpToCenterOfTip = true;
+        public bool lerpToCenterOfTip;
+
+        [Header("Damage Settings")] 
+        
+        public UnityEvent hitEvent = new UnityEvent();
+        
+        public float damage = 20f;
+
+        public bool doConstantDamage;
     }
 }
