@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using Landfall.TABS;
 using Landfall.TABS.GameState;
 using TFBGames;
@@ -82,7 +83,7 @@ namespace HiddenUnits
 				UnlockProgressFeedback();
 				if (m_unlockValue > 1f)
 				{
-					UnlockSecret();
+					StartCoroutine(UnlockSecret());
 				}
 			}
 			else
@@ -124,11 +125,11 @@ namespace HiddenUnits
 			}
 		}
 	
-		private void UnlockSecret()
+		private IEnumerator UnlockSecret()
 		{
 			if (!enabled || string.IsNullOrWhiteSpace(secretKey))
 			{
-				return;
+				yield break;
 			}
 			if ((bool)ScreenShake.Instance)
 			{
@@ -151,24 +152,12 @@ namespace HiddenUnits
 			loopSource.volume = 1f;
 			loopSource.PlayOneShot(hitClip);
 			done = true;
-			var allSecretConditions = ServiceLocator.GetService<ISaveLoaderService>().UnlockSecret(secretKey);
+			ServiceLocator.GetService<ISaveLoaderService>().UnlockSecret(secretKey);
 			for (int i = 0; i < secretDescriptions.Count; i++)
 			{
 				ServiceLocator.GetService<ModalPanel>().OpenUnlockPanel(secretDescriptions[i], secretIcon);
+				yield return new WaitForSeconds(0.1f);
 			}
-			if (allSecretConditions != null && allSecretConditions.Count > 0)
-			{
-				foreach (SecretUnlockCondition item in allSecretConditions)
-				{
-					ServiceLocator.GetService<ModalPanel>().OpenUnlockPanel(item.m_unlockDescription, item.m_unlockImage);
-				}
-			}
-			PlacementUI placementUI = FindObjectOfType<PlacementUI>();
-			if (placementUI != null)
-			{
-				placementUI.RedrawUI(secretKey);
-			}
-			CheckAchievements();
 		}
 	
 		public override void OnEnterNewScene()

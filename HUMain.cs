@@ -20,8 +20,8 @@ namespace HiddenUnits {
             var db = ContentDatabase.Instance();
 
 
-            //AssetBundle.LoadFromMemory(Properties.Resources.egyptmap);
-            //AssetBundle.LoadFromMemory(Properties.Resources.egyptmap2);
+            AssetBundle.LoadFromMemory(Properties.Resources.egyptmap);
+            AssetBundle.LoadFromMemory(Properties.Resources.egyptmap2);
             var newMapList = new List<MapAsset>();
             var newMapDict = new Dictionary<DatabaseID, int>();
             
@@ -415,11 +415,11 @@ namespace HiddenUnits {
         public List<GameObject> newAbilities = new List<GameObject>();
 
         public List<GameObject> newWeapons = new List<GameObject>();
-        
+
         public List<GameObject> newProjectiles = new List<GameObject>();
 
-        public static AssetBundle hiddenUnits;// = AssetBundle.LoadFromMemory(Properties.Resources.hiddenunits);
+        public static AssetBundle hiddenUnits = AssetBundle.LoadFromMemory(Properties.Resources.hiddenunits);
 
-        public static AssetBundle huMaps;// = AssetBundle.LoadFromMemory(Properties.Resources.humaps);
+        public static AssetBundle huMaps = AssetBundle.LoadFromMemory(Properties.Resources.humaps);
     }
 }

@@ -30,7 +30,7 @@ namespace HiddenUnits
             }
             else if (scene.name.Contains("SG_"))
             {
-                if (scene.name == "SG_Egypt" && ServiceLocator.GetService<ISaveLoaderService>().HasUnlockedSecret("BILLY_DIALOGUE1"))
+                if (scene.name == "SG_Egypt" && ServiceLocator.GetService<ISaveLoaderService>().HasUnlockedSecret("BILLY_SWORD"))
                     Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("BillyKey_Unlock4"), null, true);
                 
                 GameObject astar = null;
@@ -130,7 +130,7 @@ namespace HiddenUnits
                     name = "Secrets"
                 };
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Shaman_Unlock"), secrets.transform, true);
-                if (ServiceLocator.GetService<ISaveLoaderService>().HasUnlockedSecret("BILLY_DIALOGUE1"))
+                if (ServiceLocator.GetService<ISaveLoaderService>().HasUnlockedSecret("BILLY_SWORD"))
                     Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("BillyKey_Unlock2"), secrets.transform, true);
             }
             else if (scene.name == "01_Sandbox_Tribal_01_VC")
@@ -236,7 +236,7 @@ namespace HiddenUnits
                 {
                     name = "Secrets"
                 };
-                if (ServiceLocator.GetService<ISaveLoaderService>().HasUnlockedSecret("BILLY_DIALOGUE1"))
+                if (ServiceLocator.GetService<ISaveLoaderService>().HasUnlockedSecret("BILLY_SWORD"))
                     Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("BillyKey_Unlock1"), secrets.transform, true);
             }
             else if (scene.name == "09_Lvl1_Western_VC")
@@ -265,7 +265,7 @@ namespace HiddenUnits
                     name = "Secrets"
                 };
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("BusinessMan_Unlock"), secrets.transform, true);
-                if (ServiceLocator.GetService<ISaveLoaderService>().HasUnlockedSecret("BILLY_DIALOGUE1"))
+                if (ServiceLocator.GetService<ISaveLoaderService>().HasUnlockedSecret("BILLY_SWORD"))
                     Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("BillyKey_Unlock3"), secrets.transform, true);
             }
             else if (scene.name == "09_Lvl1_Fantasy_Good_VC")
