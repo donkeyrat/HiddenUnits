@@ -20,11 +20,11 @@ namespace HiddenUnits {
         public IEnumerator DoDrain() {
 
             var targets = SetTargets();
-            if (targets.Length > 0) { 
-
-                for (int i = 0; i < targets.Length; i++) {
-
-                    if (i >= limitPerDrain || egg.hitList.Contains(targets[i])) { yield break; }
+            if (targets.Length > 0) 
+            {
+                for (int i = 0; i < targets.Length; i++) 
+                {
+                    if (i >= limitPerDrain) yield break;
 
                     var spawnedObject = Instantiate(objectToSpawn, transform.position, transform.rotation);
                     foreach (var targetableEffect in spawnedObject.GetComponents<TargetableEffect>()) {
@@ -32,10 +32,13 @@ namespace HiddenUnits {
                         targetableEffect.DoEffect(transform, targets[i].data.mainRig.transform);
                         targetableEffect.DoEffect(transform.position, targets[i].data.mainRig.position, targets[i].data.mainRig);
                     }
+                    
                     egg.AddHealth(healthToDrain);
-                    drainEvent.Invoke();
                     egg.hitList.Add(targets[i]);
+                    
+                    drainEvent.Invoke();
                     StartCoroutine(RemoveUnitFromList(targets[i]));
+                    
                     yield return new WaitForSeconds(delayPerDrain);
                 }
                 if (!egg.hasHatched) {
@@ -54,7 +57,7 @@ namespace HiddenUnits {
             var hits = Physics.SphereCastAll(transform.position, radius, Vector3.up, 0.1f, layerMask);
             return hits
                 .Select(hit => hit.transform.root.GetComponent<Unit>())
-                .Where(x => GetComponentInParent<TeamHolder>() && x && !x.data.Dead && x.Team != GetComponentInParent<TeamHolder>().team)
+                .Where(x => GetComponentInParent<TeamHolder>() && x && !x.data.Dead && x.Team != GetComponentInParent<TeamHolder>().team && !egg.hitList.Contains(x))
                 .OrderBy(x => (x.data.mainRig.transform.position - transform.position).magnitude)
                 .Distinct()
                 .ToArray();
@@ -63,7 +66,7 @@ namespace HiddenUnits {
         public IEnumerator RemoveUnitFromList(Unit unit) {
 
             yield return new WaitForSeconds(1f);
-            egg.hitList.Remove(unit);
+            if (unit) egg.hitList.Remove(unit);
         }
 
         public UnityEvent drainEvent = new UnityEvent();

@@ -23,7 +23,7 @@ namespace HiddenUnits {
         }
 
         void Update() {
-            if (transform.root.GetComponentsInChildren<UnitEffectBase>().ToList().Find(x => x.effectID == 1987)) { Reset(); }
+            if (transform.root.GetComponentsInChildren<UnitEffectBase>().ToList().Find(x => x.effectID == 1987)) Reset();
             if (changing && t < lerpTime && Time.timeScale != 0f) {
                 t += Mathf.Clamp(Time.deltaTime / lerpTime, 0f, 1f);
                 if (useOriginalMat)

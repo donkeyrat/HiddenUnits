@@ -13,7 +13,13 @@ namespace HiddenUnits {
         }
 
         public void DoLerping() {
-            if (Physics.Raycast(new Ray(transform.position, Vector3.down), out var hitInfo, 100f, groundMask)) { Debug.Log("awoawfoaf"); groundPos = hitInfo.point; startPos = transform.position; lerping = true; }
+            if (Physics.Raycast(new Ray(transform.position, Vector3.down), out var hitInfo, 100f, groundMask))
+            {
+                Debug.Log("awoawfoaf"); 
+                groundPos = hitInfo.point; 
+                startPos = transform.position; 
+                lerping = true;
+            }
         }
 
         private bool lerping;

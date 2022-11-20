@@ -20,7 +20,7 @@ namespace HiddenUnits {
                 emit.rateOverTime = requiredHealth / 10; 
                 HatchEgg(); 
             }
-            else { emit.rateOverTime = emit.rateOverTime.constant + (amount / 10); }
+            else { emit.rateOverTime = emit.rateOverTime.constant + amount / 10; }
         }
 
         public void HatchEgg() {
