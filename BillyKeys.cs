@@ -140,6 +140,8 @@ namespace HiddenUnits
                 unlockValue -= Time.unscaledDeltaTime * 0.2f;
                 SetColor();
                 UnlockProgressFeedback();
+                loopSource.volume = Mathf.Pow(unlockValue * 0.25f, 1.3f);
+                loopSource.pitch = 1f + 1f * unlockValue;
                 yield return null;
             }
          }
