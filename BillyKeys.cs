@@ -57,7 +57,7 @@ namespace HiddenUnits
 
         public void Update()
         {
-            if (billyUnlocked) return;
+            if (save.HasUnlockedSecret(finalUnlock)) return;
             
             var num = Vector3.Distance(secretObject.worldCenterOfMass, mainCam.position);
             float num2 = Vector3.Angle(mainCam.forward, secretObject.worldCenterOfMass - mainCam.position);
@@ -120,6 +120,7 @@ namespace HiddenUnits
 
         public void UnlockSelf()
         {
+            if (save.HasUnlockedSecret(finalUnlock)) return;
             save.UnlockSecret(finalUnlock);
             ServiceLocator.GetService<ModalPanel>().OpenUnlockPanel(unlockDescription, unlockImage);
             PlacementUI placementUI = FindObjectOfType<PlacementUI>();
@@ -129,7 +130,6 @@ namespace HiddenUnits
             }
             loopSource.PlayOneShot(hitClip);
             unlockAllEvent.Invoke();
-            billyUnlocked = true;
             StartCoroutine(ShrinkUnlockValue());
         }
 
@@ -195,8 +195,6 @@ namespace HiddenUnits
         private AudioSource loopSource;
 
         private bool done;
-
-        private bool billyUnlocked;
 
         private float unlockValue;
         
