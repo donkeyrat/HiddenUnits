@@ -9,7 +9,7 @@ namespace HiddenUnits
 {
 	public class SecretUnlockMultiple : GameStateListener
 	{
-		public List<string> secretKeys = new List<string>();
+		public string secretKey;
 	
 		public List<string> secretDescriptions = new List<string>();
 	
@@ -126,7 +126,7 @@ namespace HiddenUnits
 	
 		private void UnlockSecret()
 		{
-			if (!enabled || secretKeys.TrueForAll(x => string.IsNullOrWhiteSpace(x)))
+			if (!enabled || string.IsNullOrWhiteSpace(secretKey))
 			{
 				return;
 			}
@@ -151,24 +151,24 @@ namespace HiddenUnits
 			loopSource.volume = 1f;
 			loopSource.PlayOneShot(hitClip);
 			done = true;
-			PlacementUI placementUI = FindObjectOfType<PlacementUI>();
-			for (int i = 0; i < secretKeys.Count; i++)
+			var allSecretConditions = ServiceLocator.GetService<ISaveLoaderService>().UnlockSecret(secretKey);
+			for (int i = 0; i < secretDescriptions.Count; i++)
 			{
-				List<SecretUnlockCondition> list = ServiceLocator.GetService<ISaveLoaderService>().UnlockSecret(secretKeys[i]);
-				CheckAchievements();
 				ServiceLocator.GetService<ModalPanel>().OpenUnlockPanel(secretDescriptions[i], secretIcon);
-				if (list != null && list.Count > 0)
+			}
+			if (allSecretConditions != null && allSecretConditions.Count > 0)
+			{
+				foreach (SecretUnlockCondition item in allSecretConditions)
 				{
-					foreach (SecretUnlockCondition item in list)
-					{
-						ServiceLocator.GetService<ModalPanel>().OpenUnlockPanel(item.m_unlockDescription, item.m_unlockImage);
-					}
-				}
-				if (placementUI != null)
-				{
-					placementUI.RedrawUI(secretKeys[i]);
+					ServiceLocator.GetService<ModalPanel>().OpenUnlockPanel(item.m_unlockDescription, item.m_unlockImage);
 				}
 			}
+			PlacementUI placementUI = FindObjectOfType<PlacementUI>();
+			if (placementUI != null)
+			{
+				placementUI.RedrawUI(secretKey);
+			}
+			CheckAchievements();
 		}
 	
 		public override void OnEnterNewScene()
@@ -187,11 +187,7 @@ namespace HiddenUnits
 			}
 			
 			bool flag = false;
-			foreach (var key in secretKeys)
-			{
-				if (ServiceLocator.GetService<ISaveLoaderService>().HasUnlockedSecret(key)) flag = true;
-			}
-			if (secretKeys.TrueForAll(x => !string.IsNullOrWhiteSpace(x)) && flag)
+			if (!string.IsNullOrWhiteSpace(secretKey) && ServiceLocator.GetService<ISaveLoaderService>().HasUnlockedSecret(secretKey))
 			{
 				if ((bool)m_secretObject)
 				{

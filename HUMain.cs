@@ -20,8 +20,8 @@ namespace HiddenUnits {
             var db = ContentDatabase.Instance();
 
 
-            AssetBundle.LoadFromMemory(Properties.Resources.egyptmap);
-            AssetBundle.LoadFromMemory(Properties.Resources.egyptmap2);
+            //AssetBundle.LoadFromMemory(Properties.Resources.egyptmap);
+            //AssetBundle.LoadFromMemory(Properties.Resources.egyptmap2);
             var newMapList = new List<MapAsset>();
             var newMapDict = new Dictionary<DatabaseID, int>();
             
@@ -132,22 +132,11 @@ namespace HiddenUnits {
             }
             Resources.FindObjectsOfTypeAll<SecretUnlockConditions>()[0].m_unlockConditions = allConditions.ToArray();
 
-            var allMats = Resources.FindObjectsOfTypeAll<Material>().ToList();
             foreach (var mat in hiddenUnits.LoadAllAssets<Material>()) if (Shader.Find(mat.shader.name)) mat.shader = Shader.Find(mat.shader.name);
             
             foreach (var unit in hiddenUnits.LoadAllAssets<UnitBlueprint>())
             {
                 newUnits.Add(unit);
-                if (unit.name == "Helicopter")
-                {
-                    unit.MovementComponents = new List<IMovementComponent>
-                    {
-                        new CircleTarget
-                        {
-                            CircleDistance = 1f
-                        }
-                    };
-                }
                 foreach (var b in db.LandfallContentDatabase.GetUnitBases().ToList()) { if (unit.UnitBase != null) { if (b.name == unit.UnitBase.name) { unit.UnitBase = b; } } }
                 foreach (var b in db.LandfallContentDatabase.GetWeapons().ToList()) { if (unit.RightWeapon != null && b.name == unit.RightWeapon.name) unit.RightWeapon = b; if (unit.LeftWeapon != null && b.name == unit.LeftWeapon.name) unit.LeftWeapon = b; }
             }
@@ -429,8 +418,8 @@ namespace HiddenUnits {
         
         public List<GameObject> newProjectiles = new List<GameObject>();
 
-        public static AssetBundle hiddenUnits = AssetBundle.LoadFromMemory(Properties.Resources.hiddenunits);
-        
-        public static AssetBundle huMaps = AssetBundle.LoadFromMemory(Properties.Resources.humaps);
+        public static AssetBundle hiddenUnits;// = AssetBundle.LoadFromMemory(Properties.Resources.hiddenunits);
+
+        public static AssetBundle huMaps;// = AssetBundle.LoadFromMemory(Properties.Resources.humaps);
     }
 }

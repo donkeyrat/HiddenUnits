@@ -56,11 +56,10 @@ namespace Landfall.TABS.AI.Systems.Modifiers {
 				
 				if (this.HasTargetTags[index].Target == Entity.Null) { return; }
 				
-				Debug.Log("IMPRESSIVE");
 				Entity e = this.Entities[index];
 				Direction component = this.Directions[index];
 				CircleTarget circleTarget = this.CircleTargets[index];
-				if (this.TargetDatas[index].DistanceToTarget >= circleTarget.CircleDistance) {
+				if (this.TargetDatas[index].DistanceToTarget <= circleTarget.CircleDistance) {
 					
 					float3 initial = component.Value;
 					float3 better = new float3(initial.x, 0f, initial.z);

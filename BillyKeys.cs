@@ -15,20 +15,28 @@ namespace HiddenUnits
             base.OnEnterNewScene();
             mainCam = ServiceLocator.GetService<PlayerCamerasManager>()?.GetMainCam(TFBGames.Player.One).transform;
             save = ServiceLocator.GetService<ISaveLoaderService>();
-            if (keys.Count <= 0) return;
-            for (int i = 0; i < keys.Count; i++)
+            var indexesToRemove = new List<int>();
+            if (keys.Count > 0)
             {
-                isUnlocking.Add(false);
-                if (save.HasUnlockedSecret(toBeUnlocked[i]))
+                for (int i = 0; i < keys.Count; i++)
                 {
-                    keys[i].SetActive(true);
-                    keys[i].transform.localPosition = Vector3.zero;
-                    keys.RemoveAt(i);
-                    alreadyUnlocked.RemoveAt(i);
-                    toBeUnlocked.RemoveAt(i);
-                    isUnlocking.RemoveAt(i);
+                    isUnlocking.Add(false);
+                    if (save.HasUnlockedSecret(toBeUnlocked[i]))
+                    {
+                        keys[i].SetActive(true);
+                        keys[i].transform.localPosition = Vector3.zero;
+                        indexesToRemove.Add(i);
+                    }
                 }
             }
+
+            //foreach (var index in indexesToRemove)
+            //{
+            //    keys.RemoveAt(index);
+            //    alreadyUnlocked.RemoveAt(index);
+            //    toBeUnlocked.RemoveAt(index);
+            //    isUnlocking.RemoveAt(index);
+            //}
 
             CheckUnlocks();
         }
