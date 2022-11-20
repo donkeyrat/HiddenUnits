@@ -104,6 +104,7 @@ namespace HiddenUnits
             WilhelmPhysicsFunctions.AddForceWithMinWeight(col.rigidbody, Mathf.Sqrt(goldenNumber * 50f) * transform.forward * knockback, ForceMode.Impulse, massCap);
             
             foreach (var effect in GetComponents<CollisionWeaponEffect>()) effect.DoEffect(col.transform, col);
+            if (GetComponent<CollisionSound>()) GetComponent<CollisionSound>().DoEffect(col.transform, col, goldenNumber);
 
             hitList.Add(enemyUnit);
             if (currentState == ClubState.Roaming) SetTarget(targetingRadius);
