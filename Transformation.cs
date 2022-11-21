@@ -5,18 +5,23 @@ using System.Collections;
 namespace HiddenUnits {
     
     public class Transformation : MonoBehaviour {
-        
-        public void Start() { GetComponentInChildren<WerewolfSpawner>().unitBlueprint = transform.root.GetComponent<Unit>().unitBlueprint; }
+
+        private void Start()
+        {
+            transformer.unitBlueprint = transform.root.GetComponent<Unit>().unitBlueprint;
+            root = transform.root.GetComponent<Unit>();
+        }
 
         public void Transform() {
             
-            var root = transform.root.GetComponent<Unit>();
-            var unit = transformed.Spawn();
             storedHP = root.data.health;
+            var unit = transformed.Spawn();
             transform.SetParent(unit.transform);
+            
             unit.transform.position = new Vector3(root.data.mainRig.position.x,
                 root.data.mainRig.position.y - distanceBelowToSpawn, root.data.mainRig.position.z);
             unit.transform.rotation = root.data.mainRig.rotation;
+
             Destroy(root.gameObject);
             StartCoroutine(Revert());
         }
@@ -24,16 +29,19 @@ namespace HiddenUnits {
         public IEnumerator Revert() {
             
             yield return new WaitForSeconds(revertTime);
-            var root = transform.root.GetComponent<Unit>();
-            transformer.rootUnit = root;
-            var unit = transformer.Spawn();
-            unit.data.health = storedHP;
-            unit.transform.position = new Vector3(root.data.mainRig.position.x, root.data.mainRig.position.y - distanceBelowToSpawn, root.data.mainRig.position.z);
-            unit.transform.rotation = root.data.mainRig.rotation;
-            Destroy(root.gameObject);
+            
+            var werewolf = transform.root.GetComponent<Unit>();
+            root = transformer.Spawn();
+            
+            root.data.healthHandler.TakeDamage(root.data.maxHealth - storedHP, Vector3.down);
+            root.transform.position = new Vector3(werewolf.data.mainRig.position.x, werewolf.data.mainRig.position.y - distanceBelowToSpawn, werewolf.data.mainRig.position.z);
+            root.transform.rotation = werewolf.data.mainRig.rotation;
+            
+            Destroy(werewolf.gameObject);
             Destroy(gameObject);
-            yield break;
         }
+
+        private Unit root;
 
         public WerewolfSpawner transformer;
 

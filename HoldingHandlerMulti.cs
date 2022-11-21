@@ -300,4 +300,11 @@ public class HoldingHandlerMulti : BatchedMonobehaviour
     private Vector3 currentTorque;
 
     private Vector3 currentTorqueUp;
+    
+    public class StoreHand : MonoBehaviour
+    {
+        public Rigidbody hand;
+
+        public Holdable weapon;
+    }
 }

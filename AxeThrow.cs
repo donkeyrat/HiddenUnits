@@ -6,16 +6,23 @@ namespace HiddenUnits
 {
     public class AxeThrow : MonoBehaviour
     {
-		void Awake() {
-			if (GetComponent<RangeWeapon>() && GetComponent<RangeWeapon>().ObjectToSpawn) { var dummy = objectToSpawn; objectToSpawn = GetComponent<RangeWeapon>().ObjectToSpawn; GetComponent<RangeWeapon>().ObjectToSpawn = dummy; }
+		void Awake() 
+		{
+			if (GetComponent<RangeWeapon>() && GetComponent<RangeWeapon>().ObjectToSpawn)
+			{
+				var dummy = objectToSpawn;
+				objectToSpawn = GetComponent<RangeWeapon>().ObjectToSpawn; 
+				GetComponent<RangeWeapon>().ObjectToSpawn = dummy;
+			}
 		}
 
-		void Start() {
-
+		void Start() 
+		{
 			hammerEffects = GetComponents<AxeAttackEffect>();
 			myLevel = GetComponent<Level>();
 			shootPosition = GetComponentInChildren<ShootPosition>() ? GetComponentInChildren<ShootPosition>().transform : transform;
-        }
+			weapon = GetComponent<Weapon>();
+		}
 
         public void Throw()
         {
@@ -24,15 +31,12 @@ namespace HiddenUnits
 
         public IEnumerator DelayedSwing()
         {
-			var target = GetComponent<Weapon>().connectedData.targetData.unit;
-			if (callHammerEffects)
+			var target = weapon.connectedData.targetData.unit;
+			if (callHammerEffects && target)
 			{
 				foreach (var effect in hammerEffects)
 				{
-					if (target != null)
-					{
-						effect.DoEffect(target.data.mainRig);
-					}
+					effect.DoEffect(target.data.mainRig);
 				}
 			}
 
@@ -45,9 +49,9 @@ namespace HiddenUnits
 			SetProjectileStats(spawnedObject, GetSpawnDirection((target.data.mainRig.position - shootPosition.position).normalized, target.data.mainRig, new Vector3(0f, 0f, 0f)), (target.data.mainRig.position - shootPosition.position).normalized, target.data.mainRig, shootPosition.forward, target.data.mainRig.position, target.data.mainRig.velocity);
 			
 			var team = spawnedObject.AddComponent<TeamHolder>();
-			team.spawner = GetComponent<Weapon>().connectedData.unit.gameObject;
+			team.spawner = weapon.connectedData.unit.gameObject;
 			team.spawnerWeapon = gameObject;
-			team.team = GetComponent<Weapon>().connectedData.unit.Team;
+			team.team = weapon.connectedData.unit.Team;
 			team.target = target.data.mainRig;
 			foreach (var teamc in spawnedObject.GetComponentsInChildren<TeamColor>())
 			{
@@ -95,7 +99,7 @@ namespace HiddenUnits
 				if (componentInChildren3)
 				{
 					componentInChildren3.damage *= levelMultiplier;
-					if (GetComponent<Weapon>().connectedData && GetComponent<Weapon>().connectedData.input.hasControl)
+					if (weapon.connectedData && weapon.connectedData.input.hasControl)
 					{
 						componentInChildren3.alwaysHitTeamMates = true;
 					}
@@ -137,7 +141,7 @@ namespace HiddenUnits
 		{
 			Vector3 result = directionToTarget.normalized;
 			result = Vector3.Lerp(directionToTarget, shootPosition.forward, this.shootHelpAngleCurve.Evaluate(Vector3.Angle(directionToTarget, shootPosition.forward))).normalized;
-			if (GetComponent<Weapon>().connectedData && GetComponent<Weapon>().connectedData.input.hasControl)
+			if (weapon.connectedData && weapon.connectedData.input.hasControl)
 			{
 				if (!targetRig)
 				{
@@ -149,21 +153,23 @@ namespace HiddenUnits
 
 		private Transform shootPosition;
 
-		public GameObject objectToSpawn;
-
-        private GameObject spawnedObject;
-
+		private Weapon weapon;
+		
+		private GameObject spawnedObject;
+		
+		private AxeAttackEffect[] hammerEffects;
+		
 		private Level myLevel;
+		
+		private float levelMultiplier = 1f;
+		
+		private readonly AnimationCurve shootHelpAngleCurve = new AnimationCurve();
+
+		public GameObject objectToSpawn;
 
         public float spawnDelay = 0.4f;
 
         public bool callHammerEffects = true;
-
-        private AxeAttackEffect[] hammerEffects;
-
-		private float levelMultiplier = 1f;
-
-		private AnimationCurve shootHelpAngleCurve = new AnimationCurve();
 
 		public bool parentToMe;
     }

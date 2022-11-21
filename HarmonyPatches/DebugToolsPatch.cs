@@ -5,10 +5,10 @@ using HarmonyLib;
 using TFBGames;
 using System.Collections.Generic;
 
-namespace HiddenUnits 
+namespace HiddenUnits.HarmonyPatches
 {
     [HarmonyPatch(typeof(CameraSpawnObject), "Start")]
-    class ArargdCouldveJustDoneThis 
+    class DebugToolsPatch 
     {
         [HarmonyPrefix]
         public static bool Start(CameraSpawnObject __instance, InputService ___inputService, int ___currentSelectedIndex) 

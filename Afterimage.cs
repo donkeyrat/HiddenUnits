@@ -9,13 +9,18 @@ namespace HiddenUnits
     public class Afterimage : MonoBehaviour 
     {
 
-        public void Start() { GetComponent<UnitSpawner>().unitBlueprint = transform.root.GetComponent<Unit>().unitBlueprint; }
+        public void Start()
+        {
+            GetComponent<UnitSpawner>().unitBlueprint = transform.root.GetComponent<Unit>().unitBlueprint;
+        }
 
-        public void SpawnAfterimage() { StartCoroutine(Spawn()); }
+        public void SpawnAfterimage()
+        {
+            StartCoroutine(Spawn());
+        }
 
         public IEnumerator Spawn() 
         {
-
             transform.position = transform.root.GetComponent<Unit>().data.mainRig.position;
             
             var u = GetComponent<UnitSpawner>().Spawn();

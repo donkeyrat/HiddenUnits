@@ -1,18 +1,23 @@
 ﻿using UnityEngine;
 
-namespace HiddenUnits {
+namespace HiddenUnits 
+{
 
-    public class LerpTowardsGround : MonoBehaviour {
+    public class LerpTowardsGround : MonoBehaviour 
+    {
 
-        void Update() {
-            if (lerping) {
+        void Update() 
+        {
+            if (lerping) 
+            {
                 if (counter * lerpTime > 1f) { lerping = false; return; }
                 counter += Time.deltaTime;
                 transform.position = Vector3.Lerp(startPos, groundPos + groundOffset, counter * lerpTime);
             }
         }
 
-        public void DoLerping() {
+        public void DoLerping() 
+        {
             if (Physics.Raycast(new Ray(transform.position, Vector3.down), out var hitInfo, 100f, groundMask))
             {
                 Debug.Log("awoawfoaf"); 

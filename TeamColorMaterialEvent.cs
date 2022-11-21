@@ -3,8 +3,10 @@ using System.Collections;
 using Landfall.TABS;
 using System.Linq;
 
-namespace HiddenUnits {
-    public class TeamColorMaterialEvent : MonoBehaviour {
+namespace HiddenUnits 
+{
+    public class TeamColorMaterialEvent : MonoBehaviour 
+    {
 
         public void Start()
         {

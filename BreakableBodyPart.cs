@@ -3,24 +3,24 @@ using System.Collections.Generic;
 
 namespace HiddenUnits {
     
-    public class BreakableBodyPart : MonoBehaviour {
-        
-        public void Start() { GetComponent<DataHandler>().healthHandler.AssignDamageAction(BreakPart); }
+    public class BreakableBodyPart : MonoBehaviour 
+    {
+        private void Start() { GetComponent<DataHandler>().healthHandler.AssignDamageAction(BreakPart); }
 
-        public void Update() {
-            
-            if (counter >= cooldown) {
-                
+        private void Update() 
+        {
+            if (counter >= cooldown) 
+            {
                 counter = 0f;
                 startedCounting = false;
             }
-            if (startedCounting) { counter += Time.deltaTime; }
+            if (startedCounting) counter += Time.deltaTime;
         }
 
-        public void BreakPart() {
-            
-            if (!startedCounting) {
-                
+        public void BreakPart() 
+        {
+            if (!startedCounting) 
+            {
                 if (GetComponent<DataHandler>().health <= GetComponent<DataHandler>().maxHealth / 2 && Random.value > breakChance) {
                     
                     var selected = Random.Range(0, breakableParts.Count - 1);

@@ -9,10 +9,12 @@ namespace HiddenUnits {
 
     public class AxeTargeting : ProjectileHitEffect {
 
-        public void Start() {
-
-            if (!GetComponent<TeamHolder>() || !GetComponent<TeamHolder>().spawner) { Destroy(this); }
-            target = GetComponent<TeamHolder>().spawner.GetComponent<Unit>().data.targetData.unit;
+        public void Start()
+        {
+            teamHolder = GetComponent<TeamHolder>();
+            if (!teamHolder || !teamHolder.spawner) { Destroy(this); }
+            target = teamHolder.spawner.GetComponent<Unit>().data.targetData.unit;
+            moveTransform = GetComponent<MoveTransform>();
         }
 
         public override bool DoEffect(HitData hit) {
@@ -38,11 +40,11 @@ namespace HiddenUnits {
             }
             else if (returned)
             {
-                if (GetComponent<TeamHolder>() && GetComponent<TeamHolder>().spawnerWeapon) { go = GetComponent<TeamHolder>().spawnerWeapon.transform; }
+                if (teamHolder && teamHolder.spawnerWeapon) { go = teamHolder.spawnerWeapon.transform; }
                 if (go != null && Vector3.Distance(transform.position, go.position) < returnRange)
                 {
                     Destroy(gameObject);
-                    if (GetComponent<TeamHolder>() && GetComponent<TeamHolder>().spawnerWeapon && GetComponent<TeamHolder>().spawnerWeapon.GetComponent<DelayEvent>()) { GetComponent<TeamHolder>().spawnerWeapon.GetComponent<DelayEvent>().Go(); }
+                    if (teamHolder && teamHolder.spawnerWeapon && teamHolder.spawnerWeapon.GetComponent<DelayEvent>()) { teamHolder.spawnerWeapon.GetComponent<DelayEvent>().Go(); }
                 }
             }
             if (!returned && (target == null || target.data.Dead))
@@ -62,7 +64,7 @@ namespace HiddenUnits {
 
         public void GoTowards(Transform target)
         {
-            GetComponent<MoveTransform>().velocity = (target.position - transform.position).normalized * GetComponent<MoveTransform>().selfImpulse.magnitude;
+            moveTransform.velocity = (target.position - transform.position).normalized * moveTransform.selfImpulse.magnitude;
         }
 
         public void SetTarget()
@@ -70,7 +72,7 @@ namespace HiddenUnits {
             var hits = Physics.SphereCastAll(transform.position, maxRange, Vector3.up, 0.1f, LayerMask.GetMask(new string[] { "MainRig" }));
             var foundUnits = hits
                 .Select(hit => hit.transform.root.GetComponent<Unit>())
-                .Where(x => GetComponent<TeamHolder>() && x && !x.data.Dead && x.Team != GetComponent<TeamHolder>().team && !hitList.Contains(x))
+                .Where(x => teamHolder && x && !x.data.Dead && x.Team != teamHolder.team && !hitList.Contains(x))
                 .OrderBy(x => (x.data.mainRig.transform.position - transform.position).magnitude)
                 .Distinct()
                 .ToArray();
@@ -81,6 +83,10 @@ namespace HiddenUnits {
         private List<Unit> hitList = new List<Unit>();
 
         private Unit target;
+
+        private TeamHolder teamHolder;
+
+        private MoveTransform moveTransform;
 
         public float maxRange = 20f;
 

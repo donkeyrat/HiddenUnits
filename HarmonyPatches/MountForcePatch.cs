@@ -2,10 +2,10 @@
 using UnityEngine;
 using HarmonyLib;
 
-namespace HiddenUnits
+namespace HiddenUnits.HarmonyPatches
 {
     [HarmonyPatch(typeof(Mount), "Fall")]
-    class CringeCringer
+    class MountForcePatch
     {
         [HarmonyPrefix]
         public static bool Prefix(Mount __instance, ref MountPos ___myMountPos, ref DataHandler ___otherData, ref MovementHandler ___mountMove, ref bool ___isMounted, ref DataHandler ___data, ref Landfall.TABS.AI.UnitAPI ___m_unitApi, ref RigidbodyHolder ___rigHolder, ref ConfigurableJoint[] ___joints)

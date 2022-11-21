@@ -20,7 +20,6 @@ public class AddEffectToTargetOnce : MonoBehaviour {
 	{
 		if (!(attacker == null) && (!targetData || !targetData.Dead) && targetData) {
 
-			EffectPrefab.GetType();
 			UnitEffectBase unitEffectBase = UnitEffectBase.AddEffectToTarget(targetData.unit.transform.gameObject, EffectPrefab);
 			if (unitEffectBase == null) {
 

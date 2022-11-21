@@ -14,8 +14,7 @@ namespace HiddenUnits
 
         private void Start()
         {
-            TeamHolder component = GetComponent<TeamHolder>();
-            if (!component)
+            if (!GetComponent<TeamHolder>())
             {
                 return;
             }
@@ -26,11 +25,9 @@ namespace HiddenUnits
             {
                 Compensation component1 = GetComponent<Compensation>();
                 MoveTransform component2 = GetComponent<MoveTransform>();
-                if ((bool)component2 && (bool)component)
-                {
-                    base.transform.rotation = Quaternion.LookRotation(component1.GetCompensation(target.data.mainRig.position, target.data.mainRig.velocity, 0f));
-                    component2.Initialize();
-                }
+                if (!component2 || !GetComponent<TeamHolder>()) return;
+                transform.rotation = Quaternion.LookRotation(component1.GetCompensation(target.data.mainRig.position, target.data.mainRig.velocity, 0f));
+                component2.Initialize();
             }
         }
 

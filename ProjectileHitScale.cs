@@ -1,47 +1,40 @@
-﻿using Landfall.TABS;
+﻿using System.Collections;
+using Landfall.TABS;
 using UnityEngine;
 
-namespace Unitgrad
+namespace HiddenUnits
 {
     public class ProjectileHitScale : ProjectileHitEffect
     {
         public override bool DoEffect(HitData hit)
         {
-            if (!hit.rigidbody || !hit.rigidbody.transform.root.GetComponent<Unit>() || hit.rigidbody.transform.root.GetComponent<Unit>().data.Dead || hit.rigidbody.transform.root.GetComponent<Unit>().Team == GetComponent<TeamHolder>().spawner.GetComponent<Unit>().Team)
+            if (!hit.rigidbody || !hit.transform.root.GetComponent<Unit>() || (hit.transform.root.GetComponent<Unit>() && hit.transform.root.GetComponent<Unit>().data.Dead) || (hit.transform.root.GetComponent<Unit>() && hit.transform.root.GetComponent<Unit>().Team == GetComponent<TeamHolder>().team) || hit.transform.GetComponent<Scaling>())
             {
                 return false;
             }
-            this.hit = hit;
-            startedScaling = true;
+            
+            StartCoroutine(DoScaling(hit));
             return true;
         }
         
-        public void Update()
+        public IEnumerator DoScaling(HitData hit)
         {
-            counter += Time.deltaTime;
-            if (scaleTime > counter && startedScaling)
+            hit.transform.gameObject.AddComponent<Scaling>();
+            
+            var t = 0f;
+            var originalVector = hit.transform.localScale;
+            while (t < 1f && hit.transform.localScale.magnitude > 0.1f)
             {
-                if (plus)
-                {
-                    hit.rigidbody.transform.localScale += scale * Time.deltaTime;
-                }
-                else if (hit.rigidbody.transform.localScale.magnitude > 0.01f)
-                {
-                    hit.rigidbody.transform.localScale -= scale * Time.deltaTime;
-                }
+                hit.transform.localScale = Vector3.Lerp(originalVector, originalVector * scale, t);
+                t += Time.deltaTime;
+                yield return null;
             }
+            
+            Destroy(hit.transform.GetComponent<Scaling>());
         }
 
-        private float counter;
+        public float scale = 1.6f;
 
-        public float scaleTime = 1f;
-
-        public Vector3 scale = new Vector3(1.6f, 1.6f, 1.6f);
-
-        private bool startedScaling;
-
-        private HitData hit;
-
-        public bool plus = true;
+        public class Scaling : MonoBehaviour { }
     }
 }

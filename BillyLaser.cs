@@ -3,26 +3,20 @@ using Landfall.TABS;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace HiddenUnits {
-    public class BillyLaser : MonoBehaviour {
-        public void Start() {
-            
-            collisionEffects = GetComponentsInChildren<CollisionWeaponEffect>();
-        }
+namespace HiddenUnits 
+{
+    public class BillyLaser : MonoBehaviour 
+    {
+        public void Start() { collisionEffects = GetComponentsInChildren<CollisionWeaponEffect>(); }
 
-        public void OnTriggerStay(Collider col) {
-            
-            DoDamage(col);
-        }
+        public void OnTriggerStay(Collider col) { DoDamage(col); }
         
-        public void OnTriggerEnter(Collider col) {
-            
-            DoDamage(col);
-        }
+        public void OnTriggerEnter(Collider col) { DoDamage(col); }
 
         public void DoDamage(Collider col)
         {
-            if (!col.attachedRigidbody || !col.attachedRigidbody.transform.root.GetComponent<Unit>() || col.attachedRigidbody.transform.root.GetComponent<Unit>().Team == transform.root.GetComponent<Unit>().Team || col.attachedRigidbody.transform.root == transform.root || !col.attachedRigidbody.transform.IsChildOf(col.attachedRigidbody.transform.root.GetComponent<Unit>().data.transform) || (col.attachedRigidbody.transform.root.GetComponent<Unit>() && hitList.Contains(col.attachedRigidbody.transform.root.GetComponent<Unit>()))) {
+            if (!col.attachedRigidbody || !col.attachedRigidbody.transform.root.GetComponent<Unit>() || col.attachedRigidbody.transform.root.GetComponent<Unit>().Team == transform.root.GetComponent<Unit>().Team || col.attachedRigidbody.transform.root == transform.root || !col.attachedRigidbody.transform.IsChildOf(col.attachedRigidbody.transform.root.GetComponent<Unit>().data.transform) || (col.attachedRigidbody.transform.root.GetComponent<Unit>() && hitList.Contains(col.attachedRigidbody.transform.root.GetComponent<Unit>()))) 
+            {
                 return;
             }
 
@@ -31,8 +25,7 @@ namespace HiddenUnits {
             foreach (var effect in collisionEffects) { effect.DoEffect(col.transform, new Collision()); }
             collisionEvent.Invoke();
             enemyUnit.data.healthHandler.TakeDamage(damage, Vector3.zero, transform.root.GetComponent<Unit>(), DamageType.Piercing);
-            float num2 = 1f;
-            num2 = Mathf.Clamp(col.attachedRigidbody.drag / 3f, 0.1f, 1f);
+            var num2 = Mathf.Clamp(col.attachedRigidbody.drag / 3f, 0.1f, 1f);
             WilhelmPhysicsFunctions.AddAxplosionForceWithMinWeight(col.attachedRigidbody, knockback * num2, base.transform.position, 3f, ForceMode.Impulse, massCap);
             col.attachedRigidbody.velocity *= 0.9f;
             WilhelmPhysicsFunctions.AddAxplosionForceWithMinWeight(enemyUnit.data.mainRig, knockback * num2, base.transform.position, 3f, ForceMode.Impulse, massCap);

@@ -2,8 +2,8 @@
 using UnityEngine;
 using Landfall.TABS;
 
-public class ClubSpell : TargetableEffect {
-	
+public class ClubSpell : TargetableEffect 
+{
 	public AnimationCurve upCurve;
 
 	public AnimationCurve forceCurve;
@@ -22,14 +22,17 @@ public class ClubSpell : TargetableEffect {
 
 	private Rigidbody target;
 
-    public void Start() { startPos = transform.position; }
+	public void Start()
+	{
+		startPos = transform.position;
+	}
 
-    private IEnumerator Go() {
-	    
-		float t2 = upCurve.keys[upCurve.keys.Length - 1].time;
+    private IEnumerator Go() 
+    {
+	    float t2 = upCurve.keys[upCurve.keys.Length - 1].time;
 		float c2 = 0f;
-		while (c2 < t2) {
-			
+		while (c2 < t2) 
+		{
 			c2 += Time.deltaTime;
 			rig.transform.localPosition = new Vector3(0f, upCurve.Evaluate(c2) + rockStartY, 0f);
 			yield return null;
@@ -39,10 +42,10 @@ public class ClubSpell : TargetableEffect {
 		c2 = 0f;
 		GetDirection(rig.position, target.position, target);
 		rig.useGravity = false;
-		while (c2 < t2) {
-			
+		while (c2 < t2) 
+		{
 			c2 += Time.deltaTime;
-			rig.velocity = direction * forceCurve.Evaluate(c2) * force;
+			rig.velocity = direction * (forceCurve.Evaluate(c2) * force);
 			yield return null;
 		}
 		rig.useGravity = true;
@@ -60,12 +63,16 @@ public class ClubSpell : TargetableEffect {
 		StartCoroutine(Go());
 	}
 
-	public void DoSpell() { DoEffect(startPos, transform.root.GetComponent<Unit>().data.targetMainRig.position, transform.root.GetComponent<Unit>().data.targetMainRig); }
+	public void DoSpell()
+	{
+		var enemyMainRig = transform.root.GetComponent<Unit>().data.targetMainRig;
+		DoEffect(startPos, enemyMainRig.position, enemyMainRig);
+	}
 
-	private void GetDirection(Vector3 startPoint, Vector3 endPoint, Rigidbody targetRig) {
-		
+	private void GetDirection(Vector3 startPoint, Vector3 endPoint, Rigidbody targetRig) 
+	{
 		Vector3 vector = endPoint;
-		vector += targetRig.velocity * prediction * 0.1f * Vector3.Distance(startPoint, vector);
+		vector += targetRig.velocity * (prediction * 0.1f * Vector3.Distance(startPoint, vector));
 		direction = (vector - startPoint).normalized;
 	}
 }

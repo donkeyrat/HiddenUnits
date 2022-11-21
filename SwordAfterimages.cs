@@ -6,11 +6,16 @@ namespace HiddenUnits
 {
     public class SwordAfterimages : MonoBehaviour
     {
-        public void Update()
+        private void Start()
+        {
+            rig = GetComponentInParent<Rigidbody>();
+        }
+        
+        private void Update()
         {
             counter += Time.deltaTime;
             if (!canSpawn ||
-                (requireThreshold && GetComponentInParent<Rigidbody>().velocity.magnitude < thresholdToSpawn) ||
+                (requireThreshold && rig.velocity.magnitude < thresholdToSpawn) ||
                 (requireCooldown && cooldown > counter))
             {
                 return;
@@ -29,6 +34,8 @@ namespace HiddenUnits
         public void CannotSpawn() { canSpawn = false; }
 
         private float counter;
+
+        private Rigidbody rig;
 
         public GameObject objectToSpawn;
 

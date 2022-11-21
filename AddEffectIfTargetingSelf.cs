@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using Landfall.TABS;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -26,7 +25,6 @@ namespace HiddenUnits
 
             if (query.Length > 0)
             {
-                effect.GetType();
                 foreach (var unit in query)
                 {
                     UnitEffectBase unitEffectBase = UnitEffectBase.AddEffectToTarget(unit.transform.gameObject, effect);

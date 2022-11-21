@@ -1,12 +1,10 @@
-﻿using System.Reflection;
-using System;
-using UnityEngine;
+﻿using UnityEngine;
 using HarmonyLib;
 
-namespace HiddenUnits
+namespace HiddenUnits.HarmonyPatches
 {
     [HarmonyPatch(typeof(Water), "OnTriggerStay")]
-    class FromTheDeep
+    class WaterDamagePatch
     {
         [HarmonyPrefix]
         public static bool Prefix(Water __instance, Collider other)

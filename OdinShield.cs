@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 
-namespace Unitgrad
+namespace HiddenUnits
 {
     public class OdinShield : ProjectileSurfaceEffect
     {
@@ -57,18 +57,26 @@ namespace Unitgrad
         public void Update()
         {
             counter += Time.deltaTime;
-            if (counter > rechargeTime && GetComponent<OdinShield>().health <= 0f)
+            if (counter > rechargeTime && health <= 0f)
             {
-                GetComponent<OdinShield>().health = GetComponent<OdinShield>().maxHealth;
+                health = maxHealth;
                 ReflectionRune();
             }
         }
 
-        private float counter = 0f;
+        private enum ShieldStates
+        {
+            ReflectionRune,
+            Deactivated
+        }
+        
+        private ShieldStates shieldState;
+        
+        private float counter;
+        
+        private float health;
 
         public float rechargeTime = 6f;
-
-        private ShieldStates shieldState;
 
         public UnityEvent activateEvent = new UnityEvent();
 
@@ -76,14 +84,6 @@ namespace Unitgrad
 
         public UnityEvent reflectEvent = new UnityEvent();
 
-        private float health;
-
         public float maxHealth = 1500f;
-
-        public enum ShieldStates
-        {
-            ReflectionRune,
-            Deactivated
-        }
     }
 }

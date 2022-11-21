@@ -2,17 +2,12 @@
 using UnityEngine;
 using UnityEngine.Events;
 using System.Collections.Generic;
-using System.Reflection;
 
 public class ThorBehavior : MonoBehaviour
 {
-    public void Start()
+    void Start()
     {
         unit = transform.root.GetComponent<Unit>();
-    }
-
-    public void Update()
-    {
     }
 
 	public void GrabHammerRight()
@@ -28,6 +23,7 @@ public class ThorBehavior : MonoBehaviour
 			if (unit.holdingHandler)
 			{
 				unit.WeaponHandler.fistRefernce = null;
+				unit.holdingHandler.LetGoOfWeapon(unit.holdingHandler.rightObject.gameObject);
 				SetWeapon(unit, unit.Team, weaponToGrab, new PropItemData(), HoldingHandler.HandType.Right, unit.data.mainRig.rotation, new List<GameObject>());
 			}
 			else if (unit.GetComponentInChildren<HoldingHandlerMulti>())
@@ -53,6 +49,7 @@ public class ThorBehavior : MonoBehaviour
 			if (unit.holdingHandler)
 			{
 				weaponToGrab.GetComponent<Holdable>().holdableData.snapConnect = false;
+				unit.holdingHandler.LetGoOfWeapon(unit.holdingHandler.leftObject.gameObject);
 				unit.holdingHandler.leftHandActivity = HoldingHandler.HandActivity.HoldingRightObject;
 			}
 			else if (unit.GetComponentInChildren<HoldingHandlerMulti>())

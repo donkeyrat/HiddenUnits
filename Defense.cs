@@ -7,10 +7,7 @@ namespace HiddenUnits
 {
     public class Defense : MonoBehaviour
     {
-        public void Start()
-        {
-            health = maxHealth;
-        }
+        public void Start() { health = maxHealth; }
 
         public void OnCollisionEnter(Collision col)
         {
@@ -36,7 +33,6 @@ namespace HiddenUnits
                     health = maxHealth;
                 }
             }
-            yield break;
         }
 
         public float health = 100f;

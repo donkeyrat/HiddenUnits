@@ -16,7 +16,9 @@ namespace HiddenUnits
         public void Start()
         {
             unit = transform.root.GetComponent<Unit>();
+            eyeSpawner = unit.GetComponentInChildren<EyeSpawner>();
             unit.data.healthHandler.willBeRewived = true;
+            
             if (unit.data.weaponHandler.rightWeapon != null && unit.data.weaponHandler.rightWeapon.GetComponent<Holdable>())
             {
                 rightWeaponOriginal = unit.data.weaponHandler.rightWeapon.gameObject;
@@ -114,9 +116,9 @@ namespace HiddenUnits
             }
             
             
-            if (openEyes && unit.GetComponentInChildren<EyeSpawner>() && unit.GetComponentInChildren<EyeSpawner>().spawnedEyes != null) 
+            if (openEyes && eyeSpawner && eyeSpawner.spawnedEyes != null) 
             {
-                foreach (var eye in unit.GetComponentInChildren<EyeSpawner>().spawnedEyes) 
+                foreach (var eye in eyeSpawner.spawnedEyes) 
                 {
                     eye.dead.SetActive(false);
                     eye.currentEyeState = GooglyEye.EyeState.Open;
@@ -153,6 +155,8 @@ namespace HiddenUnits
         }
 
         private Unit unit;
+
+        private EyeSpawner eyeSpawner;
         
         [Header("Revive Settings")]
 

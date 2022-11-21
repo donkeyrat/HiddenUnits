@@ -8,10 +8,11 @@ namespace HiddenUnits
         {
             scaling = true;
         }
-        public void Update()
+        
+        void Update()
         {
             counter += Time.deltaTime;
-            if (scaling && scaleTime > counter)
+            if (scaling && counter < 1f)
             {
                 transform.parent.localScale -= new Vector3(scaler, scaler, scaler) * Time.deltaTime;
             }
@@ -20,8 +21,6 @@ namespace HiddenUnits
         private float counter;
 
         private bool scaling;
-
-        private float scaleTime = 1f;
 
         public float scaler = 0.5f;
     }
