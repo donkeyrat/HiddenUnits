@@ -79,8 +79,10 @@ namespace HiddenUnits
         public IEnumerator DoZombieChecks()
         {
             if (done) yield break;
+
+            yield return new WaitForSeconds(0.05f);
             
-            yield return new WaitForEndOfFrame();
+            if (done) yield break;
     
             if (currentProgress >= 0.5f)
             {
@@ -88,19 +90,19 @@ namespace HiddenUnits
                 if (unit.GetComponentInChildren<AddRigidbodyOnDeath>())
                     foreach (var script in unit.GetComponentsInChildren<AddRigidbodyOnDeath>())
                     {
-                        unit.data.healthHandler.RemoveDieAction(new System.Action(script.Die)); 
+                        unit.data.healthHandler.RemoveDieAction(script.Die); 
                         Destroy(script);
                     }
                 if (unit.GetComponentInChildren<SinkOnDeath>())
                     foreach (var script in unit.GetComponentsInChildren<SinkOnDeath>())
                     {
-                        unit.data.healthHandler.RemoveDieAction(new System.Action(script.Sink)); 
+                        unit.data.healthHandler.RemoveDieAction(script.Sink); 
                         Destroy(script);
                     }
                 if (unit.GetComponentInChildren<RemoveJointsOnDeath>())
                     foreach (var script in unit.GetComponentsInChildren<RemoveJointsOnDeath>())
                     {
-                        unit.data.healthHandler.RemoveDieAction(new System.Action(script.Die)); 
+                        unit.data.healthHandler.RemoveDieAction(script.Die); 
                         Destroy(script);
                     }
                 if (unit.GetComponentInChildren<DisableAllSkinnedClothes>())
@@ -118,7 +120,7 @@ namespace HiddenUnits
     
         public void Revive()
         {
-            if (!done)
+            if (!done && unit.data.healthHandler.willBeRewived)
             {
                 done = true;
                 StartCoroutine(DoRevive());
@@ -127,10 +129,7 @@ namespace HiddenUnits
     
         public IEnumerator DoRevive()
         {
-            if (!unit.data.Dead)
-            {
-                ServiceLocator.GetService<GameModeService>().CurrentGameMode.OnUnitDied(unit);
-            }
+            ServiceLocator.GetService<GameModeService>().CurrentGameMode.OnUnitDied(unit);
             
             Landfall.TABS.Team newTeam;
             if (zombieType == ZombificationType.Support) newTeam = unit.data.team;
@@ -149,10 +148,7 @@ namespace HiddenUnits
             });
             World.Active.GetOrCreateManager<TeamSystem>().AddUnit(goe.Entity, unit.gameObject, unit.transform, unit.data.mainRig, unit.data, newTeam, unit, false);
             
-            if (zombieType == ZombificationType.Support)
-            {
-                AddLerpProgress();
-            }
+            if (zombieType == ZombificationType.Support) AddLerpProgress();
             
             yield return new WaitForSeconds(reviveDelay);
     

@@ -7,21 +7,24 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using System.Reflection;
+using BitCode.Debug.Commands;
 using Object = UnityEngine.Object;
 using DM;
-using Landfall.TABS.AI.Components.Modifiers;
+using Landfall.TABS.GameMode;
+using UnityEngine.Audio;
 
-namespace HiddenUnits {
+namespace HiddenUnits 
+{
 
-	public class HUMain {
+	public class HUMain 
+    {
 
         public HUMain()
         {
             var db = ContentDatabase.Instance();
 
-
-            AssetBundle.LoadFromMemory(Properties.Resources.egyptmap);
-            AssetBundle.LoadFromMemory(Properties.Resources.egyptmap2);
+            //AssetBundle.LoadFromMemory(Properties.Resources.egyptmap);
+            //AssetBundle.LoadFromMemory(Properties.Resources.egyptmap2);
             var newMapList = new List<MapAsset>();
             var newMapDict = new Dictionary<DatabaseID, int>();
             
@@ -109,19 +112,20 @@ namespace HiddenUnits {
                 hideFlags = HideFlags.HideAndDontSave
             }.AddComponent<HUSceneManager>();
 
+            var langReader = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>();
             var cringer = new GameObject  {
                 name = "Bullshit: The Trilogy",
                 hideFlags = HideFlags.HideAndDontSave
             }.AddComponent<LanguageReader>();
-            cringer.localizerCH = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerCH;
-            cringer.localizerEN = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerEN;
-            cringer.localizerES = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerES;
-            cringer.localizerFR = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerFR;
-            cringer.localizerDE = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerDE;
-            cringer.localizerIT = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerIT;
-            cringer.localizerJA = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerJA;
-            cringer.localizerRU = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerRU;
-            cringer.localizerPT_BR = hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LanguageReader>().localizerPT_BR;
+            cringer.localizerCH = langReader.localizerCH;
+            cringer.localizerEN = langReader.localizerEN;
+            cringer.localizerES = langReader.localizerES;
+            cringer.localizerFR = langReader.localizerFR;
+            cringer.localizerDE = langReader.localizerDE;
+            cringer.localizerIT = langReader.localizerIT;
+            cringer.localizerJA = langReader.localizerJA;
+            cringer.localizerRU = langReader.localizerRU;
+            cringer.localizerPT_BR = langReader.localizerPT_BR;
 
             new Harmony("SussingtonBaka").PatchAll();
 
@@ -140,7 +144,7 @@ namespace HiddenUnits {
                 foreach (var b in db.LandfallContentDatabase.GetUnitBases().ToList()) { if (unit.UnitBase != null) { if (b.name == unit.UnitBase.name) { unit.UnitBase = b; } } }
                 foreach (var b in db.LandfallContentDatabase.GetWeapons().ToList()) { if (unit.RightWeapon != null && b.name == unit.RightWeapon.name) unit.RightWeapon = b; if (unit.LeftWeapon != null && b.name == unit.LeftWeapon.name) unit.LeftWeapon = b; }
             }
-            
+
             foreach (var fac in hiddenUnits.LoadAllAssets<Faction>()) newFactions.Add(fac);
             
             foreach (var campaign in hiddenUnits.LoadAllAssets<TABSCampaignAsset>()) newCampaigns.Add(campaign);
@@ -170,7 +174,17 @@ namespace HiddenUnits {
             {
                 if (objecting != null) {
 
-                    if (objecting.GetComponent<Unit>()) newBases.Add(objecting);
+                    foreach (var audio in objecting.GetComponentsInChildren<AudioSource>(true))
+                    {
+                        audio.outputAudioMixerGroup =
+                            ServiceLocator.GetService<GameModeService>().AudioSettings.AudioMixer.outputAudioMixerGroup;
+                    }
+                    
+                    if (objecting.GetComponent<Unit>())
+                    {
+                        if (!objecting.GetComponent<Outline>()) objecting.AddComponent<Outline>().OutlineWidth = 1f;
+                        newBases.Add(objecting);
+                    }
                     else if (objecting.GetComponent<WeaponItem>()) {
                         newWeapons.Add(objecting);
                         int totalSubmeshes = 0;
@@ -418,8 +432,8 @@ namespace HiddenUnits {
 
         public List<GameObject> newProjectiles = new List<GameObject>();
 
-        public static AssetBundle hiddenUnits = AssetBundle.LoadFromMemory(Properties.Resources.hiddenunits);
+        public static AssetBundle hiddenUnits;// = AssetBundle.LoadFromMemory(Properties.Resources.hiddenunits);
 
-        public static AssetBundle huMaps = AssetBundle.LoadFromMemory(Properties.Resources.humaps);
+        public static AssetBundle huMaps;// = AssetBundle.LoadFromMemory(Properties.Resources.humaps);
     }
 }

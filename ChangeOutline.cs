@@ -19,6 +19,7 @@ namespace HiddenUnits
 
         public Color outlineColor = Color.white;
 
+        [Range(0f, 10f)]
         public float outlineWidth = 1f;
     }
 }

@@ -42,8 +42,8 @@ namespace HiddenUnits
             if (unit.data.health > 0f || effect)
             {
                 unit.data.healthHandler.willBeRewived = false;
-                yield return new WaitForSeconds(0.01f);
                 ServiceLocator.GetService<GameModeService>().CurrentGameMode.OnUnitDied(unit);
+                Destroy(this);
                 yield break;
             }
             
@@ -152,6 +152,8 @@ namespace HiddenUnits
             unit.InitializeUnit(unit.Team);
 
             reviveEvent.Invoke();
+            
+            Destroy(this);
         }
 
         private Unit unit;

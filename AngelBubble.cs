@@ -6,11 +6,11 @@ namespace HiddenUnits
 {
 	public class AngelBubble : MonoBehaviour
 	{
-		private List<Rigidbody> rigs = new List<Rigidbody>();
+		private readonly List<Rigidbody> rigs = new List<Rigidbody>();
 
-		private List<Vector3> randomOffset = new List<Vector3>();
+		private readonly List<Vector3> randomOffset = new List<Vector3>();
 
-		private List<float> floatynes = new List<float>();
+		private readonly List<float> floatiness = new List<float>();
 
 		private Transform effectTransform;
 
@@ -24,23 +24,19 @@ namespace HiddenUnits
 
 		public AnimationCurve upCurve;
 
-		public AnimationCurve throwCurve;
-
-		public float throwForce;
-
 		private Damagable[] healths;
 
 		private void Start()
 		{
-			effectTransform = base.transform.GetChild(0);
+			effectTransform = transform.GetChild(0);
 			Collider[] array = Physics.OverlapSphere(effectTransform.position, radius);
-			for (int i = 0; i < array.Length; i++)
+			foreach (var t in array)
 			{
-				if ((bool)array[i].attachedRigidbody && !rigs.Contains(array[i].attachedRigidbody))
+				if ((bool)t.attachedRigidbody && !rigs.Contains(t.attachedRigidbody))
 				{
-					rigs.Add(array[i].attachedRigidbody);
+					rigs.Add(t.attachedRigidbody);
 					randomOffset.Add(Random.insideUnitSphere * 2f);
-					floatynes.Add(Random.Range(0.5f, 1f));
+					floatiness.Add(Random.Range(0.5f, 1f));
 				}
 			}
 			healths = new Damagable[rigs.Count];
@@ -49,7 +45,7 @@ namespace HiddenUnits
 				healths[j] = rigs[j].GetComponentInParent<Damagable>();
 			}
 			StartCoroutine(AnimateSpell());
-			base.transform.rotation = Quaternion.identity;
+			transform.rotation = Quaternion.identity;
 		}
 
 		private IEnumerator AnimateSpell()
@@ -71,26 +67,16 @@ namespace HiddenUnits
 			{
 				if (!(rigs[i] == null))
 				{
-					float time = Vector3.Distance(rigs[i].position, effectTransform.position);
+					var position = effectTransform.position;
+					float time = Vector3.Distance(rigs[i].position, position);
 					float num = curve.Evaluate(time);
-					WilhelmPhysicsFunctions.AddForceWithMinWeight(rigs[i], floatynes[i] * force * num * (effectTransform.position + randomOffset[i] - rigs[i].position).normalized, ForceMode.Force, 60f);
+					WilhelmPhysicsFunctions.AddForceWithMinWeight(rigs[i], floatiness[i] * force * num * (position + randomOffset[i] - rigs[i].position).normalized, ForceMode.Force, 60f);
 					if ((bool)healths[i])
 					{
 						healths[i].TakeDamage(damage * Time.deltaTime, Vector3.zero, null);
 					}
-					rigs[i].AddForce(-200f * floatynes[i] * Time.deltaTime * rigs[i].velocity, ForceMode.Acceleration);
+					rigs[i].AddForce(-200f * floatiness[i] * Time.deltaTime * rigs[i].velocity, ForceMode.Acceleration);
 				}
-			}
-		}
-
-		private void Throw(Vector3 target, float curveMultiplier)
-		{
-			for (int i = 0; i < rigs.Count; i++)
-			{
-				float time = Vector3.Distance(rigs[i].position, effectTransform.position);
-				float num = curve.Evaluate(time);
-				WilhelmPhysicsFunctions.AddForceWithMinWeight(rigs[i], curveMultiplier * floatynes[i] * num * throwForce * (target + randomOffset[i] * 0.5f - rigs[i].position).normalized, ForceMode.Force, 60f);
-				rigs[i].AddForce(-400f * floatynes[i] * Time.deltaTime * rigs[i].velocity, ForceMode.Acceleration);
 			}
 		}
 	}

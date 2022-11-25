@@ -1,10 +1,10 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-namespace HiddenUnits {
-
-	public class AxeForceAnimation : AxeAttackEffect {
-
+namespace HiddenUnits 
+{
+	public class AxeForceAnimation : AxeAttackEffect 
+	{
 		public void Start()
 		{
 			rig = GetComponentInParent<Rigidbody>();
@@ -19,9 +19,9 @@ namespace HiddenUnits {
 			}
 		}
 
-		private IEnumerator PlayAnimationAfterDelay(SpellAnimation animation, Vector3 position, Rigidbody targetRig = null) {
-
-			if (upwardsModifier != 0f) { position += Vector3.up * upwardsModifier; }
+		private IEnumerator PlayAnimationAfterDelay(SpellAnimation animation, Vector3 position, Rigidbody targetRig = null) 
+		{
+			if (upwardsModifier != 0f) position += Vector3.up * upwardsModifier;
 
 			Rigidbody[] usedRig = new Rigidbody[] { rig };
 
@@ -50,15 +50,19 @@ namespace HiddenUnits {
 			var t = animation.rigAnimationCurve.keys[animation.rigAnimationCurve.keys.Length - 1].time;
 			var c = 0f;
 			var asm = Mathf.Clamp(data.unit.attackSpeedMultiplier, 0f, 6f);
-			while (c < t && data.ragdollControl > 0.7f) {
+			while (c < t && data.ragdollControl > 0.7f) 
+			{
 
-				if (animation.setDirectionContinious && targetRig) { animationDirection = SetDirection(targetRig.position + Vector3.up * upwardsModifier, animation); }
+				if (animation.setDirectionContinious && targetRig)
+				{
+					animationDirection = SetDirection(targetRig.position + Vector3.up * upwardsModifier, animation);
+				}
 
-				if (data.sinceGrounded < 0.3f) {
-
+				if (data.sinceGrounded < 0.3f) 
+				{
 					int num;
-					for (int i = 0; i < usedRig.Length; i = num + 1) {
-
+					for (int i = 0; i < usedRig.Length; i = num + 1) 
+					{
 						usedRig[i].AddForce(animationDirection * (animation.rigAnimationForce * Time.deltaTime * asm * 100f * animation.rigAnimationCurve.Evaluate(c)), ForceMode.Acceleration);
 						num = i;
 					}

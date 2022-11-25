@@ -23,7 +23,12 @@ public class ThorBehavior : MonoBehaviour
 			if (unit.holdingHandler)
 			{
 				unit.WeaponHandler.fistRefernce = null;
-				unit.holdingHandler.LetGoOfWeapon(unit.holdingHandler.rightObject.gameObject);
+				if (unit.holdingHandler.rightObject)
+				{
+					var oldWeapon = unit.holdingHandler.rightObject.gameObject;
+					unit.holdingHandler.LetGoOfWeapon(oldWeapon);
+					Destroy(oldWeapon);
+				}
 				SetWeapon(unit, unit.Team, weaponToGrab, new PropItemData(), HoldingHandler.HandType.Right, unit.data.mainRig.rotation, new List<GameObject>());
 			}
 			else if (unit.GetComponentInChildren<HoldingHandlerMulti>())
@@ -49,7 +54,12 @@ public class ThorBehavior : MonoBehaviour
 			if (unit.holdingHandler)
 			{
 				weaponToGrab.GetComponent<Holdable>().holdableData.snapConnect = false;
-				unit.holdingHandler.LetGoOfWeapon(unit.holdingHandler.leftObject.gameObject);
+				if (unit.holdingHandler.leftObject)
+				{
+					var oldWeapon = unit.holdingHandler.leftObject.gameObject;
+					unit.holdingHandler.LetGoOfWeapon(oldWeapon);
+					Destroy(oldWeapon);
+				}
 				unit.holdingHandler.leftHandActivity = HoldingHandler.HandActivity.HoldingRightObject;
 			}
 			else if (unit.GetComponentInChildren<HoldingHandlerMulti>())

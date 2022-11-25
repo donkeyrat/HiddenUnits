@@ -13,7 +13,7 @@ namespace HiddenUnits
 
         public override void Ping()
         {
-            if (transform.root.GetComponent<Unit>().unitBlueprint.Name.Contains("One Punch Man"))
+            if (transform.root.GetComponent<Unit>().unitBlueprint.Name.Contains("One Punch Man") || transform.root.GetComponent<Unit>().unitBlueprint.Name.Contains("Seraphim"))
             {
                 Destroy(gameObject);
             }
@@ -29,10 +29,9 @@ namespace HiddenUnits
                     drag[i].x *= dragMultiplier;
                     drag[i].y *= dragMultiplier;
                 }
-                if (transform.root.GetComponentInChildren<DragHandler>())
-                {
-                    transform.root.GetComponentInChildren<DragHandler>().UpdateDrag();
-                }
+                
+                if (transform.root.GetComponentInChildren<DragHandler>()) transform.root.GetComponentInChildren<DragHandler>().UpdateDrag();
+                
                 if (transform.root.GetComponent<Unit>().WeaponHandler && transform.root.GetComponent<Unit>().WeaponHandler.rightWeapon)
                 {
                     transform.root.GetComponent<Unit>().WeaponHandler.rightWeapon.internalCooldown /= speedMultiplier;
@@ -54,14 +53,10 @@ namespace HiddenUnits
                         weapon.FetchComponent<Level>().levelMultiplier *= damageMultiplier;
                     }
                 }
-                if (mat)
-                {
-                    transform.root.GetComponentInChildren<UnitColorHandler>().SetMaterial(mat);
-                }
-                if (color.colorName != "")
-                {
-                    transform.root.GetComponentInChildren<UnitColorHandler>().SetColor(color, 1f);
-                }
+                
+                if (mat) transform.root.GetComponentInChildren<UnitColorHandler>().SetMaterial(mat);
+                
+                if (color.colorName != "") transform.root.GetComponentInChildren<UnitColorHandler>().SetColor(color, 1f);
             }
         }
 

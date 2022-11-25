@@ -62,10 +62,17 @@ namespace HiddenUnits
             yield return new WaitUntil(() => currentState == ClubState.Idle);
             
             SetState(ClubState.Swinging);;
+            canDealDamage = true;
             
             yield return new WaitForSeconds(returnDelay);
             
-            SetState(ClubState.Idle);;
+            SetState(ClubState.Idle);
+
+            if (!dealDamageOutsideOfSwing)
+            {
+                yield return new WaitForSeconds(disableDamageDelay);
+                canDealDamage = false;
+            }
         }
 
         public void Roam()
@@ -89,9 +96,11 @@ namespace HiddenUnits
         
         public void OnCollisionEnter(Collision col) 
         {
-
             var enemyUnit = col.transform.root.GetComponent<Unit>();
-            if (damageCounter < damageCooldown || !enemyUnit || !col.rigidbody || (enemyUnit && hitList.Contains(enemyUnit)) || (enemyUnit && enemyUnit.Team == transform.root.GetComponent<Unit>().Team)) return;
+            if (damageCounter < damageCooldown || !enemyUnit || !col.rigidbody || (enemyUnit && hitList.Contains(enemyUnit)) || (enemyUnit && enemyUnit.Team == transform.root.GetComponent<Unit>().Team) || !canDealDamage)
+            {
+                return;
+            }
             damageCounter = 0f;
 
             var flag = col.transform.IsChildOf(enemyUnit.data.transform);
@@ -170,7 +179,10 @@ namespace HiddenUnits
         public float impactMultiplier = 1f;
         public float screenShakeAmount = 1f;
         public float damageCooldown = 0.01f;
+        public float disableDamageDelay = 0.3f;
+        public bool dealDamageOutsideOfSwing;
 
         private float damageCounter;
+        private bool canDealDamage = true;
     }
 }
