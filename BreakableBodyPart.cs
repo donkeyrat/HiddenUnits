@@ -1,44 +1,45 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-namespace HiddenUnits {
-    
+namespace HiddenUnits 
+{
     public class BreakableBodyPart : MonoBehaviour 
     {
-        private void Start() { GetComponent<DataHandler>().healthHandler.AssignDamageAction(BreakPart); }
+        private void Start()
+        {
+            ownData = GetComponent<DataHandler>();
+            ownData.healthHandler.AssignDamageAction(BreakPart);
+        }
 
         private void Update() 
         {
-            if (counter >= cooldown) 
-            {
-                counter = 0f;
-                startedCounting = false;
-            }
-            if (startedCounting) counter += Time.deltaTime;
+            counter += Time.deltaTime;
         }
 
         public void BreakPart() 
         {
-            if (!startedCounting) 
+            if (ownData.health <= ownData.maxHealth * percentHealthRequirement && Random.value < breakChance && counter >= cooldown)
             {
-                if (GetComponent<DataHandler>().health <= GetComponent<DataHandler>().maxHealth / 2 && Random.value > breakChance) {
+                counter = 0f;
                     
-                    var selected = Random.Range(0, breakableParts.Count - 1);
-                    breakableParts[selected].AddComponent<Rigidbody>().mass = 5f;
-                    breakableParts[selected].transform.SetParent(transform.root);
-                    breakableParts[selected].GetComponentInChildren<ParticleSystem>().Play();
-                    breakableParts[selected].GetComponentInChildren<PlaySoundEffect>().Go();
-                    startedCounting = true;
-                    breakableParts.Remove(breakableParts[selected]);
-                }
+                var selectedPart = breakableParts[Random.Range(0, breakableParts.Count - 1)];
+                selectedPart.AddComponent<Rigidbody>().mass = selectedPart.GetComponentInParent<Rigidbody>().mass;
+                selectedPart.transform.SetParent(transform.root);
+                    
+                if (selectedPart.GetComponentInChildren<ParticleSystem>()) selectedPart.GetComponentInChildren<ParticleSystem>().Play();
+                if (selectedPart.GetComponentInChildren<PlaySoundEffect>()) selectedPart.GetComponentInChildren<PlaySoundEffect>().Go();
+                    
+                breakableParts.Remove(selectedPart);
             }
         }
+        
+        private DataHandler ownData;
 
         public List<GameObject> breakableParts;
+        
+        public float percentHealthRequirement = 0.5f;
 
         public float breakChance = 0.5f;
-
-        private bool startedCounting;
 
         private float counter;
 

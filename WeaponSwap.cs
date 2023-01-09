@@ -10,6 +10,12 @@ namespace HiddenUnits {
         public void Start()
         {
             unit = transform.root.GetComponent<Unit>();
+            
+            if (useOriginalWeapons && unit && unit.unitBlueprint)
+            {
+                weaponL = unit.unitBlueprint.LeftWeapon;
+                weaponR = unit.unitBlueprint.RightWeapon;
+            }
         }
         
         public void Swap() 
@@ -100,5 +106,7 @@ namespace HiddenUnits {
         public UnityEvent swapEvent = new UnityEvent();
 
         public bool hasSwapped = true;
+        
+        public bool useOriginalWeapons;
     }
 }

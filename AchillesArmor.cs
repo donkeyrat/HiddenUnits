@@ -10,7 +10,17 @@ namespace HiddenUnits
         {
             unit = transform.root.GetComponent<Unit>();
             unit.WasDealtDamageAction += Armor;
+            
+            armoredUnit = unit.gameObject.AddComponent<UnitIsArmored>();
+            armoredUnit.projectileHitEffect = projectileHitEffect;
+            armoredUnit.weaponHitEffect = weaponHitEffect;
+            armoredUnit.parryForce = parryForce;
+            armoredUnit.parryPower = parryPower;
+            armoredUnit.blockPower = blockPower;
+            
             maxArmorHealth = armorHealth;
+            armorListeners = unit.GetComponentsInChildren<AchillesArmorEvent>();
+            foreach (var armor in armorListeners) armor.OnArmorActivated();
         }
 
         public void Armor(float damage)
@@ -27,6 +37,8 @@ namespace HiddenUnits
             {
                 armorDisabled = true;
                 armorDisableEvent.Invoke();
+                foreach (var armor in armorListeners) armor.OnArmorDeactivated();
+                armoredUnit.armorActive = false;
             }
         }
 
@@ -42,6 +54,7 @@ namespace HiddenUnits
                     armorDisabled = false;
                     armorHealth = maxArmorHealth;
                     armorEnableEvent.Invoke();
+                    foreach (var armor in armorListeners) armor.OnArmorActivated();
                 }
             }
             else
@@ -61,27 +74,52 @@ namespace HiddenUnits
         }
         
         private Unit unit;
+        private UnitIsArmored armoredUnit;
 
-        public UnityEvent armorDisableEvent = new UnityEvent();
-
-        public UnityEvent armorEnableEvent = new UnityEvent();
+        private AchillesArmorEvent[] armorListeners;
         
         private bool armorDisabled;
-
         private float armorDisabledCounter;
+        
+        private float maxArmorHealth;
+        
+        [Header("Armor Settings")]
 
+        public UnityEvent armorDisableEvent = new UnityEvent();
+        public UnityEvent armorEnableEvent = new UnityEvent();
+        
         public float armorDisabledTime = 3f;
         
+        [Header("Hit Settings")]
+        
+        public GameObject projectileHitEffect;
+        public GameObject weaponHitEffect;
+        
+        public float parryForce;
+        public float parryPower;
+        
+        public float blockPower;
+        
+        [Header("Health Settings")]
+        
         public float armorHealth = 500f;
-
-        private float maxArmorHealth;
-
+        
         public bool armorRegenerate;
-        
         public float armorRegenerationRate = 5f;
-
         public bool healthRegenerate;
-        
         public float healthRegenerationRate = 50f;
+
+        public class UnitIsArmored : MonoBehaviour
+        {
+            public bool armorActive = true;
+            
+            public GameObject projectileHitEffect;
+            public GameObject weaponHitEffect;
+
+            public float parryForce;
+            public float parryPower;
+
+            public float blockPower;
+        }
     }
 }

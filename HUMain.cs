@@ -137,6 +137,10 @@ namespace HiddenUnits
             Resources.FindObjectsOfTypeAll<SecretUnlockConditions>()[0].m_unlockConditions = allConditions.ToArray();
 
             foreach (var mat in hiddenUnits.LoadAllAssets<Material>()) if (Shader.Find(mat.shader.name)) mat.shader = Shader.Find(mat.shader.name);
+
+
+            var infiniteScaling = CreateSetting(SettingsInstance.SettingsType.Options, "Make units scale infinitely", "Toggles Mathematician/Philosopher projectiles to be able to infinitely scale unit parts.", "BUG", new[] { "Disabled", "Enabled" });
+            infiniteScaling.OnValueChanged += InfiniteScaling_OnValueChanged;
             
             foreach (var unit in hiddenUnits.LoadAllAssets<UnitBlueprint>())
             {
@@ -410,6 +414,44 @@ namespace HiddenUnits
             ServiceLocator.GetService<CustomContentLoaderModIO>().QuickRefresh(WorkshopContentType.Unit, null);
         }
         
+        public SettingsInstance CreateSetting(SettingsInstance.SettingsType settingsType, string settingName, string toolTip, string settingListToAddTo, string[] options = null, float min = 0f, float max = 1f) 
+        {
+            var setting = new SettingsInstance();
+
+            setting.settingName = settingName;
+            setting.toolTip = toolTip;
+            setting.m_settingsKey = settingName;
+
+            setting.settingsType = settingsType;
+            setting.options = options;
+            setting.min = min;
+            setting.max = max;
+
+            var global = ServiceLocator.GetService<GlobalSettingsHandler>();
+            SettingsInstance[] listToAdd;
+            if (settingListToAddTo == "BUG") listToAdd = global.BugsSettings;
+            else if (settingListToAddTo == "VIDEO") listToAdd = global.VideoSettings;
+            else if (settingListToAddTo == "AUDIO") listToAdd = global.AudioSettings;
+            else if (settingListToAddTo == "CONTROLS") listToAdd = global.ControlSettings;
+            else { listToAdd = global.GameplaySettings; }
+
+            var list = listToAdd.ToList();
+            list.Add(setting);
+
+            if (settingListToAddTo == "BUG") typeof(GlobalSettingsHandler).GetField("m_bugsSettings", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(global, list.ToArray());
+            else if (settingListToAddTo == "VIDEO") typeof(GlobalSettingsHandler).GetField("m_videoSettings", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(global, list.ToArray());
+            else if (settingListToAddTo == "AUDIO") typeof(GlobalSettingsHandler).GetField("m_audioSettings", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(global, list.ToArray());
+            else if (settingListToAddTo == "CONTROLS") typeof(GlobalSettingsHandler).GetField("m_controlSettings", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(global, list.ToArray());
+            else typeof(GlobalSettingsHandler).GetField("m_gameplaySettings", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(global, list.ToArray());
+
+            return setting;
+        }
+
+        private void InfiniteScaling_OnValueChanged(int value)
+        {
+            InfiniteScaling = value;
+        }
+        
         public List<UnitBlueprint> newUnits = new List<UnitBlueprint>();
 
         public List<Faction> newFactions = new List<Faction>();
@@ -431,6 +473,8 @@ namespace HiddenUnits
         public List<GameObject> newWeapons = new List<GameObject>();
 
         public List<GameObject> newProjectiles = new List<GameObject>();
+
+        public static int InfiniteScaling = 0;
 
         public static AssetBundle hiddenUnits;// = AssetBundle.LoadFromMemory(Properties.Resources.hiddenunits);
 

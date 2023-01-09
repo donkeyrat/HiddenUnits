@@ -8,11 +8,13 @@ namespace HiddenUnits {
     
     public class HammerBounceRig : MonoBehaviour {
 
-        public void Start() 
+        public void Start()
         {
-            target = GetComponent<TeamHolder>().spawner.GetComponent<Unit>().data.targetData.unit.data.mainRig.transform;
+            ownUnit = transform.root.GetComponent<Unit>();
             weapon = transform.GetComponentInParent<Weapon>() ? transform.GetComponentInParent<Weapon>() : transform.root.GetComponent<Unit>().WeaponHandler.rightWeapon;
             returnObject = weapon.transform.FindChildRecursive(objectToReturnTo);
+            
+            SetTarget(100f);
         }
         
         public void Update()
@@ -22,7 +24,7 @@ namespace HiddenUnits {
             else if (target)
             {
                 GetComponent<Rigidbody>().AddForce((target.position - transform.position).normalized * flightSpeed * GetComponent<Rigidbody>().mass * Time.deltaTime);
-                transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(transform.forward, target.position - transform.position, Time.deltaTime * rotationSpeed, 0f));
+                GetComponent<Rigidbody>().MoveRotation(Quaternion.LookRotation(Vector3.RotateTowards(transform.forward, target.position - transform.position, Time.deltaTime * rotationSpeed, 0f)));
             }
 
             if (returning)
@@ -69,12 +71,12 @@ namespace HiddenUnits {
             }
         }
         
-        public void SetTarget() {
-            
-            var hits = Physics.SphereCastAll(transform.position, maxRange, Vector3.up, 0.1f, LayerMask.GetMask(new string[] { "MainRig" }));
+        public void SetTarget(float radius = 0f) 
+        {
+            var hits = Physics.SphereCastAll(transform.position, radius != 0f ? radius : maxRange, Vector3.up, 0.1f, LayerMask.GetMask(new string[] { "MainRig" }));
             var foundUnits = hits
                 .Select(hit => hit.transform.root.GetComponent<Unit>())
-                .Where(x => x && !x.data.Dead && x.Team != transform.root.GetComponent<Unit>().Team && !hitList.Contains(x))
+                .Where(x => x && !x.data.Dead && x.Team != ownUnit.Team && !hitList.Contains(x))
                 .OrderBy(x => (x.data.mainRig.transform.position - transform.position).magnitude)
                 .Distinct()
                 .ToArray();
@@ -97,6 +99,7 @@ namespace HiddenUnits {
         
         private float counter;
         private Transform target;
+        private Unit ownUnit;
         private List<Unit> hitList = new List<Unit>();
         private int hitCount;
         private bool returning;

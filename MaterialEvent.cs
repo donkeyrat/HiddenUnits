@@ -11,46 +11,38 @@ namespace HiddenUnits {
             originalMat = Instantiate(rend.materials[index]);
         }
         
-        public void ChangeMaterial() {
-            t = 0f;
-            changing = true;
+        public void ChangeMaterial()
+        {
+            StartCoroutine(DoMaterialChange());
         }
         
-        public void RevertMaterial() {
-            t = 0f;
-            changing = true;
-            useOriginalMat = true;
+        public void RevertMaterial()
+        {
+            StartCoroutine(DoMaterialChange(true));
         }
 
-        void Update() {
-            if (transform.root.GetComponentsInChildren<UnitEffectBase>().ToList().Find(x => x.effectID == 1987)) Reset();
-            if (changing && t < lerpTime && Time.timeScale != 0f) {
-                t += Mathf.Clamp(Time.deltaTime / lerpTime, 0f, 1f);
-                if (useOriginalMat)
-                {
-                    rend.materials[index].Lerp(rend.materials[index], originalMat, t);
-                }
-                else
-                {
-                    rend.materials[index].Lerp(rend.materials[index], newMat, t);
-                }
+        public void Reset()
+        {
+            resetting = true;
+        }
+
+        public IEnumerator DoMaterialChange(bool useOriginalMat = false)
+        {
+            var t = 0f;
+            while (t < 1f && !resetting && !transform.root.GetComponentsInChildren<UnitEffectBase>().ToList().Find(x => x.effectID == 1987))
+            {
+                if (useOriginalMat) rend.materials[index].Lerp(rend.materials[index], originalMat, Mathf.Clamp(t, 0f, 1f));
+                else rend.materials[index].Lerp(rend.materials[index], newMat, Mathf.Clamp(t, 0f, 1f));
+                
+                t += Time.deltaTime / lerpTime;
+                
+                yield return null;
             }
-            else if (t > lerpTime) { changing = false;
-                useOriginalMat = false;
-            }
-            if (!changing) { t = 0f; }
+
+            resetting = false;
         }
 
-        public void Reset() { 
-            changing = false;
-            useOriginalMat = false;
-        }
-
-        private bool changing;
-
-        private bool useOriginalMat;
-
-        private float t;
+        private bool resetting;
 
         public Renderer rend;
 

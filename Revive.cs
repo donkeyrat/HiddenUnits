@@ -29,6 +29,30 @@ namespace HiddenUnits
                 leftWeaponOriginal = unit.data.weaponHandler.leftWeapon.gameObject;
                 if (!letGoOfWeapons) unit.data.weaponHandler.leftWeapon.GetComponent<Holdable>().ignoreDissarm = true;
             }
+            
+            if (unit.GetComponentInChildren<AddRigidbodyOnDeath>())
+                foreach (var script in unit.GetComponentsInChildren<AddRigidbodyOnDeath>())
+                {
+                    unit.data.healthHandler.RemoveDieAction(script.Die); 
+                    Destroy(script);
+                }
+            if (unit.GetComponentInChildren<SinkOnDeath>())
+                foreach (var script in unit.GetComponentsInChildren<SinkOnDeath>())
+                {
+                    unit.data.healthHandler.RemoveDieAction(script.Sink); 
+                    Destroy(script);
+                }
+            if (unit.GetComponentInChildren<RemoveJointsOnDeath>())
+                foreach (var script in unit.GetComponentsInChildren<RemoveJointsOnDeath>())
+                {
+                    unit.data.healthHandler.RemoveDieAction(script.Die); 
+                    Destroy(script);
+                }
+            if (unit.GetComponentInChildren<DisableAllSkinnedClothes>())
+                foreach (var script in unit.GetComponentsInChildren<DisableAllSkinnedClothes>())
+                {
+                    Destroy(script);
+                }
         }
 
         public void DoRevive()
@@ -61,7 +85,7 @@ namespace HiddenUnits
             
             unit.data.health = unit.data.maxHealth * reviveHealthMultiplier;
 
-            if (letGoOfWeapons)
+            if (unit.WeaponHandler && letGoOfWeapons)
             {
                 if (rightWeaponToSpawn)
                 {
@@ -114,7 +138,7 @@ namespace HiddenUnits
                     else if (removeWeaponsAfterSeconds < 0f) Destroy(leftWeaponOriginal);
                 }
             }
-            
+
             
             if (openEyes && eyeSpawner && eyeSpawner.spawnedEyes != null) 
             {

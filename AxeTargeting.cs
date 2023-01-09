@@ -12,7 +12,7 @@ namespace HiddenUnits {
         public void Start()
         {
             teamHolder = GetComponent<TeamHolder>();
-            if (!teamHolder || !teamHolder.spawner) { Destroy(this); }
+            if (!teamHolder || !teamHolder.spawner || !teamHolder.spawner.GetComponent<Unit>() || !teamHolder.spawner.GetComponent<Unit>().data.targetData) { Destroy(this); }
             target = teamHolder.spawner.GetComponent<Unit>().data.targetData.unit;
             moveTransform = GetComponent<MoveTransform>();
         }
