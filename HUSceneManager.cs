@@ -7,7 +7,6 @@ using System.Linq;
 using Landfall.TABS.UnitEditor;
 using System.Collections.Generic;
 using InControl;
-using Pathfinding;
 
 namespace HiddenUnits
 {

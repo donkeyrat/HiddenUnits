@@ -14,6 +14,11 @@ namespace HiddenUnits
 {
     public class Effect_Zombie : UnitEffectBase
     {
+        private void Awake()
+        {
+            unit = transform.root.GetComponent<Unit>();
+        }
+        
         public override void DoEffect()
         {
             unit = transform.root.GetComponent<Unit>();
@@ -44,7 +49,7 @@ namespace HiddenUnits
         
         public override void Ping()
         {
-            if (done) return;
+            if (done || !unit) return;
             
             currentProgress += Mathf.Clamp(progressToAdd / unit.data.health, 0f, 1f);
             if (zombieType != ZombificationType.Support) AddLerpProgress();

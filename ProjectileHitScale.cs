@@ -7,6 +7,11 @@ namespace HiddenUnits
 {
     public class ProjectileHitScale : ProjectileHitEffect
     {
+        private void Awake()
+        {
+            if (HUMain.InfiniteScaling) scaleLimit = 9999;
+        }
+        
         public override bool DoEffect(HitData hit)
         {
             if (!hit.rigidbody || !hit.transform.root.GetComponent<Unit>() || (hit.transform.root.GetComponent<Unit>() && hit.transform.root.GetComponent<Unit>().data.Dead) || (hit.transform.root.GetComponent<Unit>() && hit.transform.root.GetComponent<Unit>().Team == GetComponent<TeamHolder>().team) || hit.transform.GetComponent<Scaling>())
@@ -36,7 +41,7 @@ namespace HiddenUnits
             }
 
             scaleCount++;
-            if (scaleCount >= scaleLimit && HUMain.InfiniteScaling != 1) Destroy(hit.transform.GetComponent<Scaling>());
+            if (scaleCount >= scaleLimit) Destroy(hit.transform.GetComponent<Scaling>());
         }
 
         private int scaleCount;

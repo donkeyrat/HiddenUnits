@@ -22,9 +22,6 @@ public class HadezHands : MonoBehaviour
 
 	public AnimationCurve throwCurve;
 
-	[SerializeField]
-	private Renderer[] armRenderers;
-
 	private float followMainRigAmount;
 
 	private Unit unit;
@@ -46,10 +43,6 @@ public class HadezHands : MonoBehaviour
 			attackArms.Add(attackArm);
 		}
 		unit = GetComponentInParent<Weapon>().connectedData.unit;
-		if (armRenderers != null && unit != null)
-		{
-			unit.AddRenderersToShowHide(armRenderers);
-		}
 		targetTrans = transform.parent;
 		transform.SetParent(unit.transform);
 	}

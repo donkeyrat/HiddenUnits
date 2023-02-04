@@ -139,7 +139,7 @@ namespace HiddenUnits
             foreach (var mat in hiddenUnits.LoadAllAssets<Material>()) if (Shader.Find(mat.shader.name)) mat.shader = Shader.Find(mat.shader.name);
 
 
-            var infiniteScaling = CreateSetting(SettingsInstance.SettingsType.Options, "Make units scale infinitely", "Toggles Mathematician/Philosopher projectiles to be able to infinitely scale unit parts.", "BUG", new[] { "Disabled", "Enabled" });
+            var infiniteScaling = CreateSetting(SettingsInstance.SettingsType.Options, "Make units scale infinitely", "Toggles Mathematician/Philosopher projectiles to be able to infinitely scale unit parts.", "BUG", 0f, new[] { "Disabled", "Enabled" });
             infiniteScaling.OnValueChanged += InfiniteScaling_OnValueChanged;
             
             foreach (var unit in hiddenUnits.LoadAllAssets<UnitBlueprint>())
@@ -156,23 +156,47 @@ namespace HiddenUnits
             foreach (var lvl in hiddenUnits.LoadAllAssets<TABSCampaignLevelAsset>())
             {
                 newCampaignLevels.Add(lvl);
+                
+                var egypt = newFactions.Find(x => x.name.Contains("Egypt"));
+                var subunits = db.LandfallContentDatabase.GetFactions().ToList().Find(x => x.name.Contains("Subunits"));
+                var secret = db.LandfallContentDatabase.GetFactions().ToList().Find(x => x.name.Contains("Secret"));
+                
+                var allowedU = new List<UnitBlueprint>();
+                var allowed = new List<Faction>();
+                
+                if (lvl.name.Contains("EgyptLevel"))
+                { 
+                    allowed.AddRange(db.LandfallContentDatabase.GetFactions().ToList());
+                    allowed.Remove(secret);
+                    if (subunits) allowed.Remove(subunits);
+                }
+                else if (lvl.name.Contains("EgyptMiscLevel"))
+                {
+                    allowed.Add(egypt);
+                    allowed.Add(secret);
+                    
+                    allowedU.AddRange(egypt.Units);
+                    
+                    allowedU.Add(secret.Units.ToList().Find(x => x.name.Contains("BoomerangThrower")));
+                    allowedU.Add(secret.Units.ToList().Find(x => x.name.Contains("PotThrower")));
+                    allowedU.Add(secret.Units.ToList().Find(x => x.name.Contains("Sarcophagus")));
+                    allowedU.Add(secret.Units.ToList().Find(x => x.name.Contains("Selket")));
+                    allowedU.Add(secret.Units.ToList().Find(x => x.name.Contains("RaWarrior")));
+                }
+                
+                if (lvl.name.Contains("MapEquals"))
+                {
+                    var find = db.LandfallContentDatabase.GetMapAssetsOrdered().ToList().Find(x => x.name.Contains(lvl.name.Split(new[] { "MapEquals_" }, StringSplitOptions.RemoveEmptyEntries).Last()));
+                    if (find) lvl.MapAsset = find;
+                }
+                
+                lvl.AllowedFactions = allowed.ToArray();
+                lvl.AllowedUnits = allowedU.ToArray();
             }
 
             foreach (var vb in hiddenUnits.LoadAllAssets<VoiceBundle>()) newVoiceBundles.Add(vb);
             
-            int startID = 122436;
-            foreach (var sprite in hiddenUnits.LoadAllAssets<Sprite>()) {
-
-                if (sprite.name.Contains("Icons_128x128")) {
-
-                    var icon = Object.Instantiate(db.GetFactionIcon(db.LandfallContentDatabase.GetFactionIconIds().ToList()[0]));
-                    icon.name = sprite.name;
-                    icon.Entity.SetSpriteIcon(sprite);
-                    icon.Entity.GUID = new DatabaseID(-2, startID);
-                    startID++;
-                    newFactionIcons.Add(icon);
-                }
-            }
+            foreach (var icon in hiddenUnits.LoadAllAssets<FactionIcon>()) newFactionIcons.Add(icon);
 
             foreach (var objecting in hiddenUnits.LoadAllAssets<GameObject>()) 
             {
@@ -409,23 +433,32 @@ namespace HiddenUnits
             }
             typeof(LandfallContentDatabase).GetField("m_projectiles", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(db, projectiles);
 
-
+            typeof(AssetLoader).GetField("m_nonStreamableAssets", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(ContentDatabase.Instance().AssetLoader, nonStreamableAssets);
             
             ServiceLocator.GetService<CustomContentLoaderModIO>().QuickRefresh(WorkshopContentType.Unit, null);
         }
         
-        public SettingsInstance CreateSetting(SettingsInstance.SettingsType settingsType, string settingName, string toolTip, string settingListToAddTo, string[] options = null, float min = 0f, float max = 1f) 
+        private void InfiniteScaling_OnValueChanged(int value)
         {
-            var setting = new SettingsInstance();
-
-            setting.settingName = settingName;
-            setting.toolTip = toolTip;
-            setting.m_settingsKey = settingName;
-
-            setting.settingsType = settingsType;
-            setting.options = options;
-            setting.min = min;
-            setting.max = max;
+            InfiniteScaling = value != 0;
+        }
+        
+        private SettingsInstance CreateSetting(SettingsInstance.SettingsType settingsType, string settingName, string toolTip, string settingListToAddTo, float defaultValue, string[] options = null, float min = 0f, float max = 1f) 
+        {
+            var setting = new SettingsInstance
+            {
+                settingName = settingName,
+                toolTip = toolTip,
+                m_settingsKey = settingName,
+                settingsType = settingsType,
+                options = options,
+                min = min,
+                max = max,
+                defaultValue = (int)defaultValue,
+                currentValue = (int)defaultValue,
+                defaultSliderValue = defaultValue,
+                currentSliderValue = defaultValue
+            };
 
             var global = ServiceLocator.GetService<GlobalSettingsHandler>();
             SettingsInstance[] listToAdd;
@@ -433,23 +466,31 @@ namespace HiddenUnits
             else if (settingListToAddTo == "VIDEO") listToAdd = global.VideoSettings;
             else if (settingListToAddTo == "AUDIO") listToAdd = global.AudioSettings;
             else if (settingListToAddTo == "CONTROLS") listToAdd = global.ControlSettings;
-            else { listToAdd = global.GameplaySettings; }
+            else listToAdd = global.GameplaySettings;
 
             var list = listToAdd.ToList();
             list.Add(setting);
 
-            if (settingListToAddTo == "BUG") typeof(GlobalSettingsHandler).GetField("m_bugsSettings", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(global, list.ToArray());
-            else if (settingListToAddTo == "VIDEO") typeof(GlobalSettingsHandler).GetField("m_videoSettings", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(global, list.ToArray());
-            else if (settingListToAddTo == "AUDIO") typeof(GlobalSettingsHandler).GetField("m_audioSettings", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(global, list.ToArray());
-            else if (settingListToAddTo == "CONTROLS") typeof(GlobalSettingsHandler).GetField("m_controlSettings", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(global, list.ToArray());
-            else typeof(GlobalSettingsHandler).GetField("m_gameplaySettings", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(global, list.ToArray());
+            switch (settingListToAddTo)
+            {
+                case "BUG":
+                    typeof(GlobalSettingsHandler).GetField("m_bugsSettings", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(global, list.ToArray());
+                    break;
+                case "VIDEO":
+                    typeof(GlobalSettingsHandler).GetField("m_videoSettings", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(global, list.ToArray());
+                    break;
+                case "AUDIO":
+                    typeof(GlobalSettingsHandler).GetField("m_audioSettings", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(global, list.ToArray());
+                    break;
+                case "CONTROLS":
+                    typeof(GlobalSettingsHandler).GetField("m_controlSettings", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(global, list.ToArray());
+                    break;
+                default:
+                    typeof(GlobalSettingsHandler).GetField("m_gameplaySettings", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(global, list.ToArray());
+                    break;
+            }
 
             return setting;
-        }
-
-        private void InfiniteScaling_OnValueChanged(int value)
-        {
-            InfiniteScaling = value;
         }
         
         public List<UnitBlueprint> newUnits = new List<UnitBlueprint>();
@@ -474,7 +515,7 @@ namespace HiddenUnits
 
         public List<GameObject> newProjectiles = new List<GameObject>();
 
-        public static int InfiniteScaling = 0;
+        public static bool InfiniteScaling = false;
 
         public static AssetBundle hiddenUnits;// = AssetBundle.LoadFromMemory(Properties.Resources.hiddenunits);
 

@@ -44,10 +44,6 @@ namespace HiddenUnits
 	
 		private ParticleSystem part;
 	
-		private Unit furthestUnit;
-	
-		private Unit closestUnit;
-	
 		private List<PhysicsFollowBodyPart> followers;
 	
 		private float currentDistance;

@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using Landfall.TABS;
+using Landfall.TABS.AI.Systems;
+using Unity.Entities;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -44,8 +46,15 @@ namespace HiddenUnits
                 yield return new WaitForSeconds(destroyDelay);
                 
                 colorHandler.SetMaterial(mat);
-                
-                if (destroyRoot) ownUnit.DestroyUnit();
+
+                if (destroyRoot)
+                {
+                    if (ownUnit && ownUnit.GetComponent<GameObjectEntity>() && World.Active.GetOrCreateManager<TeamSystem>().GetTeamUnits(ownUnit.Team).Contains(ownUnit))
+                    {
+                        World.Active.GetOrCreateManager<TeamSystem>().RemoveEntity(ownUnit.GetComponent<GameObjectEntity>().Entity, ownUnit.Team, ownUnit);
+                    }
+                    ownUnit.DestroyUnit();
+                }
             }
         }
 

@@ -175,7 +175,6 @@ namespace HiddenUnits
 				m_secretObject.isKinematic = true;
 			}
 			
-			bool flag = false;
 			if (!string.IsNullOrWhiteSpace(secretKey) && ServiceLocator.GetService<ISaveLoaderService>().HasUnlockedSecret(secretKey))
 			{
 				if ((bool)m_secretObject)

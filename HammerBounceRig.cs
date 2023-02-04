@@ -67,7 +67,7 @@ namespace HiddenUnits {
             SetTarget();
             if (hitCount >= hitLimit)
             {
-                finishEvent.Invoke();
+                Finish();
             }
         }
         
@@ -82,7 +82,7 @@ namespace HiddenUnits {
                 .ToArray();
             
             if (foundUnits.Length > 0) target = foundUnits[0].data.mainRig.transform;
-            else finishEvent.Invoke();
+            else Finish();
         }
 
         public void Return()
@@ -92,9 +92,12 @@ namespace HiddenUnits {
             returnRotation = transform.rotation;
         }
 
-        public void TriggerFinish()
+        public void Finish()
         {
+            if (finished) return;
+            
             finishEvent.Invoke();
+            finished = true;
         }
         
         private float counter;
@@ -103,6 +106,7 @@ namespace HiddenUnits {
         private List<Unit> hitList = new List<Unit>();
         private int hitCount;
         private bool returning;
+        private bool finished;
         
         [Header("Projectile Settings")] 
         
