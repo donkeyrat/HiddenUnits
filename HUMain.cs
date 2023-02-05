@@ -56,27 +56,17 @@ namespace HiddenUnits
             
             
             var factions = db.LandfallContentDatabase.GetFactions().ToList();
-            foreach (var fac in hiddenUnits.LoadAllAssets<Faction>()) 
+            foreach (var fac in hiddenUnits.LoadAllAssets<Faction>())
             {
-                var veryNewUnits = (
-                    from UnitBlueprint unit
-                    in fac.Units
-                    orderby unit.GetUnitCost()
-                    select unit).ToList();
+                var veryNewUnits = fac.Units.Where(x => x).OrderBy(x => x.GetUnitCost()).ToArray();
                 fac.Units = veryNewUnits.ToArray();
-                foreach (var vFac in factions) {
-
-                    if (fac.Entity.Name == vFac.Entity.Name + "_NEW") {
-
+                foreach (var vFac in factions) 
+                {
+                    if (fac.Entity.Name == vFac.Entity.Name + "_NEW") 
+                    {
                         var vFacUnits = new List<UnitBlueprint>(vFac.Units);
                         vFacUnits.AddRange(fac.Units);
-                        var newUnits = (
-                            from UnitBlueprint unit
-                            in vFacUnits
-                            orderby unit.GetUnitCost()
-                            select unit).ToList();
-                        vFac.Units = newUnits.ToArray();
-                        Object.DestroyImmediate(fac);
+                        vFac.Units = vFacUnits.Where(x => x).OrderBy(x => x.GetUnitCost()).ToArray();
                     }
                 }
             }
@@ -139,8 +129,11 @@ namespace HiddenUnits
             foreach (var mat in hiddenUnits.LoadAllAssets<Material>()) if (Shader.Find(mat.shader.name)) mat.shader = Shader.Find(mat.shader.name);
 
 
-            var infiniteScaling = CreateSetting(SettingsInstance.SettingsType.Options, "Make units scale infinitely", "Toggles Mathematician/Philosopher projectiles to be able to infinitely scale unit parts.", "BUG", 0f, new[] { "Disabled", "Enabled" });
-            infiniteScaling.OnValueChanged += InfiniteScaling_OnValueChanged;
+            var infiniteScaling = CreateSetting(SettingsInstance.SettingsType.Options, "Toggle infinite projectile scaling", "Enables/disables Mathematician/Philosopher projectiles infinitely scaling unit parts.", "BUG", 0f, HULauncher.ConfigInfiniteScalingEnabled.Value ? 0 : 1, new[] { "Disabled", "Enabled" });
+            infiniteScaling.OnValueChanged += delegate(int value)
+            {
+                HULauncher.ConfigInfiniteScalingEnabled.Value = value == 0;
+            };
             
             foreach (var unit in hiddenUnits.LoadAllAssets<UnitBlueprint>())
             {
@@ -438,12 +431,7 @@ namespace HiddenUnits
             ServiceLocator.GetService<CustomContentLoaderModIO>().QuickRefresh(WorkshopContentType.Unit, null);
         }
         
-        private void InfiniteScaling_OnValueChanged(int value)
-        {
-            InfiniteScaling = value != 0;
-        }
-        
-        private SettingsInstance CreateSetting(SettingsInstance.SettingsType settingsType, string settingName, string toolTip, string settingListToAddTo, float defaultValue, string[] options = null, float min = 0f, float max = 1f) 
+        private SettingsInstance CreateSetting(SettingsInstance.SettingsType settingsType, string settingName, string toolTip, string settingListToAddTo, float defaultValue, float currentValue, string[] options = null, float min = 0f, float max = 1f) 
         {
             var setting = new SettingsInstance
             {
@@ -455,9 +443,9 @@ namespace HiddenUnits
                 min = min,
                 max = max,
                 defaultValue = (int)defaultValue,
-                currentValue = (int)defaultValue,
+                currentValue = (int)currentValue,
                 defaultSliderValue = defaultValue,
-                currentSliderValue = defaultValue
+                currentSliderValue = currentValue
             };
 
             var global = ServiceLocator.GetService<GlobalSettingsHandler>();
@@ -515,7 +503,7 @@ namespace HiddenUnits
 
         public List<GameObject> newProjectiles = new List<GameObject>();
 
-        public static bool InfiniteScaling = false;
+        public static bool InfiniteScalingEnabled => HULauncher.ConfigInfiniteScalingEnabled.Value;
 
         public static AssetBundle hiddenUnits;// = AssetBundle.LoadFromMemory(Properties.Resources.hiddenunits);
 

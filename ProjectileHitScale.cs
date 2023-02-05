@@ -9,7 +9,7 @@ namespace HiddenUnits
     {
         private void Awake()
         {
-            if (HUMain.InfiniteScaling) scaleLimit = 9999;
+            if (HUMain.InfiniteScalingEnabled) scaleLimit = 9999;
         }
         
         public override bool DoEffect(HitData hit)
