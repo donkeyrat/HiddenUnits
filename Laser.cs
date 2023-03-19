@@ -22,32 +22,18 @@ public class Laser : MonoBehaviour
 
     public IEnumerator Animate(bool activating)
     {
-        if (!line) line = GetComponent<LineRenderer>();
         var t = 0f;
-        if (activating)
+        while (t < 1f)
         {
-            while (t < 1f && line)
-            {
-                t += Time.deltaTime;
-                line.widthMultiplier = Mathf.Lerp(0f, scaleMultiplier, Mathf.Clamp(t, 0f, 1f));
-                yield return null;
-            }
-        }
-        else
-        {
-            while (t < 1f && line)
-            {
-                t += Time.deltaTime;
-                line.widthMultiplier = Mathf.Lerp(scaleMultiplier, 0f, Mathf.Clamp(t, 0f, 1f));
-                yield return null;
-            }
+            t += Time.deltaTime;
+            line.widthMultiplier = Mathf.Lerp(activating ? 0f : scaleMultiplier, activating ? scaleMultiplier : 0f, Mathf.Clamp(t, 0f, 1f));
+            yield return null;
         }
     }
 
 
     public void Update()
     {
-        if (!line) line = GetComponent<LineRenderer>();
         line.SetPosition(0, p2.transform.position);
         if (Physics.Raycast(p2.transform.position, p2.transform.forward, out var hit, maxDistance, layer))
         {

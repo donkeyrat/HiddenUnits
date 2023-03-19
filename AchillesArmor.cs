@@ -37,6 +37,7 @@ namespace HiddenUnits
             {
                 armorDisabled = true;
                 armorDisableEvent.Invoke();
+                
                 foreach (var armor in armorListeners) armor.OnArmorDeactivated();
                 armoredUnit.armorActive = false;
             }
@@ -44,7 +45,6 @@ namespace HiddenUnits
 
         public void Update()
         {
-            
             if (armorDisabled)
             {
                 armorDisabledCounter += Time.deltaTime;
@@ -54,7 +54,9 @@ namespace HiddenUnits
                     armorDisabled = false;
                     armorHealth = maxArmorHealth;
                     armorEnableEvent.Invoke();
+                    
                     foreach (var armor in armorListeners) armor.OnArmorActivated();
+                    armoredUnit.armorActive = true;
                 }
             }
             else
@@ -64,7 +66,6 @@ namespace HiddenUnits
                     armorHealth += Time.deltaTime * armorRegenerationRate;
                     armorHealth = Mathf.Clamp(armorHealth, 0f, maxArmorHealth);
                 }
-
                 if (healthRegenerate)
                 {
                     unit.data.health += Time.deltaTime * healthRegenerationRate;

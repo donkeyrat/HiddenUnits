@@ -8,7 +8,6 @@ namespace HiddenUnits
 
     public class Afterimage : MonoBehaviour 
     {
-
         public void Start()
         {
             GetComponent<UnitSpawner>().unitBlueprint = transform.root.GetComponent<Unit>().unitBlueprint;

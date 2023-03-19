@@ -9,12 +9,12 @@ namespace HiddenUnits
             scaling = true;
         }
         
-        void Update()
+        private void Update()
         {
             counter += Time.deltaTime;
             if (scaling && counter < 1f)
             {
-                transform.parent.localScale -= new Vector3(scaler, scaler, scaler) * Time.deltaTime;
+                transform.parent.localScale -= Vector3.one * (scaler * Time.deltaTime);
             }
         }
 

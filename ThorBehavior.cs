@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 using System.Collections.Generic;
+using TGCore.Library;
 
 public class ThorBehavior : MonoBehaviour
 {

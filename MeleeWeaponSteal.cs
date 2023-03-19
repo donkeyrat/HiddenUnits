@@ -25,14 +25,14 @@ namespace HiddenUnits
                     {
                         stolenWeapon = hold.rightObject.gameObject;
                         handType = HoldingHandler.HandType.Right;
-                        hold.LetGoOfWeapon(hold.rightObject.gameObject);
+                        hold.LetGoOfWeapon(stolenWeapon);
                         Destroy(hold.rightObject);
                     }
                     else if (hold.leftObject)
                     {
                         stolenWeapon = hold.leftObject.gameObject;
                         handType = HoldingHandler.HandType.Left;
-                        hold.LetGoOfWeapon(hold.leftObject.gameObject);
+                        hold.LetGoOfWeapon(stolenWeapon);
                         Destroy(hold.leftObject);
                     }
                 }

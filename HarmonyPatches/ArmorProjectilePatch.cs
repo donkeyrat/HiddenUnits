@@ -1,5 +1,6 @@
 ﻿using Landfall.TABS;
 using HarmonyLib;
+using TGCore.Library;
 using UnityEngine;
 
 namespace HiddenUnits.HarmonyPatches
@@ -12,7 +13,7 @@ namespace HiddenUnits.HarmonyPatches
         {
             var armoredUnit = sentHit.transform.root.GetComponent<AchillesArmor.UnitIsArmored>();
             
-            if (sentHit.transform && armoredUnit && armoredUnit.armorActive && sentHit.rigidbody && armoredUnit.blockPower > __instance.blockPoweredNeeded)
+            if (!__instance.GetComponent<ProjectileHoming>() && sentHit.transform && armoredUnit && armoredUnit.armorActive && sentHit.rigidbody && armoredUnit.blockPower > __instance.blockPoweredNeeded)
             {
                 if (___move) ___move.velocity = Vector3.Reflect(___move.velocity, sentHit.normal) * Random.Range(0.2f, 0.4f);
                 if (___trail) ___trail.ignoredFrames = 3;

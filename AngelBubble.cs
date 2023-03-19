@@ -1,83 +1,80 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Landfall.TABS;
 using UnityEngine;
 
 namespace HiddenUnits
 {
 	public class AngelBubble : MonoBehaviour
 	{
-		private readonly List<Rigidbody> rigs = new List<Rigidbody>();
-
-		private readonly List<Vector3> randomOffset = new List<Vector3>();
-
-		private readonly List<float> floatiness = new List<float>();
-
-		private Transform effectTransform;
-
-		public float radius = 5f;
-
-		public float force = 1000f;
-
-		public float damage;
-
-		public AnimationCurve curve;
-
-		public AnimationCurve upCurve;
-
-		private Damagable[] healths;
-
 		private void Start()
 		{
 			effectTransform = transform.GetChild(0);
-			Collider[] array = Physics.OverlapSphere(effectTransform.position, radius);
-			foreach (var t in array)
-			{
-				if ((bool)t.attachedRigidbody && !rigs.Contains(t.attachedRigidbody))
-				{
-					rigs.Add(t.attachedRigidbody);
-					randomOffset.Add(Random.insideUnitSphere * 2f);
-					floatiness.Add(Random.Range(0.5f, 1f));
-				}
-			}
-			healths = new Damagable[rigs.Count];
-			for (int j = 0; j < rigs.Count; j++)
-			{
-				healths[j] = rigs[j].GetComponentInParent<Damagable>();
-			}
+			var hits = Physics.OverlapSphere(effectTransform.position, radius);
+			hitRigs = hits
+				.Select(x => x.attachedRigidbody)
+				.Where(x => x)
+				.Distinct()
+				.ToArray();
+			
+			hitUnits = hits
+				.Select(hit => hit.transform.root.GetComponent<Unit>())
+				.Where(x => x && !x.data.Dead)
+				.OrderBy(x => (x.data.mainRig.transform.position - transform.position).magnitude)
+				.Distinct()
+				.ToArray();
+			
 			StartCoroutine(AnimateSpell());
-			transform.rotation = Quaternion.identity;
 		}
 
 		private IEnumerator AnimateSpell()
 		{
-			float t = upCurve.keys[upCurve.keys.Length - 1].time;
-			float c = 0f;
-			while (c < t)
+			var time = upCurve.keys[upCurve.keys.Length - 1].time;
+			var t = 0f;
+			var startPos = effectTransform.position;
+			while (t < time)
 			{
+				t += Time.deltaTime;
+				
 				Pull();
-				effectTransform.localPosition = Vector3.zero + Vector3.up * upCurve.Evaluate(c);
-				c += Time.deltaTime;
+				effectTransform.position = startPos + Vector3.up * upCurve.Evaluate(t);
 				yield return null;
 			}
 		}
 
 		private void Pull()
 		{
-			for (int i = 0; i < rigs.Count; i++)
+			foreach (var rig in hitRigs.Where(x => x)) 
 			{
-				if (!(rigs[i] == null))
-				{
-					var position = effectTransform.position;
-					float time = Vector3.Distance(rigs[i].position, position);
-					float num = curve.Evaluate(time);
-					WilhelmPhysicsFunctions.AddForceWithMinWeight(rigs[i], floatiness[i] * force * num * (position + randomOffset[i] - rigs[i].position).normalized, ForceMode.Force, 60f);
-					if ((bool)healths[i])
-					{
-						healths[i].TakeDamage(damage * Time.deltaTime, Vector3.zero, null);
-					}
-					rigs[i].AddForce(-200f * floatiness[i] * Time.deltaTime * rigs[i].velocity, ForceMode.Acceleration);
-				}
+				var position = effectTransform.position;
+				var num = influenceCurve.Evaluate(Vector3.Distance(rig.position, position));
+				var randomFloat = Random.Range(0.5f, 1f);
+				WilhelmPhysicsFunctions.AddForceWithMinWeight(rig, randomFloat * force * num * (position + Random.insideUnitSphere * 2f - rig.position).normalized, ForceMode.Force, minMassCap);
+
+				rig.AddForce(-200f * randomFloat * Time.deltaTime * rig.velocity, ForceMode.Acceleration);
+			}
+
+			foreach (var unit in hitUnits)
+			{
+				unit.data.healthHandler.TakeDamage(damageOverTime * Time.deltaTime, Vector3.up);
 			}
 		}
+		
+		private Rigidbody[] hitRigs;
+		private Unit[] hitUnits;
+		private Transform effectTransform;
+
+		[Header("Damage Settings")]
+		
+		public float radius = 5f;
+		public float force = 1000f;
+		public float minMassCap = 60f;
+		public float damageOverTime = 60f;
+		
+		[Header("Curve Settings")]
+
+		public AnimationCurve influenceCurve;
+		public AnimationCurve upCurve;
 	}
 }

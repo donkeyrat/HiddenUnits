@@ -10,6 +10,7 @@ namespace HiddenUnits {
 
         public void Start()
         {
+            ownRig = GetComponent<Rigidbody>();
             ownUnit = transform.root.GetComponent<Unit>();
             weapon = transform.GetComponentInParent<Weapon>() ? transform.GetComponentInParent<Weapon>() : transform.root.GetComponent<Unit>().WeaponHandler.rightWeapon;
             returnObject = weapon.transform.FindChildRecursive(objectToReturnTo);
@@ -23,8 +24,9 @@ namespace HiddenUnits {
             if (!target && !returning) SetTarget();
             else if (target)
             {
-                GetComponent<Rigidbody>().AddForce((target.position - transform.position).normalized * flightSpeed * GetComponent<Rigidbody>().mass * Time.deltaTime);
-                GetComponent<Rigidbody>().MoveRotation(Quaternion.LookRotation(Vector3.RotateTowards(transform.forward, target.position - transform.position, Time.deltaTime * rotationSpeed, 0f)));
+                var targetPos = target.data.mainRig.position - transform.position;
+                ownRig.AddForce(targetPos.normalized * (flightSpeed * ownRig.mass * Time.deltaTime));
+                ownRig.MoveRotation(Quaternion.LookRotation(Vector3.RotateTowards(transform.forward, targetPos, Time.deltaTime * rotationSpeed, 0f)));
             }
 
             if (returning)
@@ -36,10 +38,8 @@ namespace HiddenUnits {
                     returning = false;
                     return;
                 }
-                transform.position = Vector3.Lerp(returnPosition,
-                    returnObject.position, returnCounter);
-                transform.rotation = Quaternion.Lerp(returnRotation,
-                    returnObject.rotation, returnCounter);
+                transform.position = Vector3.Lerp(returnPosition, returnObject.position, returnCounter);
+                transform.rotation = Quaternion.Lerp(returnRotation, returnObject.rotation, returnCounter);
                 returnCounter += Time.deltaTime * returnSpeed;
             }
         }
@@ -54,7 +54,7 @@ namespace HiddenUnits {
             
             enemyUnit.data.healthHandler.TakeDamage(damage * (flag ? 1f : 0f), Vector3.zero);
 
-            var goldenNumber = Mathf.Clamp(col.impulse.magnitude / (GetComponent<Rigidbody>().mass + 10f) * 0.3f * impactMultiplier, 0f, 2f);
+            var goldenNumber = Mathf.Clamp(col.impulse.magnitude / (ownRig.mass + 10f) * 0.3f * impactMultiplier, 0f, 2f);
             if (ScreenShake.Instance) ScreenShake.Instance.AddForce(transform.forward * Mathf.Sqrt(goldenNumber * 0.5f) * 0.5f * impactScreenShake, col.contacts[0].point);
             WilhelmPhysicsFunctions.AddForceWithMinWeight(enemyUnit.data.mainRig, Mathf.Sqrt(goldenNumber * 50f) * transform.forward * impactForce * (flag ? 1f : 0f), ForceMode.Impulse, massCap);
             WilhelmPhysicsFunctions.AddForceWithMinWeight(col.rigidbody, Mathf.Sqrt(goldenNumber * 50f) * transform.forward * impactForce, ForceMode.Impulse, massCap);
@@ -80,8 +80,8 @@ namespace HiddenUnits {
                 .OrderBy(x => (x.data.mainRig.transform.position - transform.position).magnitude)
                 .Distinct()
                 .ToArray();
-            
-            if (foundUnits.Length > 0) target = foundUnits[0].data.mainRig.transform;
+
+            if (foundUnits.Length > 0) target = foundUnits[0];
             else Finish();
         }
 
@@ -101,11 +101,11 @@ namespace HiddenUnits {
         }
         
         private float counter;
-        private Transform target;
+        private Rigidbody ownRig;
+        private Unit target;
         private Unit ownUnit;
         private List<Unit> hitList = new List<Unit>();
         private int hitCount;
-        private bool returning;
         private bool finished;
         
         [Header("Projectile Settings")] 
@@ -122,9 +122,10 @@ namespace HiddenUnits {
         public float returnSpeed = 0.5f;
         public string objectToReturnTo;
 
+        private bool returning;
+        
         private float returnCounter;
-        
-        
+
         private Transform returnObject;
         private Weapon weapon;
         

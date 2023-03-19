@@ -11,7 +11,12 @@ namespace HiddenUnits
 {
     public class RootBehavior : MonoBehaviour
     {
-        public void Update()
+        private void Start()
+        {
+            team = GetComponent<TeamHolder>();
+        }
+        
+        private void Update()
         {
             counter += Time.deltaTime;
             if (unitTarget && !joint && Vector3.Distance(tip.position, unitTarget.data.mainRig.position) < attachDistance && unitTarget.data.mainRig.GetComponents<ConfigurableJoint>().Length < 3)
@@ -29,7 +34,7 @@ namespace HiddenUnits
             StartCoroutine(ChooseTarget());
         }
 
-        public IEnumerator ChooseTarget()
+        private IEnumerator ChooseTarget()
         {
             SetTarget();
             if (unitTarget)
@@ -90,7 +95,7 @@ namespace HiddenUnits
             var hits = Physics.SphereCastAll(transform.position, targetRange, Vector3.up, 0.1f, LayerMask.GetMask(new string[] { "MainRig" }));
             var foundUnits = hits
                 .Select(hit => hit.transform.root.GetComponent<Unit>())
-                .Where(x => x && !x.data.Dead && x.Team != GetComponent<TeamHolder>().team)
+                .Where(x => x && !x.data.Dead && x.Team != team.team)
                 .OrderBy(x => (x.data.mainRig.transform.position - transform.position).magnitude)
                 .Distinct()
                 .ToArray();
@@ -102,10 +107,9 @@ namespace HiddenUnits
         }
 
         private float counter;
-        
         private Unit unitTarget;
-        
         private FixedJoint joint;
+        private TeamHolder team;
         
         [Header("Root Settings")]
 

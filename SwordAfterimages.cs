@@ -14,12 +14,9 @@ namespace HiddenUnits
         private void Update()
         {
             counter += Time.deltaTime;
-            if (!canSpawn ||
-                (requireThreshold && rig.velocity.magnitude < thresholdToSpawn) ||
-                (requireCooldown && cooldown > counter))
-            {
-                return;
-            }
+            
+            if (!canSpawn || (requireThreshold && rig.velocity.magnitude < thresholdToSpawn) || (requireCooldown && cooldown > counter)) return;
+            
             DoAfterimage();
         } 
 
