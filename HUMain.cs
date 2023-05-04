@@ -7,28 +7,24 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using System.Reflection;
-using BitCode.Debug.Commands;
 using Object = UnityEngine.Object;
 using DM;
 using Landfall.TABS.GameMode;
 using TGCore;
-using UnityEngine.Audio;
 
 namespace HiddenUnits 
 {
-
-	public class HUMain 
+    public class HUMain 
     {
-
         public HUMain()
         {
-            //AssetBundle.LoadFromMemory(Properties.Resources.egyptmap);
-            //AssetBundle.LoadFromMemory(Properties.Resources.egyptmap2);
+            AssetBundle.LoadFromMemory(Properties.Resources.egyptmap);
+            AssetBundle.LoadFromMemory(Properties.Resources.egyptmap2);
             
             var newMapList = new List<MapAsset>();
             var newMapDict = new Dictionary<DatabaseID, int>();
             
-            var maps = ((MapAsset[])typeof(LandfallContentDatabase).GetField("m_orderedMapAssets", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(TGMain.landfallDb)).ToList();
+            var maps = ((MapAsset[])typeof(LandfallContentDatabase).GetField("m_orderedMapAssets", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(TGMain.landfallDb)).ToList();
 
             for (int i = 0; i < 29; i++)
             {
@@ -51,32 +47,36 @@ namespace HiddenUnits
                 newMapDict.Add(map.Entity.GUID, newMapList.IndexOf(map));
             }
 
-            typeof(LandfallContentDatabase).GetField("m_orderedMapAssets", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(TGMain.landfallDb, newMapList.ToArray());
-            typeof(LandfallContentDatabase).GetField("m_mapAssetIndexLookup", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(TGMain.landfallDb, newMapDict);
+            typeof(LandfallContentDatabase).GetField("m_orderedMapAssets", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(TGMain.landfallDb, newMapList.ToArray());
+            typeof(LandfallContentDatabase).GetField("m_mapAssetIndexLookup", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(TGMain.landfallDb, newMapDict);
 
             new Harmony("HiddenUnis").PatchAll();
+            
+            Debug.Log("Bye?");
 
             var allConditions = new List<SecretUnlockCondition>(Resources.FindObjectsOfTypeAll<SecretUnlockConditions>()[0].m_unlockConditions);
-            foreach (var condition in hiddenUnits.LoadAsset<SecretUnlockConditions>("HUUnlockConditions").m_unlockConditions) 
-            {
-                allConditions.Add(condition);
-            }
+            allConditions.AddRange(hiddenUnits.LoadAsset<SecretUnlockConditions>("HUUnlockConditions").m_unlockConditions);
             Resources.FindObjectsOfTypeAll<SecretUnlockConditions>()[0].m_unlockConditions = allConditions.ToArray();
 
             foreach (var mat in hiddenUnits.LoadAllAssets<Material>()) if (Shader.Find(mat.shader.name)) mat.shader = Shader.Find(mat.shader.name);
 
+            Debug.Log("Hi?");
+            
             foreach (var unit in hiddenUnits.LoadAllAssets<UnitBlueprint>().Where(x => x.UnitBase != null))
             {
-                foreach (var unitBase in TGMain.landfallDb.GetUnitBases().ToList())
+                foreach (var unitBase in TGMain.landfallDb.GetUnitBases().ToList().Where(unitBase => unitBase.name == unit.UnitBase.name))
                 {
-                    if (unitBase.name == unit.UnitBase.name) unit.UnitBase = unitBase;
+                    unit.UnitBase = unitBase;
                 }
+
                 foreach (var weapon in TGMain.landfallDb.GetWeapons().ToList())
                 {
                     if (unit.RightWeapon && weapon.name == unit.RightWeapon.name) unit.RightWeapon = weapon;
                     if (unit.LeftWeapon && weapon.name == unit.LeftWeapon.name) unit.LeftWeapon = weapon;
                 }
             }
+            
+            Debug.Log("Die?");
 
             foreach (var fac in hiddenUnits.LoadAllAssets<Faction>())
             {
@@ -93,6 +93,8 @@ namespace HiddenUnits
                     }
                 }
             }
+            
+            Debug.Log("Zeep Zorp?");
             
             foreach (var lvl in hiddenUnits.LoadAllAssets<TABSCampaignLevelAsset>())
             {
@@ -132,7 +134,7 @@ namespace HiddenUnits
                 unitsToSearch.AddRange(lvl.RedUnits);
                 foreach (var unit in unitsToSearch)
                 {
-                    if (unit.m_unitBlueprint.name.Contains("_VANILLA"))
+                    if (unit.m_unitBlueprint && unit.m_unitBlueprint.name.Contains("_VANILLA"))
                     {
                         var vanillaVersion = TGMain.landfallDb.GetUnitBlueprints().ToList().Find(x => x.name == unit.m_unitBlueprint.name.Replace("_VANILLA", ""));
                         if (vanillaVersion) unit.m_unitBlueprint = vanillaVersion;
@@ -142,6 +144,8 @@ namespace HiddenUnits
                 lvl.AllowedFactions = allowed.ToArray();
                 lvl.AllowedUnits = allowedU.ToArray();
             }
+            
+            Debug.Log("Sneep Snorp?");
 
             foreach (var prop in hiddenUnits.LoadAllAssets<PropItem>())
             {
@@ -156,6 +160,8 @@ namespace HiddenUnits
                 }
             }
             
+            Debug.Log("ABABABA?");
+            
             foreach (var weapon in hiddenUnits.LoadAllAssets<WeaponItem>())
             {
                 var totalSubmeshes = weapon.GetComponentsInChildren<MeshFilter>().Where(rend => rend.gameObject.activeSelf && rend.gameObject.activeInHierarchy && rend.mesh.subMeshCount > 0 && rend.GetComponent<MeshRenderer>() && rend.GetComponent<MeshRenderer>().enabled).Sum(rend => rend.mesh.subMeshCount) + weapon.GetComponentsInChildren<SkinnedMeshRenderer>().Where(rend => rend.gameObject.activeSelf && rend.sharedMesh.subMeshCount > 0 && rend.enabled).Sum(rend => rend.sharedMesh.subMeshCount);
@@ -169,45 +175,9 @@ namespace HiddenUnits
                 }
             }
 
-            foreach (var audio in hiddenUnits.LoadAllAssets<AudioSource>()) 
+            foreach (var audio in hiddenUnits.LoadAllAssets<AudioSource>())
             {
                 audio.outputAudioMixerGroup = ServiceLocator.GetService<GameModeService>().AudioSettings.AudioMixer.outputAudioMixerGroup;
-            }
-            
-            foreach (var lvl in hiddenUnits.LoadAllAssets<TABSCampaignLevelAsset>())
-            {
-                var allowedU = new List<UnitBlueprint>();
-                var allowed = new List<Faction>();
-                allowed.AddRange(ContentDatabase.Instance().LandfallContentDatabase.GetFactions().ToList());
-                allowed.Remove(allowed.Find(x => x.name.Contains("Secret")));
-                var sub = allowed.Find(x => x.name.Contains("Subunits"));
-                if (sub) allowed.Remove(sub);
-                if (lvl.name.Contains("Egypt") && !lvl.name.Contains("Misc")) { 
-                    allowed.Remove(allowed.Find(x => x.name.Contains("Egypt"))); 
-                }
-                else if (lvl.name.Contains("Egypt") && lvl.name.Contains("Misc")) { 
-                    var egypt = ContentDatabase.Instance().LandfallContentDatabase.GetFactions().ToList().Find(x => x.name.Contains("Egypt"));
-                    var legacy = ContentDatabase.Instance().LandfallContentDatabase.GetFactions().ToList().Find(x => x.name.Contains("Legacy"));
-                    var secret = ContentDatabase.Instance().LandfallContentDatabase.GetFactions().ToList().Find(x => x.name.Contains("Secret"));
-                    allowed.Clear();
-                    allowed.Add(egypt);
-                    allowed.Add(legacy);
-                    allowed.Add(secret);
-                    foreach (var unit in egypt.Units) { allowedU.Add(unit); }
-                    allowedU.Add(ContentDatabase.Instance().LandfallContentDatabase.GetFactions().ToList().Find(x => x.name.Contains("Secret")).Units.ToList().Find(x => x.name.Contains("Pot")));
-                    allowedU.Add(ContentDatabase.Instance().LandfallContentDatabase.GetFactions().ToList().Find(x => x.name.Contains("Secret")).Units.ToList().Find(x => x.name.Contains("Boomerang")));
-                    allowedU.Add(ContentDatabase.Instance().LandfallContentDatabase.GetFactions().ToList().Find(x => x.name.Contains("Secret")).Units.ToList().Find(x => x.name.Contains("Warrior")));
-                    allowedU.Add(ContentDatabase.Instance().LandfallContentDatabase.GetFactions().ToList().Find(x => x.name.Contains("Secret")).Units.ToList().Find(x => x.name.Contains("Sarcophagus")));
-                    allowedU.Add(ContentDatabase.Instance().LandfallContentDatabase.GetFactions().ToList().Find(x => x.name.Contains("Secret")).Units.ToList().Find(x => x.name.Contains("Selket")));
-                    allowedU.Add(ContentDatabase.Instance().LandfallContentDatabase.GetFactions().ToList().Find(x => x.name.Contains("Legacy")).Units.ToList().Find(x => x.name.Contains("Pharaoh")));
-                }
-                if (lvl.name.Contains("MapEquals"))
-                {
-                    var find = ContentDatabase.Instance().LandfallContentDatabase.GetMapAssetsOrdered().ToList().Find(x => x.name.Contains(lvl.name.Split(new string[] { "MapEquals_" }, StringSplitOptions.RemoveEmptyEntries).Last()));
-                    if (find) lvl.MapAsset = find;
-                }
-                lvl.AllowedFactions = allowed.ToArray();
-                lvl.AllowedUnits = allowedU.ToArray();
             }
             
             TGAddons.AddItems(hiddenUnits.LoadAllAssets<UnitBlueprint>(), hiddenUnits.LoadAllAssets<Faction>(),
@@ -219,10 +189,10 @@ namespace HiddenUnits
             TGMain.newSounds.AddRange(hiddenUnits.LoadAllAssets<SoundBank>());
         }
 
-        public static bool InfiniteScalingEnabled => HULauncher.configInfiniteScalingEnabled.Value;
+        public static bool InfiniteScalingEnabled => HULauncher.ConfigInfiniteScalingEnabled.Value;
 
-        public static AssetBundle hiddenUnits;// = AssetBundle.LoadFromMemory(Properties.Resources.hiddenunits);
+        public static AssetBundle hiddenUnits = AssetBundle.LoadFromMemory(Properties.Resources.hiddenunits);
 
-        public static AssetBundle huMaps;// = AssetBundle.LoadFromMemory(Properties.Resources.humaps);
+        public static AssetBundle huMaps = AssetBundle.LoadFromMemory(Properties.Resources.humaps);
     }
 }

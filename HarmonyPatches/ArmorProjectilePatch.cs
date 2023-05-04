@@ -1,11 +1,10 @@
-﻿using Landfall.TABS;
-using HarmonyLib;
+﻿using HarmonyLib;
 using TGCore.Library;
 using UnityEngine;
 
 namespace HiddenUnits.HarmonyPatches
 {
-    [HarmonyPatch(typeof(ProjectileHit), "Hit", MethodType.Setter)]
+    [HarmonyPatch(typeof(ProjectileHit), "Hit")]
     class ArmorProjectilePatch
     {
         [HarmonyPrefix]

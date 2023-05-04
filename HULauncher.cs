@@ -9,9 +9,10 @@ using TGCore.Localization;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace HiddenUnits {
-
-	[BepInPlugin("teamgrad.hiddenunits", "Hidden Units", "1.2.0")]
+namespace HiddenUnits 
+{
+    [BepInPlugin("teamgrad.hiddenunits", "Hidden Units", "1.2.0")]
+    [BepInDependency("teamgrad.core")]
 	public class HULauncher : TGMod
 	{
 		public override void Launch()
@@ -21,12 +22,12 @@ namespace HiddenUnits {
 
 		public override void AddSettings()
 		{
-			configInfiniteScalingEnabled = Config.Bind("Bug", "InfiniteScalingEnabled", true, "Enables/disables Mathematician/Philosopher projectiles infinitely scaling unit parts.");
+			ConfigInfiniteScalingEnabled = Config.Bind("Bug", "InfiniteScalingEnabled", true, "Enables/disables Mathematician/Philosopher projectiles infinitely scaling unit parts.");
 			
-			var infiniteScaling = TGAddons.CreateSetting(SettingsInstance.SettingsType.Options, "Toggle infinite projectile scaling", "Enables/disables Mathematician/Philosopher projectiles infinitely scaling unit parts.", "BUG", 0f, HULauncher.configInfiniteScalingEnabled.Value ? 0 : 1, new[] { "Disabled", "Enabled" });
+			var infiniteScaling = TGAddons.CreateSetting(SettingsInstance.SettingsType.Options, "Toggle infinite projectile scaling", "Enables/disables Mathematician/Philosopher projectiles infinitely scaling unit parts.", "BUG", 0f, ConfigInfiniteScalingEnabled.Value ? 0 : 1, new[] { "Disabled", "Enabled" });
 			infiniteScaling.OnValueChanged += delegate(int value)
 			{
-				configInfiniteScalingEnabled.Value = value == 0;
+				ConfigInfiniteScalingEnabled.Value = value == 1;
 			};
 		}
 
@@ -37,7 +38,7 @@ namespace HiddenUnits {
                 if (!ServiceLocator.GetService<ISaveLoaderService>().HasUnlockedSecret("SECRET_EGYPT")) {
 
                     ServiceLocator.GetService<ISaveLoaderService>().UnlockSecret("SECRET_EGYPT");
-                    ServiceLocator.GetService<ModalPanel>().OpenUnlockPanel("You unlocked the Egypt faction, maps, and campaign!", HUMain.hiddenUnits.LoadAsset<Sprite>("egypt"));
+                    ServiceLocator.GetService<ModalPanel>().OpenUnlockPanel("You unlocked the Egypt faction!", HUMain.hiddenUnits.LoadAsset<Sprite>("egypt"));
                 }
             }
             else if (scene.name.Contains("SG_"))
@@ -293,8 +294,9 @@ namespace HiddenUnits {
             }
         }
 
-        public override void Localize(LocalizationHolder holder) => holder.languages.AddRange(HUMain.hiddenUnits.LoadAsset<GameObject>("Lang").GetComponent<LocalizationHolder>().languages);
+        public override void Localize(LocalizationHolder holder) => holder.languages.AddRange(HUMain.hiddenUnits
+            .LoadAsset<GameObject>("Lang").GetComponent<LocalizationHolder>().languages);
 		
-		public static ConfigEntry<bool> configInfiniteScalingEnabled;
+		public static ConfigEntry<bool> ConfigInfiniteScalingEnabled;
 	}
 }

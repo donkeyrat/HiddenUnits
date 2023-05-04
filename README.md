@@ -1,3 +1,4 @@
+﻿
 # Hidden Units
 
 __FIFTY TWO__ different unique units are added by this mod, a majority of which can be found in the Secret faction. *HOWEVER*, all units added to the Secret faction must be unlocked, just like ordinary secret units!
@@ -28,8 +29,8 @@ To unlock the secret units, you'll have to find them first.
 | **Sand Mage** | Their pyramid staffs summon sandy tornadoes, lifting units up into the air and dropping them back down. |
 | **Architect** | Using their bronze trowels, they raise sandstone brick walls in an instant between themselves and enemies, causing enemies to attack the walls until they fall over, crushing any in the wall's vicinity. |
 | **Beastmaster** | Tamers of the great crocodiles of the nile river, they wear crocodile armor as proof of their glory. When in close combat, they leap off their crocodiles, throwing their khopeshes and stabbing with them to fight, while the croc performs death rolls. |
-| **Scribe** | Possessing forbidden magic, the scribes summon dark plagues from ages long past to eat away units, in the form of a vicious swarm of hungry locusts. They eat away at units, until they dissipate. |
-| **Sun Chariot** | Piloted by two venom archers and two boomerang throwers, as well as driven by two camels (historically accurate I'm sure), the chariots of the sun are a force to be reckoned with. |
+| **Scribe** | Possessing forbidden magic, the scribes summon dark plagues from ages long past to devour units, in the form of a vicious swarm of hungry locusts. They eat away at units, until they dissipate. |
+| **Merchant** | Piloted by two venom archers and two boomerang throwers, as well as driven by two camels (historically accurate I'm sure), these merchants aren't here to trade. |
 | ***NILE QUEEN*** | Wielding the phoenix magic of Ra in the form of two time-defying hieroglyphs and shooting orbs of pure fire, the queen of the nile defends her people even at the cost of her lifeforce. She can summon pyramids from the ground, and push back nearby enemies with a forcefield. |
 
 ## Secret Units
@@ -196,6 +197,30 @@ The mod's [**Github**](https://github.com/donkeyrat/HiddenUnits) is now the only
  - Fixed outdated zombification code.
  - Fixed numerous other outdated code.
 
+## 1.2.0
+
+ - Added TGCore as a dependency.
+ - Rebalanced (nearly) every unit (let us know if anything seems unbalanced still).
+ - Reworked Sand Mage (new tornado behavior and sound/visual effects).
+ - Reworked Scribe (locusts have new visuals and behavior, unit has new outfit).
+ - Reworked Sun Chariot (complete mechanical and visual revamp, renamed to Merchant).
+ - Reworked Witch Doctor (complete mechanical revamp).
+ - Reworked Reaver (many mechanical tweaks, wolves more stable).
+ - Reworked Mummy (new weapons and visuals).
+ - Reworked Selket (proper scorpion walking and mechanical changes).
+ - Reworked Warrior of Ra (unit has been mechanically redesigned).
+ - Reworked Ares (complete mechanical revamp).
+ - Reworked Seraphim (it is now killable).
+ - Gave Apollo a new cape.
+ - Gave Centaur a new belt and scabbards.
+ - Gave numerous powerful units custom outline colors (available in the Unit Creator).
+ - Gave nearly every unit new sound effects.
+ - Gave the Helicopter team coloring.
+ - Tweaked many other units.
+ - Chinese translation has been redone by StarFan.
+ - Fixed a bug where the Spider Mage's webs would despawn incorrectly.
+ - Fixed numerous other bugs.
+
 ## Credits
 
 This mod was created by Team Grad, an ambitious mod team that aims to improve the game through adding a plethora of new content to Totally Accurate Battle Simulator!
@@ -208,11 +233,13 @@ This mod was created by Team Grad, an ambitious mod team that aims to improve th
 
 **Hambody - Icon Artist/Concept Artist**
 
+**Voup - Composer**
+
 **Grakalor - Quality Checker**
 
 **Doorknob - Icon Artist/Concept Artist**
 
-**Voup - Composer**
+**StarFan - Translator**
 
 ## Music
 
@@ -221,6 +248,8 @@ The new music for the mod was composed by *Voup*, a talented musician. You can v
 [**Egypt Placement**](https://www.youtube.com/watch?v=sq79L46WuAw)
 
 [**Egypt Battle**](https://www.youtube.com/watch?v=iYm2xraBMj4)
+
+## Gallery
 
 ![enter image description here](https://cdn.discordapp.com/attachments/651812532746584085/999419368905658378/unknown.png)
 
@@ -238,7 +267,7 @@ The new music for the mod was composed by *Voup*, a talented musician. You can v
 
 ![enter image description here](https://cdn.discordapp.com/attachments/651812532746584085/999411819619811459/unknown.png)
 
-![enter image description here](https://cdn.discordapp.com/attachments/651812532746584085/999412288186482779/unknown.png)
+![enter image description here](https://cdn.discordapp.com/attachments/651812532746584085/1103678863566962811/image.png)
 
 ![enter image description here](https://cdn.discordapp.com/attachments/651812532746584085/999419133315784714/unknown.png)
 
@@ -278,7 +307,7 @@ The new music for the mod was composed by *Voup*, a talented musician. You can v
 
 ![enter image description here](https://cdn.discordapp.com/attachments/734897446567542845/999425688488652831/unknown.png)
 
-![enter image description here](https://cdn.discordapp.com/attachments/651812532746584085/1043802124871544832/image.png)
+![enter image description here](https://cdn.discordapp.com/attachments/651812532746584085/1103685530056671313/image.png)
 
 ![enter image description here](https://cdn.discordapp.com/attachments/651812532746584085/999415309440127076/unknown.png)
 
@@ -300,13 +329,13 @@ The new music for the mod was composed by *Voup*, a talented musician. You can v
 
 ![enter image description here](https://cdn.discordapp.com/attachments/651812532746584085/1043802998066913332/image.png)
 
-![enter image description here](https://cdn.discordapp.com/attachments/651812532746584085/999421870505988106/unknown.png)
+![enter image description here](https://cdn.discordapp.com/attachments/651812532746584085/1103686582621454336/image.png)
 
 ![enter image description here](https://cdn.discordapp.com/attachments/651812532746584085/1043802490082172938/image.png)
 
 ![enter image description here](https://cdn.discordapp.com/attachments/651812532746584085/1043799033833066536/image.png)
 
-![enter image description here](https://cdn.discordapp.com/attachments/651812532746584085/999422472006934559/unknown.png)
+![enter image description here](https://cdn.discordapp.com/attachments/651812532746584085/1103685924082167858/image.png)
 
 ![enter image description here](https://cdn.discordapp.com/attachments/651812532746584085/999422953370431658/unknown.png)
 
@@ -314,10 +343,11 @@ The new music for the mod was composed by *Voup*, a talented musician. You can v
 
 ![enter image description here](https://cdn.discordapp.com/attachments/651812532746584085/999423863442116769/unknown.png)
 
-![enter image description here](https://cdn.discordapp.com/attachments/651812532746584085/999424366418874419/unknown.png)
+![enter image description here](https://cdn.discordapp.com/attachments/651812532746584085/1103686274705006683/image.png)
 
 ![enter image description here](https://cdn.discordapp.com/attachments/651812532746584085/999424830472466584/unknown.png)
 
 ![enter image description here](https://cdn.discordapp.com/attachments/651812532746584085/1043799676488536134/image.png)
 
 ![enter image description here](https://cdn.discordapp.com/attachments/734897446567542845/999425482191814756/unknown.png)
+

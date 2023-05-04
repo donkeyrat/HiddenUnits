@@ -22,8 +22,8 @@ namespace HiddenUnits
             StartCoroutine(DoScaling(hit));
             return true;
         }
-        
-        public IEnumerator DoScaling(HitData hit)
+
+        private IEnumerator DoScaling(HitData hit)
         {
             hit.transform.gameObject.AddComponent<Scaling>();
 
