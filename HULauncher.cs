@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 
 namespace HiddenUnits 
 {
-    [BepInPlugin("teamgrad.hiddenunits", "Hidden Units", "1.2.1")]
+    [BepInPlugin("teamgrad.hiddenunits", "Hidden Units", "1.2.2")]
     [BepInDependency("teamgrad.core")]
 	public class HULauncher : TGMod
 	{

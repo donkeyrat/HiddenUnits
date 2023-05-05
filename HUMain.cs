@@ -171,7 +171,7 @@ namespace HiddenUnits
                         .Sum(rend => rend.mesh.subMeshCount) + weapon.GetComponentsInChildren<SkinnedMeshRenderer>()
                         .Where(rend => rend && rend.gameObject.activeSelf && rend.sharedMesh.subMeshCount > 0 && rend.enabled)
                         .Sum(rend => rend.sharedMesh.subMeshCount);
-                if (totalSubmeshes > 0) 
+                if (totalSubmeshes > 0)
                 {
                     var average = 1f / totalSubmeshes;
                     var averageList = new List<float>();
