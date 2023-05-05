@@ -137,12 +137,21 @@ namespace HiddenUnits
                 lvl.AllowedUnits = allowedU.ToArray();
             }
 
-            foreach (var prop in hiddenUnits.LoadAllAssets<PropItem>())
+            foreach (var prop in hiddenUnits.LoadAllAssets<GameObject>().Where(x => x.GetComponent<PropItem>()).Select(x => x.GetComponent<PropItem>()))
             {
-                var totalSubmeshes = prop.GetComponentsInChildren<MeshFilter>().Where(rend => rend.gameObject.activeSelf && rend.gameObject.activeInHierarchy && rend.mesh.subMeshCount > 0 && rend.GetComponent<MeshRenderer>() && rend.GetComponent<MeshRenderer>().enabled).Sum(rend => rend.mesh.subMeshCount) + prop.GetComponentsInChildren<SkinnedMeshRenderer>().Where(rend => rend.gameObject.activeSelf && rend.sharedMesh.subMeshCount > 0 && rend.enabled).Sum(rend => rend.sharedMesh.subMeshCount);
+                if (!prop) continue;
+                
+                var totalSubmeshes =
+                    prop.GetComponentsInChildren<MeshFilter>().Where(rend =>
+                            rend && rend.gameObject.activeSelf && rend.gameObject.activeInHierarchy &&
+                            rend.mesh.subMeshCount > 0 &&
+                            rend.GetComponent<MeshRenderer>() && rend.GetComponent<MeshRenderer>().enabled)
+                        .Sum(rend => rend.mesh.subMeshCount) + prop.GetComponentsInChildren<SkinnedMeshRenderer>()
+                        .Where(rend => rend && rend.gameObject.activeSelf && rend.sharedMesh.subMeshCount > 0 && rend.enabled)
+                        .Sum(rend => rend.sharedMesh.subMeshCount);
                 if (totalSubmeshes > 0) 
                 {
-                    float average = 1f / totalSubmeshes;
+                    var average = 1f / totalSubmeshes;
                     var averageList = new List<float>();
                     for (var i = 0; i < totalSubmeshes - 1; i++) averageList.Add(average);
                     
@@ -150,12 +159,21 @@ namespace HiddenUnits
                 }
             }
             
-            foreach (var weapon in hiddenUnits.LoadAllAssets<WeaponItem>())
+            foreach (var weapon in hiddenUnits.LoadAllAssets<GameObject>().Where(x => x.GetComponent<WeaponItem>()).Select(x => x.GetComponent<WeaponItem>()))
             {
-                var totalSubmeshes = weapon.GetComponentsInChildren<MeshFilter>().Where(rend => rend.gameObject.activeSelf && rend.gameObject.activeInHierarchy && rend.mesh.subMeshCount > 0 && rend.GetComponent<MeshRenderer>() && rend.GetComponent<MeshRenderer>().enabled).Sum(rend => rend.mesh.subMeshCount) + weapon.GetComponentsInChildren<SkinnedMeshRenderer>().Where(rend => rend.gameObject.activeSelf && rend.sharedMesh.subMeshCount > 0 && rend.enabled).Sum(rend => rend.sharedMesh.subMeshCount);
+                if (!weapon) continue;
+                
+                var totalSubmeshes =
+                    weapon.GetComponentsInChildren<MeshFilter>().Where(rend =>
+                            rend && rend.gameObject.activeSelf && rend.gameObject.activeInHierarchy &&
+                            rend.mesh.subMeshCount > 0 &&
+                            rend.GetComponent<MeshRenderer>() && rend.GetComponent<MeshRenderer>().enabled)
+                        .Sum(rend => rend.mesh.subMeshCount) + weapon.GetComponentsInChildren<SkinnedMeshRenderer>()
+                        .Where(rend => rend && rend.gameObject.activeSelf && rend.sharedMesh.subMeshCount > 0 && rend.enabled)
+                        .Sum(rend => rend.sharedMesh.subMeshCount);
                 if (totalSubmeshes > 0) 
                 {
-                    float average = 1f / totalSubmeshes;
+                    var average = 1f / totalSubmeshes;
                     var averageList = new List<float>();
                     for (var i = 0; i < totalSubmeshes - 1; i++) averageList.Add(average);
                     
