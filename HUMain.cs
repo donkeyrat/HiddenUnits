@@ -51,16 +51,12 @@ namespace HiddenUnits
             typeof(LandfallContentDatabase).GetField("m_mapAssetIndexLookup", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(TGMain.landfallDb, newMapDict);
 
             new Harmony("HiddenUnis").PatchAll();
-            
-            Debug.Log("Bye?");
 
             var allConditions = new List<SecretUnlockCondition>(Resources.FindObjectsOfTypeAll<SecretUnlockConditions>()[0].m_unlockConditions);
             allConditions.AddRange(hiddenUnits.LoadAsset<SecretUnlockConditions>("HUUnlockConditions").m_unlockConditions);
             Resources.FindObjectsOfTypeAll<SecretUnlockConditions>()[0].m_unlockConditions = allConditions.ToArray();
 
             foreach (var mat in hiddenUnits.LoadAllAssets<Material>()) if (Shader.Find(mat.shader.name)) mat.shader = Shader.Find(mat.shader.name);
-
-            Debug.Log("Hi?");
             
             foreach (var unit in hiddenUnits.LoadAllAssets<UnitBlueprint>().Where(x => x.UnitBase != null))
             {
@@ -76,8 +72,6 @@ namespace HiddenUnits
                 }
             }
             
-            Debug.Log("Die?");
-
             foreach (var fac in hiddenUnits.LoadAllAssets<Faction>())
             {
                 var veryNewUnits = fac.Units.Where(x => x).OrderBy(x => x.GetUnitCost()).ToArray();
@@ -93,8 +87,6 @@ namespace HiddenUnits
                     }
                 }
             }
-            
-            Debug.Log("Zeep Zorp?");
             
             foreach (var lvl in hiddenUnits.LoadAllAssets<TABSCampaignLevelAsset>())
             {
@@ -144,8 +136,6 @@ namespace HiddenUnits
                 lvl.AllowedFactions = allowed.ToArray();
                 lvl.AllowedUnits = allowedU.ToArray();
             }
-            
-            Debug.Log("Sneep Snorp?");
 
             foreach (var prop in hiddenUnits.LoadAllAssets<PropItem>())
             {
@@ -159,8 +149,6 @@ namespace HiddenUnits
                     prop.SubmeshArea = averageList.ToArray();
                 }
             }
-            
-            Debug.Log("ABABABA?");
             
             foreach (var weapon in hiddenUnits.LoadAllAssets<WeaponItem>())
             {
@@ -183,9 +171,9 @@ namespace HiddenUnits
             TGAddons.AddItems(hiddenUnits.LoadAllAssets<UnitBlueprint>(), hiddenUnits.LoadAllAssets<Faction>(),
                 hiddenUnits.LoadAllAssets<TABSCampaignAsset>(), hiddenUnits.LoadAllAssets<TABSCampaignLevelAsset>(),
                 hiddenUnits.LoadAllAssets<VoiceBundle>(), hiddenUnits.LoadAllAssets<FactionIcon>(),
-                hiddenUnits.LoadAllAssets<Unit>(), hiddenUnits.LoadAllAssets<PropItem>(),
-                hiddenUnits.LoadAllAssets<SpecialAbility>(), hiddenUnits.LoadAllAssets<WeaponItem>(),
-                hiddenUnits.LoadAllAssets<ProjectileEntity>());
+                hiddenUnits.LoadAllAssets<GameObject>().Select(x => x.GetComponent<Unit>()), hiddenUnits.LoadAllAssets<GameObject>().Select(x => x.GetComponent<PropItem>()),
+                hiddenUnits.LoadAllAssets<GameObject>().Select(x => x.GetComponent<SpecialAbility>()), hiddenUnits.LoadAllAssets<GameObject>().Select(x => x.GetComponent<WeaponItem>()),
+                hiddenUnits.LoadAllAssets<GameObject>().Select(x => x.GetComponent<ProjectileEntity>()));
             TGMain.newSounds.AddRange(hiddenUnits.LoadAllAssets<SoundBank>());
         }
 

@@ -221,6 +221,19 @@ The mod's [**Github**](https://github.com/donkeyrat/HiddenUnits) is now the only
  - Fixed a bug where the Spider Mage's webs would despawn incorrectly.
  - Fixed numerous other bugs.
 
+### 1.2.1
+
+ - Improved the Centaur's swap animation.
+ - Reworked the Mathematician and Philosopher (they now have a scale limit, theres a Bug DLC setting to remove the limit).
+ - Rebalanced the Merchant.
+ - Fixed a bug where the Pot Thrower's Cobras were sometimes pink.
+ - Fixed a bug where The Emperor and Thor were naked when UFoxLib was installed.
+ - Fixed a bug where boomerangs didn't deal damage.
+ - Fixed a bug where no items appeared in the Unit Creator.
+ - Fixed a bug where the Merchant's riders were too big.
+ - Fixed a bug where the Merchant cart had 60,000 health.
+ - Fixed a bug where the Venom Archer had terrible aim.
+
 ## Credits
 
 This mod was created by Team Grad, an ambitious mod team that aims to improve the game through adding a plethora of new content to Totally Accurate Battle Simulator!
