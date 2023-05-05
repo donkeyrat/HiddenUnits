@@ -234,6 +234,10 @@ The mod's [**Github**](https://github.com/donkeyrat/HiddenUnits) is now the only
  - Fixed a bug where the Merchant cart had 60,000 health.
  - Fixed a bug where the Venom Archer had terrible aim.
 
+### 1.2.2
+
+ - Fixed a bug where the Warlord was naked when UFoxLib was installed.
+
 ## Credits
 
 This mod was created by Team Grad, an ambitious mod team that aims to improve the game through adding a plethora of new content to Totally Accurate Battle Simulator!
