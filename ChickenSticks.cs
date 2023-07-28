@@ -11,27 +11,27 @@ namespace HiddenUnits
     {
         public void Start()
         {
-            rig = GetComponent<Rigidbody>();
+            Rig = GetComponent<Rigidbody>();
             offset = GetComponentInParent<Holdable>().hl ? new Vector3(-offset.x, offset.y, offset.z) : offset;
         }
         
         public void Update()
         {
-            damageCounter += Time.deltaTime;
+            DamageCounter += Time.deltaTime;
             if (currentState == ClubState.Idle && hoverTarget)
             {
-                rig.AddForce((hoverTarget.TransformPoint(offset) - base.transform.position) * idleForce, ForceMode.Acceleration);
-                rig.velocity *= idleDrag;
-                rig.angularVelocity *= idleDrag;
-                rig.AddTorque(Vector3.Cross(base.transform.forward, hoverTarget.forward).normalized * Vector3.Angle(base.transform.forward, hoverTarget.forward) * idleAngularForce, ForceMode.Acceleration);
-                rig.AddTorque(Vector3.Cross(base.transform.up, Vector3.up).normalized * Vector3.Angle(base.transform.up, Vector3.up) * idleAngularForce * 0.2f, ForceMode.Acceleration);
+                Rig.AddForce((hoverTarget.TransformPoint(offset) - transform.position) * idleForce, ForceMode.Acceleration);
+                Rig.velocity *= idleDrag;
+                Rig.angularVelocity *= idleDrag;
+                Rig.AddTorque(Vector3.Cross(transform.forward, hoverTarget.forward).normalized * Vector3.Angle(transform.forward, hoverTarget.forward) * idleAngularForce, ForceMode.Acceleration);
+                Rig.AddTorque(Vector3.Cross(transform.up, Vector3.up).normalized * Vector3.Angle(transform.up, Vector3.up) * idleAngularForce * 0.2f, ForceMode.Acceleration);
             }
             else if (currentState == ClubState.Roaming)
             {
-                if (roamingTarget)
+                if (RoamingTarget)
                 {
-                    rig.AddForce((roamingTarget.data.mainRig.position - transform.position).normalized * roamingForce * rig.mass * Time.deltaTime);
-                    rig.AddTorque((roamingTarget.data.mainRig.position - transform.position).normalized * roamingTorque * rig.mass * Time.deltaTime);
+                    Rig.AddForce((RoamingTarget.data.mainRig.position - transform.position).normalized * roamingForce * Rig.mass * Time.deltaTime);
+                    Rig.AddTorque((RoamingTarget.data.mainRig.position - transform.position).normalized * roamingTorque * Rig.mass * Time.deltaTime);
                 }
                 else SetTarget(targetingRadius);
             }
@@ -40,11 +40,11 @@ namespace HiddenUnits
         public void SetState(ClubState state)
         {
             currentState = state;
-            hitList.Clear();
-            if (state == ClubState.Idle) rig.drag = idleDragAmount;
-            if (state == ClubState.Swinging) rig.drag = swingingDragAmount;
-            if (state == ClubState.Roaming) rig.drag = roamingDragAmount;
-            if (state == ClubState.Disabled) rig.drag = 0f;
+            HitList.Clear();
+            if (state == ClubState.Idle) Rig.drag = idleDragAmount;
+            if (state == ClubState.Swinging) Rig.drag = swingingDragAmount;
+            if (state == ClubState.Roaming) Rig.drag = roamingDragAmount;
+            if (state == ClubState.Disabled) Rig.drag = 0f;
         }
 
         public void SetStateDisabled()
@@ -62,7 +62,7 @@ namespace HiddenUnits
             yield return new WaitUntil(() => currentState == ClubState.Idle);
             
             SetState(ClubState.Swinging);;
-            canDealDamage = true;
+            CanDealDamage = true;
             
             yield return new WaitForSeconds(returnDelay);
             
@@ -71,7 +71,7 @@ namespace HiddenUnits
             if (!dealDamageOutsideOfSwing)
             {
                 yield return new WaitForSeconds(disableDamageDelay);
-                canDealDamage = false;
+                CanDealDamage = false;
             }
         }
 
@@ -97,11 +97,11 @@ namespace HiddenUnits
         public void OnCollisionEnter(Collision col) 
         {
             var enemyUnit = col.transform.root.GetComponent<Unit>();
-            if (damageCounter < damageCooldown || !enemyUnit || !col.rigidbody || (enemyUnit && hitList.Contains(enemyUnit)) || (enemyUnit && enemyUnit.Team == transform.root.GetComponent<Unit>().Team) || !canDealDamage)
+            if (DamageCounter < damageCooldown || !enemyUnit || !col.rigidbody || (enemyUnit && HitList.Contains(enemyUnit)) || (enemyUnit && enemyUnit.Team == transform.root.GetComponent<Unit>().Team) || !CanDealDamage)
             {
                 return;
             }
-            damageCounter = 0f;
+            DamageCounter = 0f;
 
             var flag = col.transform.IsChildOf(enemyUnit.data.transform);
             
@@ -115,7 +115,7 @@ namespace HiddenUnits
             foreach (var effect in GetComponents<CollisionWeaponEffect>()) effect.DoEffect(col.transform, col);
             if (GetComponent<CollisionSound>()) GetComponent<CollisionSound>().DoEffect(col.transform, col, goldenNumber);
 
-            hitList.Add(enemyUnit);
+            HitList.Add(enemyUnit);
             if (currentState == ClubState.Roaming) SetTarget(targetingRadius);
         }
         
@@ -124,15 +124,15 @@ namespace HiddenUnits
             var hits = Physics.SphereCastAll(transform.position, range, Vector3.up, 0.1f, LayerMask.GetMask(new string[] { "MainRig" }));
             var foundUnits = hits
                 .Select(hit => hit.transform.root.GetComponent<Unit>())
-                .Where(x => x && !x.data.Dead && x.Team != transform.root.GetComponent<Unit>().Team && !hitList.Contains(x))
+                .Where(x => x && !x.data.Dead && x.Team != transform.root.GetComponent<Unit>().Team && !HitList.Contains(x))
                 .OrderBy(x => (x.data.mainRig.transform.position - transform.position).magnitude)
                 .Distinct()
                 .ToArray();
 
-            if (foundUnits.Length > 0) roamingTarget = foundUnits[Random.Range(0, foundUnits.Length - 1)];
+            if (foundUnits.Length > 0) RoamingTarget = foundUnits[Random.Range(0, foundUnits.Length - 1)];
         }
         
-        private Rigidbody rig;
+        private Rigidbody Rig;
         
         public enum ClubState
         {
@@ -168,8 +168,8 @@ namespace HiddenUnits
         public float roamingTorque;
         public float roamingDragAmount; 
         
-        private Unit roamingTarget;
-        private List<Unit> hitList = new List<Unit>();
+        private Unit RoamingTarget;
+        private List<Unit> HitList = new List<Unit>();
 
         [Header("Damage")] 
         
@@ -182,7 +182,7 @@ namespace HiddenUnits
         public float disableDamageDelay = 0.3f;
         public bool dealDamageOutsideOfSwing;
 
-        private float damageCounter;
-        private bool canDealDamage = true;
+        private float DamageCounter;
+        private bool CanDealDamage = true;
     }
 }

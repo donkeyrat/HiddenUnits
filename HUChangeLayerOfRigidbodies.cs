@@ -7,74 +7,74 @@ namespace HiddenUnits
     {
         public bool includeWeapons = true;
 
-        private RigidbodyHolder rigHolder;
+        private RigidbodyHolder RigHolder;
 
-        private List<Rigidbody> rigs;
+        private List<Rigidbody> Rigs;
 
-        private List<int> layers;
+        private List<int> Layers;
 
-        private List<int> colliderLayers;
+        private List<int> ColliderLayers;
 
-        private Collider[] colliders;
+        private Collider[] Colliders;
 
-        private WeaponHandler weaponHandler;
+        private WeaponHandler WeaponHandler;
 
         private void Start()
         {
-            rigHolder = base.transform.root.GetComponentInChildren<RigidbodyHolder>();
-            rigs = new List<Rigidbody>();
-            layers = new List<int>();
-            colliderLayers = new List<int>();
-            rigs.AddRange(rigHolder.AllRigs);
-            colliders = base.transform.root.GetComponentInChildren<DataHandler>().transform.GetComponentsInChildren<Collider>();
-            weaponHandler = base.transform.root.GetComponentInChildren<WeaponHandler>();
-            if (weaponHandler && includeWeapons)
+            RigHolder = transform.root.GetComponentInChildren<RigidbodyHolder>();
+            Rigs = new List<Rigidbody>();
+            Layers = new List<int>();
+            ColliderLayers = new List<int>();
+            Rigs.AddRange(RigHolder.AllRigs);
+            Colliders = transform.root.GetComponentInChildren<DataHandler>().transform.GetComponentsInChildren<Collider>();
+            WeaponHandler = transform.root.GetComponentInChildren<WeaponHandler>();
+            if (WeaponHandler && includeWeapons)
             {
-                if ((bool)weaponHandler.rightWeapon)
+                if ((bool)WeaponHandler.rightWeapon)
                 {
-                    rigs.Add(weaponHandler.rightWeapon.rigidbody);
+                    Rigs.Add(WeaponHandler.rightWeapon.rigidbody);
                 }
-                if ((bool)weaponHandler.leftWeapon)
+                if ((bool)WeaponHandler.leftWeapon)
                 {
-                    rigs.Add(weaponHandler.leftWeapon.rigidbody);
+                    Rigs.Add(WeaponHandler.leftWeapon.rigidbody);
                 }
             }
         }
 
         public void ChangeLayer()
         {
-            for (int i = 0; i < rigs.Count; i++)
+            for (int i = 0; i < Rigs.Count; i++)
             {
-                if ((bool)rigs[i])
+                if ((bool)Rigs[i])
                 {
-                    layers.Add(rigs[i].gameObject.layer);
-                    rigs[i].gameObject.layer = 20;
+                    Layers.Add(Rigs[i].gameObject.layer);
+                    Rigs[i].gameObject.layer = 20;
                 }
             }
-            for (int j = 0; j < colliders.Length; j++)
+            for (int j = 0; j < Colliders.Length; j++)
             {
-                if ((bool)colliders[j])
+                if ((bool)Colliders[j])
                 {
-                    colliderLayers.Add(colliders[j].gameObject.layer);
-                    colliders[j].gameObject.layer = 20;
+                    ColliderLayers.Add(Colliders[j].gameObject.layer);
+                    Colliders[j].gameObject.layer = 20;
                 }
             }
         }
 
         public void ResetLayer()
         {
-            for (int i = 0; i < rigs.Count; i++)
+            for (int i = 0; i < Rigs.Count; i++)
             {
-                if ((bool)rigs[i])
+                if ((bool)Rigs[i])
                 {
-                    rigs[i].gameObject.layer = layers[i];
+                    Rigs[i].gameObject.layer = Layers[i];
                 }
             }
-            for (int j = 0; j < colliders.Length; j++)
+            for (int j = 0; j < Colliders.Length; j++)
             {
-                if ((bool)colliders[j])
+                if ((bool)Colliders[j])
                 {
-                    colliders[j].gameObject.layer = colliderLayers[j];
+                    Colliders[j].gameObject.layer = ColliderLayers[j];
                 }
             }
         }

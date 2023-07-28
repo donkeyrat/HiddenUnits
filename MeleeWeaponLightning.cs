@@ -10,18 +10,18 @@ namespace HiddenUnits
     {
         private void Start()
         {
-            ownUnit = GetComponent<Weapon>().connectedData.unit;
+            OwnUnit = GetComponent<Weapon>().connectedData.unit;
         }
         
         public override void DoEffect(Transform hitTransform, Collision collision)
         {
-            if (!hitTransform.root.GetComponent<Unit>() || hitTransform.root.GetComponent<Unit>().Team == ownUnit.Team || hitTransform.root.GetComponent<Unit>().data.Dead)
+            if (!hitTransform.root.GetComponent<Unit>() || hitTransform.root.GetComponent<Unit>().Team == OwnUnit.Team || hitTransform.root.GetComponent<Unit>().data.Dead)
             {
                 return;
             }
-            oldTarget = hitTransform.root.GetComponent<Unit>();
-            hitList.Add(oldTarget);
-            oldTarget.data.healthHandler.TakeDamage(damage, Vector3.zero);
+            OldTarget = hitTransform.root.GetComponent<Unit>();
+            HitList.Add(OldTarget);
+            OldTarget.data.healthHandler.TakeDamage(damage, Vector3.zero);
             
             SetTarget(transform.position);
             StartCoroutine(DoLightning());
@@ -33,47 +33,47 @@ namespace HiddenUnits
             {
                 for (int j = 0; j < consecutiveChains; j++)
                 {
-                    if (target && target.data && target.data.healthHandler && lineObject && oldTarget)
+                    if (Target && Target.data && Target.data.healthHandler && lineObject && OldTarget)
                     {
-                        var line = Instantiate(lineObject, oldTarget.transform, true);
-                        line.transform.FindChildRecursive("T1").position = oldTarget.data.mainRig.position;
-                        line.transform.FindChildRecursive("T2").position = target.data.mainRig.position;
+                        var line = Instantiate(lineObject, OldTarget.transform, true);
+                        line.transform.FindChildRecursive("T1").position = OldTarget.data.mainRig.position;
+                        line.transform.FindChildRecursive("T2").position = Target.data.mainRig.position;
                         
-                        target.data.healthHandler.TakeDamage(damage, Vector3.zero);
+                        Target.data.healthHandler.TakeDamage(damage, Vector3.zero);
                         
-                        hitList.Add(target);
-                        oldTarget = target;
+                        HitList.Add(Target);
+                        OldTarget = Target;
                     }
                     
-                    if (oldTarget) SetTarget(oldTarget.data.mainRig.position);
+                    if (OldTarget) SetTarget(OldTarget.data.mainRig.position);
                 }
 
                 yield return new WaitForSeconds(0.1f);
             }
             
-            hitList.Clear();
+            HitList.Clear();
         }
         
         public void SetTarget(Vector3 source)
         {
-            target = null;
+            Target = null;
             var hits = Physics.SphereCastAll(transform.position, maxTargetRange, Vector3.up, 0.1f, LayerMask.GetMask(new string[] { "MainRig" }));
             var foundUnits = hits
                 .Select(hit => hit.transform.root.GetComponent<Unit>())
-                .Where(x => x && !x.data.Dead && x.Team != ownUnit.Team && !hitList.Contains(x))
+                .Where(x => x && !x.data.Dead && x.Team != OwnUnit.Team && !HitList.Contains(x))
                 .OrderBy(x => (x.data.mainRig.transform.position - source).magnitude)
                 .Distinct()
                 .ToArray();
-            if (foundUnits.Length > 0) target = foundUnits[0];
+            if (foundUnits.Length > 0) Target = foundUnits[0];
         }
 
-        private Unit target;
+        private Unit Target;
 
-        private Unit oldTarget;
+        private Unit OldTarget;
 
-        private Unit ownUnit;
+        private Unit OwnUnit;
 
-        private List<Unit> hitList = new List<Unit>();
+        private List<Unit> HitList = new List<Unit>();
 
         public float maxTargetRange = 6f;
 

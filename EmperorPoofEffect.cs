@@ -29,57 +29,57 @@ namespace HiddenUnits
 	
 		public bool useRandom = true;
 	
-		public bool Meshparticle = true;
+		public bool meshparticle = true;
 	
 		[Tooltip("Enable for units that have erratic movement after teleporting in a ProjectMars game.")]
 		public bool setUnitMainRigKinematic;
 	
 		public UnityEvent poofEvent;
 	
-		private TeamSystem m_teamSystem;
+		private TeamSystem MTeamSystem;
 	
-		private Unit unit;
+		private Unit Unit;
 	
-		private ParticleSystem.ShapeModule emiss;
+		private ParticleSystem.ShapeModule Emiss;
 	
-		private ParticleSystem part;
+		private ParticleSystem Part;
 	
-		private List<PhysicsFollowBodyPart> followers;
+		private List<PhysicsFollowBodyPart> Followers;
 	
-		private float currentDistance;
+		private float CurrentDistance;
 	
-		private CanDoUnitEvents canDo;
+		private CanDoUnitEvents CanDo;
 	
-		private bool done;
+		private bool Done;
 	
-		private float counter;
+		private float Counter;
 	
 		private void Start()
 		{
-			unit = GetComponentInParent<Unit>();
-			m_teamSystem = World.Active.GetOrCreateManager<TeamSystem>();
-			canDo = GetComponent<CanDoUnitEvents>();
-			counter = Random.Range(0f, 0.5f);
-			if (Meshparticle)
+			Unit = GetComponentInParent<Unit>();
+			MTeamSystem = World.Active.GetOrCreateManager<TeamSystem>();
+			CanDo = GetComponent<CanDoUnitEvents>();
+			Counter = Random.Range(0f, 0.5f);
+			if (meshparticle)
 			{
-				part = GetComponentInChildren<ParticleSystem>();
-				emiss = part.shape;
-				emiss.skinnedMeshRenderer = base.transform.root.GetComponentInChildren<SkinnedMeshRenderer>();
+				Part = GetComponentInChildren<ParticleSystem>();
+				Emiss = Part.shape;
+				Emiss.skinnedMeshRenderer = transform.root.GetComponentInChildren<SkinnedMeshRenderer>();
 			}
 			if (setUnitMainRigKinematic && BoltNetwork.IsClient)
 			{
-				unit.data.mainRig.isKinematic = true;
+				Unit.data.mainRig.isKinematic = true;
 			}
 		}
 	
 		private void Update()
 		{
-			if (automatic && canDo.canDoStuff && !done)
+			if (automatic && CanDo.canDoStuff && !Done)
 			{
-				counter += Time.deltaTime;
-				if (counter > 1f)
+				Counter += Time.deltaTime;
+				if (Counter > 1f)
 				{
-					done = true;
+					Done = true;
 					StartCoroutine(DoPoof());
 				}
 			}
@@ -87,44 +87,44 @@ namespace HiddenUnits
 	
 		private IEnumerator DoPoof()
 		{
-			if ((bool)part)
+			if ((bool)Part)
 			{
-				part.Emit(25);
+				Part.Emit(25);
 			}
 			yield return new WaitForSeconds(moveDelay);
-			List<Unit> list = ((this.unit.Team == Team.Blue) ? m_teamSystem.GetTeamUnits(Team.Red) : m_teamSystem.GetTeamUnits(Team.Blue));
+			List<Unit> list = ((Unit.Team == Team.Blue) ? MTeamSystem.GetTeamUnits(Team.Red) : MTeamSystem.GetTeamUnits(Team.Blue));
 			Unit unit = null;
 			for (int i = 0; i < list.Count; i++)
 			{
-				float num = Vector3.Distance(base.transform.position, list[i].data.mainRig.position);
+				float num = Vector3.Distance(transform.position, list[i].data.mainRig.position);
 				if ((bool)unit)
 				{
 					if (!(Random.value > 0.2f) || !useRandom)
 					{
-						if (unitTarget == UnitTarget.Furthest && num > currentDistance)
+						if (unitTarget == UnitTarget.Furthest && num > CurrentDistance)
 						{
-							currentDistance = num;
+							CurrentDistance = num;
 							unit = list[i];
 						}
-						if (unitTarget == UnitTarget.Closest && num < currentDistance)
+						if (unitTarget == UnitTarget.Closest && num < CurrentDistance)
 						{
-							currentDistance = num;
+							CurrentDistance = num;
 							unit = list[i];
 						}
 					}
 				}
 				else
 				{
-					currentDistance = num;
+					CurrentDistance = num;
 					unit = list[i];
 				}
 			}
 			if ((bool)unit)
 			{
-				_ = base.transform.root.position - this.unit.data.mainRig.position;
-				Vector3 vector = (unit.data.mainRig.transform.position - this.unit.data.mainRig.position).normalized * ((unit.data.mainRig.transform.position - this.unit.data.mainRig.position).magnitude + distanceFromUnit);
-				Debug.DrawLine(base.transform.position, unit.data.mainRig.transform.position, Color.blue, 1.5f);
-				DataHandler componentInChildren = base.transform.root.GetComponentInChildren<DataHandler>();
+				_ = transform.root.position - Unit.data.mainRig.position;
+				Vector3 vector = (unit.data.mainRig.transform.position - Unit.data.mainRig.position).normalized * ((unit.data.mainRig.transform.position - Unit.data.mainRig.position).magnitude + distanceFromUnit);
+				Debug.DrawLine(transform.position, unit.data.mainRig.transform.position, Color.blue, 1.5f);
+				DataHandler componentInChildren = transform.root.GetComponentInChildren<DataHandler>();
 				for (int j = 0; j < componentInChildren.transform.childCount; j++)
 				{
 					Transform child = componentInChildren.transform.GetChild(j);
@@ -146,17 +146,17 @@ namespace HiddenUnits
 						component.leftWeapon.transform.position += vector + Vector3.up * distanceAboveUnit;
 					}
 				}
-				followers = new List<PhysicsFollowBodyPart>();
-				followers.AddRange(base.transform.root.GetComponentsInChildren<PhysicsFollowBodyPart>());
-				for (int k = 0; k < followers.Count; k++)
+				Followers = new List<PhysicsFollowBodyPart>();
+				Followers.AddRange(transform.root.GetComponentsInChildren<PhysicsFollowBodyPart>());
+				for (int k = 0; k < Followers.Count; k++)
 				{
-					followers[k].transform.position += vector + Vector3.up * distanceAboveUnit;
+					Followers[k].transform.position += vector + Vector3.up * distanceAboveUnit;
 				}
 			}
 			poofEvent?.Invoke();
-			if ((bool)part)
+			if ((bool)Part)
 			{
-				part.Play();
+				Part.Play();
 			}
 		}
 	

@@ -8,55 +8,55 @@ namespace HiddenUnits
     {
         public void Start()
         {
-            unit = transform.root.GetComponent<Unit>();
-            unit.WasDealtDamageAction += Armor;
+            Unit = transform.root.GetComponent<Unit>();
+            Unit.WasDealtDamageAction += Armor;
             
-            armoredUnit = unit.gameObject.AddComponent<UnitIsArmored>();
-            armoredUnit.projectileHitEffect = projectileHitEffect;
-            armoredUnit.weaponHitEffect = weaponHitEffect;
-            armoredUnit.parryForce = parryForce;
-            armoredUnit.parryPower = parryPower;
-            armoredUnit.blockPower = blockPower;
+            ArmoredUnit = Unit.gameObject.AddComponent<UnitIsArmored>();
+            ArmoredUnit.projectileHitEffect = projectileHitEffect;
+            ArmoredUnit.weaponHitEffect = weaponHitEffect;
+            ArmoredUnit.parryForce = parryForce;
+            ArmoredUnit.parryPower = parryPower;
+            ArmoredUnit.blockPower = blockPower;
             
-            maxArmorHealth = armorHealth;
-            armorListeners = unit.GetComponentsInChildren<AchillesArmorEvent>();
-            foreach (var armor in armorListeners) armor.OnArmorActivated();
+            MaxArmorHealth = armorHealth;
+            ArmorListeners = Unit.GetComponentsInChildren<AchillesArmorEvent>();
+            foreach (var armor in ArmorListeners) armor.OnArmorActivated();
         }
 
         public void Armor(float damage)
         {
-            if (armorDisabled)
+            if (ArmorDisabled)
             {
                 return;
             }
 
-            unit.data.health += damage;
+            Unit.data.health += damage;
             armorHealth -= damage;
-            armorHealth = Mathf.Clamp(armorHealth, 0f, maxArmorHealth);
+            armorHealth = Mathf.Clamp(armorHealth, 0f, MaxArmorHealth);
             if (armorHealth <= 0f)
             {
-                armorDisabled = true;
+                ArmorDisabled = true;
                 armorDisableEvent.Invoke();
                 
-                foreach (var armor in armorListeners) armor.OnArmorDeactivated();
-                armoredUnit.armorActive = false;
+                foreach (var armor in ArmorListeners) armor.OnArmorDeactivated();
+                ArmoredUnit.armorActive = false;
             }
         }
 
         public void Update()
         {
-            if (armorDisabled)
+            if (ArmorDisabled)
             {
-                armorDisabledCounter += Time.deltaTime;
-                if (armorDisabledCounter >= armorDisabledTime)
+                ArmorDisabledCounter += Time.deltaTime;
+                if (ArmorDisabledCounter >= armorDisabledTime)
                 {
-                    armorDisabledCounter = 0f;
-                    armorDisabled = false;
-                    armorHealth = maxArmorHealth;
+                    ArmorDisabledCounter = 0f;
+                    ArmorDisabled = false;
+                    armorHealth = MaxArmorHealth;
                     armorEnableEvent.Invoke();
                     
-                    foreach (var armor in armorListeners) armor.OnArmorActivated();
-                    armoredUnit.armorActive = true;
+                    foreach (var armor in ArmorListeners) armor.OnArmorActivated();
+                    ArmoredUnit.armorActive = true;
                 }
             }
             else
@@ -64,25 +64,25 @@ namespace HiddenUnits
                 if (armorRegenerate)
                 {
                     armorHealth += Time.deltaTime * armorRegenerationRate;
-                    armorHealth = Mathf.Clamp(armorHealth, 0f, maxArmorHealth);
+                    armorHealth = Mathf.Clamp(armorHealth, 0f, MaxArmorHealth);
                 }
                 if (healthRegenerate)
                 {
-                    unit.data.health += Time.deltaTime * healthRegenerationRate;
-                    unit.data.health = Mathf.Clamp(unit.data.health, 0f, unit.data.maxHealth);
+                    Unit.data.health += Time.deltaTime * healthRegenerationRate;
+                    Unit.data.health = Mathf.Clamp(Unit.data.health, 0f, Unit.data.maxHealth);
                 }
             }
         }
         
-        private Unit unit;
-        private UnitIsArmored armoredUnit;
+        private Unit Unit;
+        private UnitIsArmored ArmoredUnit;
 
-        private AchillesArmorEvent[] armorListeners;
+        private AchillesArmorEvent[] ArmorListeners;
         
-        private bool armorDisabled;
-        private float armorDisabledCounter;
+        private bool ArmorDisabled;
+        private float ArmorDisabledCounter;
         
-        private float maxArmorHealth;
+        private float MaxArmorHealth;
         
         [Header("Armor Settings")]
 

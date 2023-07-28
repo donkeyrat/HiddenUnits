@@ -10,9 +10,9 @@ public class HadezHands : MonoBehaviour
 
 	public string hitRef;
 
-	private Transform targetTrans;
+	private Transform TargetTrans;
 
-	private List<AttackArm> attackArms = new List<AttackArm>();
+	private List<AttackArm> AttackArms = new List<AttackArm>();
 
 	public AnimationCurve reachCurve;
 
@@ -22,13 +22,13 @@ public class HadezHands : MonoBehaviour
 
 	public AnimationCurve throwCurve;
 
-	private float followMainRigAmount;
+	private float FollowMainRigAmount;
 
-	private Unit unit;
+	private Unit Unit;
 
-	private float snapSpeed;
+	private float SnapSpeed;
 
-	private List<Unit> hitList = new List<Unit>();
+	private List<Unit> HitList = new List<Unit>();
 
 	public void Start()
 	{
@@ -40,55 +40,55 @@ public class HadezHands : MonoBehaviour
 			attackArm.lerpSpeed = Random.Range(0.5f, 1.5f);
 			attackArm.smoothTargetPos = transform.position;
 			attackArm.targetPos = transform.position;
-			attackArms.Add(attackArm);
+			AttackArms.Add(attackArm);
 		}
-		unit = GetComponentInParent<Weapon>().connectedData.unit;
-		targetTrans = transform.parent;
-		transform.SetParent(unit.transform);
+		Unit = GetComponentInParent<Weapon>().connectedData.unit;
+		TargetTrans = transform.parent;
+		transform.SetParent(Unit.transform);
 	}
 
 	private void Update()
 	{
-		if (targetTrans == null || unit.data.Dead)
+		if (TargetTrans == null || Unit.data.Dead)
 		{
-			Object.Destroy(gameObject);
+			Destroy(gameObject);
 			return;
 		}
-		transform.position = targetTrans.position;
-		transform.rotation = Quaternion.Lerp(transform.rotation, targetTrans.rotation, Time.deltaTime * 2.5f);
-		for (int i = 0; i < attackArms.Count; i++)
+		transform.position = TargetTrans.position;
+		transform.rotation = Quaternion.Lerp(transform.rotation, TargetTrans.rotation, Time.deltaTime * 2.5f);
+		for (int i = 0; i < AttackArms.Count; i++)
 		{
-			attackArms[i].counter += Time.deltaTime;
-			Vector3 vector = Vector3.Lerp(attackArms[i].smoothTargetPos, attackArms[i].targetPos, Time.deltaTime * 10f);
-			if (attackArms[i].armState == AttackArm.ArmState.Free)
+			AttackArms[i].counter += Time.deltaTime;
+			Vector3 vector = Vector3.Lerp(AttackArms[i].smoothTargetPos, AttackArms[i].targetPos, Time.deltaTime * 10f);
+			if (AttackArms[i].armState == AttackArm.ArmState.Free)
 			{
-				attackArms[i].targetPos = Vector3.Lerp(attackArms[i].targetPos, attackArms[i].restPosObj.transform.position + GetPerlinPos(attackArms[i].lerpSpeed) * 2f, Time.deltaTime * 3f * attackArms[i].lerpSpeed);
-				attackArms[i].smoothTargetPos = vector;
-				snapSpeed = 0f;
+				AttackArms[i].targetPos = Vector3.Lerp(AttackArms[i].targetPos, AttackArms[i].restPosObj.transform.position + GetPerlinPos(AttackArms[i].lerpSpeed) * 2f, Time.deltaTime * 3f * AttackArms[i].lerpSpeed);
+				AttackArms[i].smoothTargetPos = vector;
+				SnapSpeed = 0f;
 			}
 			else
 			{
-				snapSpeed += Time.deltaTime;
-				attackArms[i].smoothTargetPos = Vector3.Lerp(vector, attackArms[i].targetPos, snapSpeed);
+				SnapSpeed += Time.deltaTime;
+				AttackArms[i].smoothTargetPos = Vector3.Lerp(vector, AttackArms[i].targetPos, SnapSpeed);
 			}
-			if (attackArms[i].heldUnit)
+			if (AttackArms[i].heldUnit)
 			{
-				attackArms[i].targetObj.transform.position = Vector3.Lerp(attackArms[i].smoothTargetPos, attackArms[i].heldUnit.data.mainRig.position, followMainRigAmount);
+				AttackArms[i].targetObj.transform.position = Vector3.Lerp(AttackArms[i].smoothTargetPos, AttackArms[i].heldUnit.data.mainRig.position, FollowMainRigAmount);
 			}
 			else
 			{
-				attackArms[i].targetObj.transform.position = attackArms[i].smoothTargetPos;
+				AttackArms[i].targetObj.transform.position = AttackArms[i].smoothTargetPos;
 			}
 		}
-		CheckAttack(attackArms[Random.Range(0, attackArms.Count)]);
+		CheckAttack(AttackArms[Random.Range(0, AttackArms.Count)]);
 	}
 
 	private void CheckAttack(AttackArm attack)
 	{
 		var targ = SetTarget();
-		if (attack.counter > 3f && unit.data.distanceToTarget <= 10f && attack.armState == AttackArm.ArmState.Free && targ != null)
+		if (attack.counter > 3f && Unit.data.distanceToTarget <= 10f && attack.armState == AttackArm.ArmState.Free && targ != null)
 		{
-			hitList.Add(targ);
+			HitList.Add(targ);
 			attack.counter = 0f;
 			StartCoroutine(Attack(attack, targ));
 		}
@@ -107,7 +107,7 @@ public class HadezHands : MonoBehaviour
 		{
 			Vector3 a = targetUnit.data.mainRig.position - attack.restPosObj.transform.position;
 			attack.targetPos = attack.restPosObj.transform.position + a * reachCurve.Evaluate(c2);
-			targetUnit.data.healthHandler.TakeDamage(100f * Time.deltaTime, Vector3.up, null);
+			targetUnit.data.healthHandler.TakeDamage(100f * Time.deltaTime, Vector3.up);
 			c2 += Time.deltaTime * Time.timeScale;
 			yield return null;
 		}
@@ -119,10 +119,10 @@ public class HadezHands : MonoBehaviour
 			Vector3 a2 = targetUnit.data.mainRig.position - attack.restPosObj.transform.position;
 			attack.targetPos = attack.restPosObj.transform.position + a2 * goBackToHoldCurve.Evaluate(c2);
 			c2 += Time.deltaTime;
-			followMainRigAmount = goBackToHoldCurveFollowMainRigAmount.Evaluate(c2);
+			FollowMainRigAmount = goBackToHoldCurveFollowMainRigAmount.Evaluate(c2);
 			yield return null;
 		}
-		hitList.Remove(attack.heldUnit);
+		HitList.Remove(attack.heldUnit);
 		attack.heldUnit = null;
 	}
 
@@ -145,7 +145,7 @@ public class HadezHands : MonoBehaviour
 		= (
 		  from Unit unit
 		  in FindObjectsOfType<Unit>()
-		  where !unit.data.Dead && unit.Team != transform.root.GetComponent<Unit>().Team && !hitList.Contains(unit) && (unit.data.mainRig.transform.position - transform.position).magnitude <= 10f
+		  where !unit.data.Dead && unit.Team != transform.root.GetComponent<Unit>().Team && !HitList.Contains(unit) && (unit.data.mainRig.transform.position - transform.position).magnitude <= 10f
 		  orderby (unit.data.mainRig.transform.position - transform.position).magnitude
 		  select unit
 		).ToArray();

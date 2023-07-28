@@ -7,39 +7,39 @@ namespace HiddenUnits
     {
         public void Start()
         {
-            health = maxHealth;
+            Health = maxHealth;
             ReflectionRune();
         }
 
         public void ReflectionRune()
         {
-            shieldState = ShieldStates.ReflectionRune;
+            ShieldState = ShieldStates.ReflectionRune;
             activateEvent.Invoke();
         }
 
         public void Deactivate()
         {
-            shieldState = ShieldStates.Deactivated;
+            ShieldState = ShieldStates.Deactivated;
             deactivateEvent.Invoke();
         }
 
         public override bool DoEffect(HitData hit, GameObject projectile)
         {
-            if (shieldState != ShieldStates.ReflectionRune)
+            if (ShieldState != ShieldStates.ReflectionRune)
             {
                 return false;
             }
             if (projectile.GetComponent<ProjectileHit>())
             {
-                health -= projectile.GetComponent<ProjectileHit>().damage;
+                Health -= projectile.GetComponent<ProjectileHit>().damage;
             }
             if (projectile.GetComponent<CollisionWeapon>())
             {
-                health -= projectile.GetComponent<CollisionWeapon>().damage;
+                Health -= projectile.GetComponent<CollisionWeapon>().damage;
             }
-            if (health <= 0f)
+            if (Health <= 0f)
             {
-                counter = 0f;
+                Counter = 0f;
                 Deactivate();
                 return false;
             }
@@ -56,10 +56,10 @@ namespace HiddenUnits
 
         public void Update()
         {
-            counter += Time.deltaTime;
-            if (counter > rechargeTime && health <= 0f)
+            Counter += Time.deltaTime;
+            if (Counter > rechargeTime && Health <= 0f)
             {
-                health = maxHealth;
+                Health = maxHealth;
                 ReflectionRune();
             }
         }
@@ -70,11 +70,11 @@ namespace HiddenUnits
             Deactivated
         }
         
-        private ShieldStates shieldState;
+        private ShieldStates ShieldState;
         
-        private float counter;
+        private float Counter;
         
-        private float health;
+        private float Health;
 
         public float rechargeTime = 6f;
 

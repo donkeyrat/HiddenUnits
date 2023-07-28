@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Landfall.TABS;
 using System.Linq;
-using BitCode.Debug.Commands;
 using RootMotion.FinalIK;
 using UnityEngine.Events;
 
@@ -13,19 +12,19 @@ namespace HiddenUnits
     {
         private void Start()
         {
-            team = GetComponent<TeamHolder>();
+            Team = GetComponent<TeamHolder>();
         }
         
         private void Update()
         {
-            counter += Time.deltaTime;
-            if (unitTarget && !joint && Vector3.Distance(tip.position, unitTarget.data.mainRig.position) < attachDistance && unitTarget.data.mainRig.GetComponents<ConfigurableJoint>().Length < 3)
+            Counter += Time.deltaTime;
+            if (UnitTarget && !Joint && Vector3.Distance(tip.position, UnitTarget.data.mainRig.position) < attachDistance && UnitTarget.data.mainRig.GetComponents<ConfigurableJoint>().Length < 3)
             {
                 StartCoroutine(AttachJoint());
             }
-            else if (unitTarget && joint && doConstantDamage)
+            else if (UnitTarget && Joint && doConstantDamage)
             {
-                unitTarget.data.healthHandler.TakeDamage(damage * Time.deltaTime, Vector3.zero);
+                UnitTarget.data.healthHandler.TakeDamage(damage * Time.deltaTime, Vector3.zero);
             }
         }
         
@@ -37,14 +36,14 @@ namespace HiddenUnits
         private IEnumerator ChooseTarget()
         {
             SetTarget();
-            if (unitTarget)
+            if (UnitTarget)
             {
                 var t = 0f;
                 var beginPosition = moveTarget.position;
-                while (t < 1f && !joint && unitTarget)
+                while (t < 1f && !Joint && UnitTarget)
                 {
                     t += Time.deltaTime * followSpeed;
-                    moveTarget.position = Vector3.Lerp(beginPosition, unitTarget.data.mainRig.position,
+                    moveTarget.position = Vector3.Lerp(beginPosition, UnitTarget.data.mainRig.position,
                         Mathf.Clamp(t, 0f, 1f));
                     yield return null;
                 }
@@ -53,39 +52,39 @@ namespace HiddenUnits
 
         public IEnumerator AttachJoint()
         {
-            if (!unitTarget) yield break;
+            if (!UnitTarget) yield break;
             foreach (var rig in rigs)
             {
                 rig.isKinematic = false;
             }
             GetComponent<CCDIK>().enabled = false;
 
-            joint = unitTarget.data.mainRig.gameObject.AddComponent<FixedJoint>();
-            joint.connectedBody = tip.GetComponent<Rigidbody>();
-            joint.breakForce = breakForce;
-            joint.breakTorque = breakForce;
+            Joint = UnitTarget.data.mainRig.gameObject.AddComponent<FixedJoint>();
+            Joint.connectedBody = tip.GetComponent<Rigidbody>();
+            Joint.breakForce = breakForce;
+            Joint.breakTorque = breakForce;
             
             if (lerpToCenterOfTip) StartCoroutine(LerpJoint());
             
-            if (!doConstantDamage) unitTarget.data.healthHandler.TakeDamage(damage, Vector3.zero);
+            if (!doConstantDamage) UnitTarget.data.healthHandler.TakeDamage(damage, Vector3.zero);
             hitEvent.Invoke();
 
             var seconds = GetComponent<RemoveAfterSeconds>();
-            yield return new WaitUntil(() => counter >= seconds.seconds - 1f);
+            yield return new WaitUntil(() => Counter >= seconds.seconds - 1f);
             
-            if (joint) Destroy(joint);
+            if (Joint) Destroy(Joint);
         }
 
         public IEnumerator LerpJoint()
         {
-            if (!joint) yield break;
+            if (!Joint) yield break;
             var t = 0f;
-            var initialVector = joint.connectedAnchor;
-            while (t < 1f && joint)
+            var initialVector = Joint.connectedAnchor;
+            while (t < 1f && Joint)
             {
-                joint.autoConfigureConnectedAnchor = false;
+                Joint.autoConfigureConnectedAnchor = false;
                 t += Time.deltaTime * adjustTime;
-                joint.connectedAnchor = Vector3.Lerp(initialVector, Vector3.zero, Mathf.Clamp(t, 0f, 1f));
+                Joint.connectedAnchor = Vector3.Lerp(initialVector, Vector3.zero, Mathf.Clamp(t, 0f, 1f));
                 yield return null;
             }
         }
@@ -95,21 +94,21 @@ namespace HiddenUnits
             var hits = Physics.SphereCastAll(transform.position, targetRange, Vector3.up, 0.1f, LayerMask.GetMask(new string[] { "MainRig" }));
             var foundUnits = hits
                 .Select(hit => hit.transform.root.GetComponent<Unit>())
-                .Where(x => x && !x.data.Dead && x.Team != team.team)
+                .Where(x => x && !x.data.Dead && x.Team != Team.team)
                 .OrderBy(x => (x.data.mainRig.transform.position - transform.position).magnitude)
                 .Distinct()
                 .ToArray();
 
             if (foundUnits.Length > 0)
             {
-                unitTarget = foundUnits[0]; 
+                UnitTarget = foundUnits[0]; 
             }
         }
 
-        private float counter;
-        private Unit unitTarget;
-        private FixedJoint joint;
-        private TeamHolder team;
+        private float Counter;
+        private Unit UnitTarget;
+        private FixedJoint Joint;
+        private TeamHolder Team;
         
         [Header("Root Settings")]
 

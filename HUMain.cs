@@ -18,8 +18,8 @@ namespace HiddenUnits
     {
         public HUMain()
         {
-            AssetBundle.LoadFromMemory(Properties.Resources.egyptmap);
-            AssetBundle.LoadFromMemory(Properties.Resources.egyptmap2);
+            //AssetBundle.LoadFromMemory(Properties.Resources.egyptmap);
+            //AssetBundle.LoadFromMemory(Properties.Resources.egyptmap2);
             
             var newMapList = new List<MapAsset>();
             var newMapDict = new Dictionary<DatabaseID, int>();
@@ -195,10 +195,10 @@ namespace HiddenUnits
             TGMain.newSounds.AddRange(hiddenUnits.LoadAllAssets<SoundBank>());
         }
 
-        public static bool InfiniteScalingEnabled => HULauncher.ConfigInfiniteScalingEnabled.Value;
+        public static bool InfiniteScalingEnabled => HULauncher.configInfiniteScalingEnabled.Value;
 
-        public static AssetBundle hiddenUnits = AssetBundle.LoadFromMemory(Properties.Resources.hiddenunits);
+        public static AssetBundle hiddenUnits;// = AssetBundle.LoadFromMemory(Properties.Resources.hiddenunits);
 
-        public static AssetBundle huMaps = AssetBundle.LoadFromMemory(Properties.Resources.humaps);
+        public static AssetBundle huMaps;// = AssetBundle.LoadFromMemory(Properties.Resources.humaps);
     }
 }

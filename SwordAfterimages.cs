@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace HiddenUnits
 {
@@ -8,21 +6,21 @@ namespace HiddenUnits
     {
         private void Start()
         {
-            rig = GetComponentInParent<Rigidbody>();
+            Rig = GetComponentInParent<Rigidbody>();
         }
         
         private void Update()
         {
-            counter += Time.deltaTime;
+            Counter += Time.deltaTime;
             
-            if (!canSpawn || (requireThreshold && rig.velocity.magnitude < thresholdToSpawn) || (requireCooldown && cooldown > counter)) return;
+            if (!canSpawn || (requireThreshold && Rig.velocity.magnitude < thresholdToSpawn) || (requireCooldown && cooldown > Counter)) return;
             
             DoAfterimage();
         } 
 
         public void DoAfterimage()
         {
-            counter = 0f;
+            Counter = 0f;
             Instantiate(objectToSpawn, transform.position, transform.rotation);
         }
 
@@ -30,9 +28,9 @@ namespace HiddenUnits
     
         public void CannotSpawn() { canSpawn = false; }
 
-        private float counter;
+        private float Counter;
 
-        private Rigidbody rig;
+        private Rigidbody Rig;
 
         public GameObject objectToSpawn;
 

@@ -22,12 +22,12 @@ namespace HiddenUnits
 
 		public override void AddSettings()
 		{
-			ConfigInfiniteScalingEnabled = Config.Bind("Bug", "InfiniteScalingEnabled", true, "Enables/disables Mathematician/Philosopher projectiles infinitely scaling unit parts.");
+			configInfiniteScalingEnabled = Config.Bind("Bug", "InfiniteScalingEnabled", true, "Enables/disables Mathematician/Philosopher projectiles infinitely scaling unit parts.");
 			
-			var infiniteScaling = TGAddons.CreateSetting(SettingsInstance.SettingsType.Options, "Toggle infinite projectile scaling", "Enables/disables Mathematician/Philosopher projectiles infinitely scaling unit parts.", "BUG", 0f, ConfigInfiniteScalingEnabled.Value ? 0 : 1, new[] { "Disabled", "Enabled" });
+			var infiniteScaling = TGAddons.CreateSetting(SettingsInstance.SettingsType.Options, "Toggle infinite projectile scaling", "Enables/disables Mathematician/Philosopher projectiles infinitely scaling unit parts.", "BUG", 0f, configInfiniteScalingEnabled.Value ? 0 : 1, new[] { "Disabled", "Enabled" });
 			infiniteScaling.OnValueChanged += delegate(int value)
 			{
-				ConfigInfiniteScalingEnabled.Value = value == 1;
+				configInfiniteScalingEnabled.Value = value == 1;
 			};
 		}
 
@@ -297,6 +297,6 @@ namespace HiddenUnits
         public override void Localize(LocalizationHolder holder) => holder.languages.AddRange(HUMain.hiddenUnits
             .LoadAsset<GameObject>("Lang").GetComponent<LocalizationHolder>().languages);
 		
-		public static ConfigEntry<bool> ConfigInfiniteScalingEnabled;
+		public static ConfigEntry<bool> configInfiniteScalingEnabled;
 	}
 }

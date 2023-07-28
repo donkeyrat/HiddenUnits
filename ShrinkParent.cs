@@ -6,21 +6,21 @@ namespace HiddenUnits
     {
         public void Shrink()
         {
-            scaling = true;
+            Scaling = true;
         }
         
         private void Update()
         {
-            counter += Time.deltaTime;
-            if (scaling && counter < 1f)
+            Counter += Time.deltaTime;
+            if (Scaling && Counter < 1f)
             {
                 transform.parent.localScale -= Vector3.one * (scaler * Time.deltaTime);
             }
         }
 
-        private float counter;
+        private float Counter;
 
-        private bool scaling;
+        private bool Scaling;
 
         public float scaler = 0.5f;
     }

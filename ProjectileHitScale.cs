@@ -40,11 +40,11 @@ namespace HiddenUnits
                 yield return null;
             }
 
-            scaleCount++;
-            if (scaleCount >= scaleLimit) Destroy(hit.transform.GetComponent<Scaling>());
+            ScaleCount++;
+            if (ScaleCount >= scaleLimit) Destroy(hit.transform.GetComponent<Scaling>());
         }
 
-        private int scaleCount;
+        private int ScaleCount;
 
         public float scaleDelay = 0.5f;
 

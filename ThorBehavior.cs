@@ -8,33 +8,33 @@ public class ThorBehavior : MonoBehaviour
 {
     void Start()
     {
-        unit = transform.root.GetComponent<Unit>();
+        Unit = transform.root.GetComponent<Unit>();
     }
 
 	public void GrabHammerRight()
 	{
-		if (!holdingRight)
+		if (!HoldingRight)
 		{
-			holdingRight = true;
+			HoldingRight = true;
 			grabEvent.Invoke();
-			foreach (var hand in unit.GetComponentInChildren<HandRight>().GetComponentsInChildren<Collider>())
+			foreach (var hand in Unit.GetComponentInChildren<HandRight>().GetComponentsInChildren<Collider>())
 			{
 				hand.enabled = false;
 			}
-			if (unit.holdingHandler)
+			if (Unit.holdingHandler)
 			{
-				unit.WeaponHandler.fistRefernce = null;
-				if (unit.holdingHandler.rightObject)
+				Unit.WeaponHandler.fistRefernce = null;
+				if (Unit.holdingHandler.rightObject)
 				{
-					var oldWeapon = unit.holdingHandler.rightObject.gameObject;
-					unit.holdingHandler.LetGoOfWeapon(oldWeapon);
+					var oldWeapon = Unit.holdingHandler.rightObject.gameObject;
+					Unit.holdingHandler.LetGoOfWeapon(oldWeapon);
 					Destroy(oldWeapon);
 				}
-				SetWeapon(unit, unit.Team, weaponToGrab, new PropItemData(), HoldingHandler.HandType.Right, unit.data.mainRig.rotation, new List<GameObject>());
+				SetWeapon(Unit, Unit.Team, weaponToGrab, new PropItemData(), HoldingHandler.HandType.Right, Unit.data.mainRig.rotation, new List<GameObject>());
 			}
-			else if (unit.GetComponentInChildren<HoldingHandlerMulti>())
+			else if (Unit.GetComponentInChildren<HoldingHandlerMulti>())
 			{
-				var multi = unit.GetComponentInChildren<HoldingHandlerMulti>();
+				var multi = Unit.GetComponentInChildren<HoldingHandlerMulti>();
 				foreach (var hand in multi.mainHands)
 				{
 					multi.SetWeapon(hand.gameObject, weaponToGrab);
@@ -45,27 +45,27 @@ public class ThorBehavior : MonoBehaviour
 	}
 	public void GrabHammerLeft()
 	{
-		if (!holdingLeft)
+		if (!HoldingLeft)
 		{
-			holdingLeft = true;
-			foreach (var hand in unit.GetComponentInChildren<HandLeft>().GetComponentsInChildren<Collider>())
+			HoldingLeft = true;
+			foreach (var hand in Unit.GetComponentInChildren<HandLeft>().GetComponentsInChildren<Collider>())
 			{
 				hand.enabled = false;
 			}
-			if (unit.holdingHandler)
+			if (Unit.holdingHandler)
 			{
 				weaponToGrab.GetComponent<Holdable>().holdableData.snapConnect = false;
-				if (unit.holdingHandler.leftObject)
+				if (Unit.holdingHandler.leftObject)
 				{
-					var oldWeapon = unit.holdingHandler.leftObject.gameObject;
-					unit.holdingHandler.LetGoOfWeapon(oldWeapon);
+					var oldWeapon = Unit.holdingHandler.leftObject.gameObject;
+					Unit.holdingHandler.LetGoOfWeapon(oldWeapon);
 					Destroy(oldWeapon);
 				}
-				unit.holdingHandler.leftHandActivity = HoldingHandler.HandActivity.HoldingRightObject;
+				Unit.holdingHandler.leftHandActivity = HoldingHandler.HandActivity.HoldingRightObject;
 			}
-			else if (unit.GetComponentInChildren<HoldingHandlerMulti>())
+			else if (Unit.GetComponentInChildren<HoldingHandlerMulti>())
 			{
-				var multi = unit.GetComponentInChildren<HoldingHandlerMulti>();
+				var multi = Unit.GetComponentInChildren<HoldingHandlerMulti>();
 				foreach (var hand in multi.otherHands)
 				{
 					multi.SetWeapon(hand.gameObject, weaponToGrab);
@@ -77,18 +77,18 @@ public class ThorBehavior : MonoBehaviour
 
 	public void UnGrabHammer()
     {
-        if (holdingLeft || holdingRight)
+        if (HoldingLeft || HoldingRight)
         {
-			holdingLeft = false;
-			holdingRight = false;
+			HoldingLeft = false;
+			HoldingRight = false;
 			ungrabEvent.Invoke();
-            if (unit.holdingHandler)
+            if (Unit.holdingHandler)
             {
-                unit.holdingHandler.LetGoOfWeapon(weaponToGrab);
+                Unit.holdingHandler.LetGoOfWeapon(weaponToGrab);
             }
-            else if (unit.GetComponentInChildren<HoldingHandlerMulti>())
+            else if (Unit.GetComponentInChildren<HoldingHandlerMulti>())
             {
-                var multi = unit.GetComponentInChildren<HoldingHandlerMulti>();
+                var multi = Unit.GetComponentInChildren<HoldingHandlerMulti>();
                 multi.LetGoOfAll();
             }
         }
@@ -173,11 +173,11 @@ public class ThorBehavior : MonoBehaviour
 		return null;
 	}
 
-	private Unit unit;
+	private Unit Unit;
 
-    private bool holdingRight;
+    private bool HoldingRight;
 
-	private bool holdingLeft;
+	private bool HoldingLeft;
 
     public GameObject weaponToGrab;
 

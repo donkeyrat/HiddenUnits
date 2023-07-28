@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Landfall.TABC;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Events;
@@ -11,9 +10,9 @@ public class DreadSwords : MonoBehaviour
 
 	public UnityEvent shootEvent;
 
-	private ShootPosition[] swordPoints;
+	private ShootPosition[] SwordPoints;
 
-	private List<SpookySword> swords = new List<SpookySword>();
+	private List<SpookySword> Swords = new List<SpookySword>();
 
 	public GameObject sourceSword;
 
@@ -25,134 +24,134 @@ public class DreadSwords : MonoBehaviour
 
 	public AnimationCurve throwCurve;
 
-	private float counter;
+	private float Counter;
 
-	private DataHandler data;
+	private DataHandler Data;
 
-	private bool done;
+	private bool Done;
 
 	public float attackRate;
 
-	private float attackspeedMulti = 1f;
+	private float AttackspeedMulti = 1f;
 
-	private int attackID;
+	private int AttackID;
 
 	public event AttackedEventHandler Attacked;
 
 	private void Awake()
 	{
-		swordPoints = GetComponentsInChildren<ShootPosition>();
+		SwordPoints = GetComponentsInChildren<ShootPosition>();
 	}
 
 	private void Start()
 	{
-		data = base.transform.root.GetComponentInChildren<DataHandler>();
+		Data = transform.root.GetComponentInChildren<DataHandler>();
 		List<Renderer> list = new List<Renderer>();
-		for (int i = 0; i < swordPoints.Length; i++)
+		for (int i = 0; i < SwordPoints.Length; i++)
 		{
-			SpookySword spookySword = CreateNewSword(swordPoints[i].transform.position + Vector3.up * 2f, swordPoints[i].transform.rotation);
+			SpookySword spookySword = CreateNewSword(SwordPoints[i].transform.position + Vector3.up * 2f, SwordPoints[i].transform.rotation);
 			Renderer[] componentsInChildren = spookySword.gameObject.GetComponentsInChildren<Renderer>();
 			if (componentsInChildren != null && componentsInChildren.Length != 0)
 			{
 				list.AddRange(componentsInChildren);
 			}
-			swords.Add(spookySword);
+			Swords.Add(spookySword);
 		}
-		if (data != null && data.unit != null)
+		if (Data != null && Data.unit != null)
 		{
-			data.unit.AddRenderersToShowHide(list.ToArray(), data.unit.IsSpawnedInBlindPlacement);
+			Data.unit.AddRenderersToShowHide(list.ToArray(), Data.unit.IsSpawnedInBlindPlacement);
 		}
-		for (int k = 0; k < swords.Count; k++)
+		for (int k = 0; k < Swords.Count; k++)
 		{
-			if (!(swords[k].gameObject == null))
+			if (!(Swords[k].gameObject == null))
 			{
-				swords[k].gameObject.transform.position = swordPoints[k].transform.position;
-				swords[k].gameObject.transform.rotation = swordPoints[k].transform.rotation;
+				Swords[k].gameObject.transform.position = SwordPoints[k].transform.position;
+				Swords[k].gameObject.transform.rotation = SwordPoints[k].transform.rotation;
 			}
 		}
 	}
 
 	private void Update()
 	{
-		if (done)
+		if (Done)
 		{
 			return;
 		}
-		if ((bool)data && data.Dead)
+		if ((bool)Data && Data.Dead)
 		{
-			done = true;
-			for (int i = 0; i < swords.Count; i++)
+			Done = true;
+			for (int i = 0; i < Swords.Count; i++)
 			{
-				attackID = i;
-				Attack(data.mainRig, attackID);
+				AttackID = i;
+				Attack(Data.mainRig, AttackID);
 			}
 		}
 		float num = Mathf.Clamp(Time.deltaTime, 0f, 0.02f);
-		if ((bool)data.weaponHandler)
+		if ((bool)Data.weaponHandler)
 		{
-			attackspeedMulti = data.weaponHandler.attackSpeedMultiplier;
+			AttackspeedMulti = Data.weaponHandler.attackSpeedMultiplier;
 		}
-		bool num2 = data.unit == null || !data.unit.IsRemotelyControlled;
-		counter += Time.deltaTime * attackspeedMulti;
-		if (num2 && (bool)data.targetMainRig && counter > attackRate)
+		bool num2 = Data.unit == null || !Data.unit.IsRemotelyControlled;
+		Counter += Time.deltaTime * AttackspeedMulti;
+		if (num2 && (bool)Data.targetMainRig && Counter > attackRate)
 		{
 			float num3 = 999f;
-			for (int j = 0; j < swordPoints.Length; j++)
+			for (int j = 0; j < SwordPoints.Length; j++)
 			{
-				float num4 = Vector3.Angle(data.targetMainRig.position - base.transform.position, swordPoints[j].gameObject.transform.position - base.transform.position);
-				if (num4 < num3 && swords[j].sinceSpawn > 1.5f)
+				float num4 = Vector3.Angle(Data.targetMainRig.position - transform.position, SwordPoints[j].gameObject.transform.position - transform.position);
+				if (num4 < num3 && Swords[j].sinceSpawn > 1.5f)
 				{
 					num3 = num4;
-					attackID = j;
+					AttackID = j;
 				}
 			}
-			if ((bool)data.targetMainRig && data.distanceToTarget < throwRange)
+			if ((bool)Data.targetMainRig && Data.distanceToTarget < throwRange)
 			{
-				Attack(data.targetMainRig, attackID);
+				Attack(Data.targetMainRig, AttackID);
 			}
 		}
-		for (int k = 0; k < swords.Count; k++)
+		for (int k = 0; k < Swords.Count; k++)
 		{
-			if (!(swords[k].gameObject == null))
+			if (!(Swords[k].gameObject == null))
 			{
-				swords[k].sinceSpawn += num;
-				swords[k].gameObject.transform.position = swordPoints[k].transform.position;
-				swords[k].gameObject.transform.rotation = swordPoints[k].transform.rotation;
+				Swords[k].sinceSpawn += num;
+				Swords[k].gameObject.transform.position = SwordPoints[k].transform.position;
+				Swords[k].gameObject.transform.rotation = SwordPoints[k].transform.rotation;
 			}
 		}
 	}
 
 	public void Attack(Rigidbody target, int useAttackID)
 	{
-		counter = 0f;
-		if (useAttackID < 0 || useAttackID >= swords.Count)
+		Counter = 0f;
+		if (useAttackID < 0 || useAttackID >= Swords.Count)
 		{
-			useAttackID = UnityEngine.Random.Range(0, swords.Count);
+			useAttackID = UnityEngine.Random.Range(0, Swords.Count);
 		}
-		SpookySword spookySword = swords[useAttackID];
+		SpookySword spookySword = Swords[useAttackID];
 		if (spookySword != null)
 		{
 			StartCoroutine(DoAttack(spookySword, target));
 			shootEvent.Invoke();
-			if (!done)
+			if (!Done)
 			{
-				swords[useAttackID] = CreateNewSword(swordPoints[useAttackID].gameObject.transform.position, swordPoints[useAttackID].gameObject.transform.rotation);
+				Swords[useAttackID] = CreateNewSword(SwordPoints[useAttackID].gameObject.transform.position, SwordPoints[useAttackID].gameObject.transform.rotation);
 			}
 			else
 			{
 				spookySword.gameObject.GetComponent<ProjectileHit>().ignoreTeamMates = false;
 			}
-			this.Attacked?.Invoke(target, useAttackID);
+			Attacked?.Invoke(target, useAttackID);
 		}
 	}
 
 	private void OnDestroy()
 	{
 		StopAllCoroutines();
-		for (int i = 0; i < swords.Count; i++)
+		for (int i = 0; i < Swords.Count; i++)
 		{
-			_ = swords[i].gameObject != null;
-			Object.Destroy(swords[i].gameObject);
+			_ = Swords[i].gameObject != null;
+			Destroy(Swords[i].gameObject);
 		}
 	}
 
@@ -195,11 +194,11 @@ public class DreadSwords : MonoBehaviour
 	{
 		SpookySword obj = new SpookySword
 		{
-			gameObject = Object.Instantiate(sourceSword, pos, rot)
+			gameObject = Instantiate(sourceSword, pos, rot)
 		};
 		obj.move = obj.gameObject.GetComponent<MoveTransform>();
-		obj.gameObject.FetchComponent<TeamHolder>().team = data.team;
-		obj.gameObject.GetComponentInChildren<Landfall.TABC.CodeAnimation>().speedMultiplier = attackspeedMulti;
+		obj.gameObject.FetchComponent<TeamHolder>().team = Data.team;
+		obj.gameObject.GetComponentInChildren<Landfall.TABC.CodeAnimation>().speedMultiplier = AttackspeedMulti;
 		return obj;
 	}
 }

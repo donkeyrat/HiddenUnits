@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Landfall.TABS;
 using System.Linq;
@@ -12,7 +11,7 @@ namespace HiddenUnits {
 
         void Start() {
 
-            egg = GetComponentInParent<TeamHolder>().spawner.GetComponentInChildren<HadesEgg>();
+            Egg = GetComponentInParent<TeamHolder>().spawner.GetComponentInChildren<HadesEgg>();
         }
 
         public void Drain() { StartCoroutine(DoDrain()); }
@@ -33,20 +32,20 @@ namespace HiddenUnits {
                         targetableEffect.DoEffect(transform.position, targets[i].data.mainRig.position, targets[i].data.mainRig);
                     }
                     
-                    egg.AddHealth(healthToDrain);
-                    egg.hitList.Add(targets[i]);
+                    Egg.AddHealth(healthToDrain);
+                    Egg.hitList.Add(targets[i]);
                     
                     drainEvent.Invoke();
                     StartCoroutine(RemoveUnitFromList(targets[i]));
                     
                     yield return new WaitForSeconds(delayPerDrain);
                 }
-                if (!egg.hasHatched) {
+                if (!Egg.hasHatched) {
                     var spawnedObjectEgg = Instantiate(objectToSpawn, transform.position, transform.rotation);
                     Destroy(spawnedObjectEgg.GetComponent<AddTargetableEffect>());
                     foreach (var targetableEffect in spawnedObjectEgg.GetComponents<TargetableEffect>()) {
 
-                        targetableEffect.DoEffect(transform, egg.transform);
+                        targetableEffect.DoEffect(transform, Egg.transform);
                     }
                 }
             }
@@ -57,7 +56,7 @@ namespace HiddenUnits {
             var hits = Physics.SphereCastAll(transform.position, radius, Vector3.up, 0.1f, layerMask);
             return hits
                 .Select(hit => hit.transform.root.GetComponent<Unit>())
-                .Where(x => GetComponentInParent<TeamHolder>() && x && !x.data.Dead && x.Team != GetComponentInParent<TeamHolder>().team && !egg.hitList.Contains(x))
+                .Where(x => GetComponentInParent<TeamHolder>() && x && !x.data.Dead && x.Team != GetComponentInParent<TeamHolder>().team && !Egg.hitList.Contains(x))
                 .OrderBy(x => (x.data.mainRig.transform.position - transform.position).magnitude)
                 .Distinct()
                 .ToArray();
@@ -66,12 +65,12 @@ namespace HiddenUnits {
         public IEnumerator RemoveUnitFromList(Unit unit) {
 
             yield return new WaitForSeconds(1f);
-            if (unit) egg.hitList.Remove(unit);
+            if (unit) Egg.hitList.Remove(unit);
         }
 
         public UnityEvent drainEvent = new UnityEvent();
 
-        private HadesEgg egg;
+        private HadesEgg Egg;
 
         public LayerMask layerMask;
 

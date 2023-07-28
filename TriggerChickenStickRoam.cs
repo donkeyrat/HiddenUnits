@@ -16,7 +16,7 @@ namespace HiddenUnits
             StartCoroutine(OnStartRoaming());
         }
 
-        public IEnumerator OnStartRoaming()
+        private IEnumerator OnStartRoaming()
         {
             yield return new WaitUntil(() =>
                 transform.root.GetComponentsInChildren<ChickenSticks>().ToList()

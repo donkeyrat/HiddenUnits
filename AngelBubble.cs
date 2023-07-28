@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using Landfall.TABS;
 using UnityEngine;
@@ -10,15 +9,15 @@ namespace HiddenUnits
 	{
 		private void Start()
 		{
-			effectTransform = transform.GetChild(0);
-			var hits = Physics.OverlapSphere(effectTransform.position, radius);
-			hitRigs = hits
+			EffectTransform = transform.GetChild(0);
+			var hits = Physics.OverlapSphere(EffectTransform.position, radius);
+			HitRigs = hits
 				.Select(x => x.attachedRigidbody)
 				.Where(x => x)
 				.Distinct()
 				.ToArray();
 			
-			hitUnits = hits
+			HitUnits = hits
 				.Select(hit => hit.transform.root.GetComponent<Unit>())
 				.Where(x => x && !x.data.Dead)
 				.OrderBy(x => (x.data.mainRig.transform.position - transform.position).magnitude)
@@ -32,22 +31,22 @@ namespace HiddenUnits
 		{
 			var time = upCurve.keys[upCurve.keys.Length - 1].time;
 			var t = 0f;
-			var startPos = effectTransform.position;
+			var startPos = EffectTransform.position;
 			while (t < time)
 			{
 				t += Time.deltaTime;
 				
 				Pull();
-				effectTransform.position = startPos + Vector3.up * upCurve.Evaluate(t);
+				EffectTransform.position = startPos + Vector3.up * upCurve.Evaluate(t);
 				yield return null;
 			}
 		}
 
 		private void Pull()
 		{
-			foreach (var rig in hitRigs.Where(x => x)) 
+			foreach (var rig in HitRigs.Where(x => x)) 
 			{
-				var position = effectTransform.position;
+				var position = EffectTransform.position;
 				var num = influenceCurve.Evaluate(Vector3.Distance(rig.position, position));
 				var randomFloat = Random.Range(0.5f, 1f);
 				WilhelmPhysicsFunctions.AddForceWithMinWeight(rig, randomFloat * force * num * (position + Random.insideUnitSphere * 2f - rig.position).normalized, ForceMode.Force, minMassCap);
@@ -55,15 +54,15 @@ namespace HiddenUnits
 				rig.AddForce(-200f * randomFloat * Time.deltaTime * rig.velocity, ForceMode.Acceleration);
 			}
 
-			foreach (var unit in hitUnits)
+			foreach (var unit in HitUnits)
 			{
 				unit.data.healthHandler.TakeDamage(damageOverTime * Time.deltaTime, Vector3.up);
 			}
 		}
 		
-		private Rigidbody[] hitRigs;
-		private Unit[] hitUnits;
-		private Transform effectTransform;
+		private Rigidbody[] HitRigs;
+		private Unit[] HitUnits;
+		private Transform EffectTransform;
 
 		[Header("Damage Settings")]
 		

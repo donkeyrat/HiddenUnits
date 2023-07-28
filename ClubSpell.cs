@@ -10,21 +10,21 @@ public class ClubSpell : TargetableEffect
 
 	public float force;
 
-	private float rockStartY;
+	private float RockStartY;
 
-	private Rigidbody rig;
+	private Rigidbody Rig;
 
-	private Vector3 direction;
+	private Vector3 Direction;
 
-	private Vector3 startPos;
+	private Vector3 StartPos;
 
 	public float prediction = 1f;
 
-	private Rigidbody target;
+	private Rigidbody Target;
 
 	public void Start()
 	{
-		startPos = transform.position;
+		StartPos = transform.position;
 	}
 
     private IEnumerator Go() 
@@ -34,21 +34,21 @@ public class ClubSpell : TargetableEffect
 		while (c2 < t2) 
 		{
 			c2 += Time.deltaTime;
-			rig.transform.localPosition = new Vector3(0f, upCurve.Evaluate(c2) + rockStartY, 0f);
+			Rig.transform.localPosition = new Vector3(0f, upCurve.Evaluate(c2) + RockStartY, 0f);
 			yield return null;
 		}
-		rig.isKinematic = false;
+		Rig.isKinematic = false;
 		t2 = forceCurve.keys[forceCurve.keys.Length - 1].time;
 		c2 = 0f;
-		GetDirection(rig.position, target.position, target);
-		rig.useGravity = false;
+		GetDirection(Rig.position, Target.position, Target);
+		Rig.useGravity = false;
 		while (c2 < t2) 
 		{
 			c2 += Time.deltaTime;
-			rig.velocity = direction * (forceCurve.Evaluate(c2) * force);
+			Rig.velocity = Direction * (forceCurve.Evaluate(c2) * force);
 			yield return null;
 		}
-		rig.useGravity = true;
+		Rig.useGravity = true;
 	}
 
 	public override void DoEffect(Transform startPoint, Transform endPoint)
@@ -57,22 +57,22 @@ public class ClubSpell : TargetableEffect
 
 	public override void DoEffect(Vector3 startPoint, Vector3 endPoint, Rigidbody targetRig = null)
 	{
-		target = targetRig;
-		rig = GetComponentInChildren<Rigidbody>();
-		rockStartY = rig.transform.localPosition.y;
+		Target = targetRig;
+		Rig = GetComponentInChildren<Rigidbody>();
+		RockStartY = Rig.transform.localPosition.y;
 		StartCoroutine(Go());
 	}
 
 	public void DoSpell()
 	{
 		var enemyMainRig = transform.root.GetComponent<Unit>().data.targetMainRig;
-		DoEffect(startPos, enemyMainRig.position, enemyMainRig);
+		DoEffect(StartPos, enemyMainRig.position, enemyMainRig);
 	}
 
 	private void GetDirection(Vector3 startPoint, Vector3 endPoint, Rigidbody targetRig) 
 	{
 		Vector3 vector = endPoint;
 		vector += targetRig.velocity * (prediction * 0.1f * Vector3.Distance(startPoint, vector));
-		direction = (vector - startPoint).normalized;
+		Direction = (vector - startPoint).normalized;
 	}
 }

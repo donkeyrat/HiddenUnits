@@ -13,15 +13,15 @@ namespace HiddenUnits
         public override void OnEnterPlacementState()
 		{
 			gameObject.SetActive(false);
-			if (myClone)
+			if (MyClone)
 			{
-				Destroy(myClone);
+				Destroy(MyClone);
 			}
-			myClone = Instantiate(gameObject, transform.position, transform.rotation, transform.parent);
-			myClone.SetActive(true);
-			Destroy(myClone.GetComponent<MapCringe>());
+			MyClone = Instantiate(gameObject, transform.position, transform.rotation, transform.parent);
+			MyClone.SetActive(true);
+			Destroy(MyClone.GetComponent<MapCringe>());
 		}
 
-		private GameObject myClone;
+		private GameObject MyClone;
 	}
 }

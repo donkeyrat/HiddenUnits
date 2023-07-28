@@ -1,13 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
-using Landfall.TABS;
 using UnityEngine.Events;
 
 public class Laser : MonoBehaviour
 {
     public void Awake()
     {
-        line = GetComponent<LineRenderer>();
+        Line = GetComponent<LineRenderer>();
     }
 
     public void Activate()
@@ -26,7 +25,7 @@ public class Laser : MonoBehaviour
         while (t < 1f)
         {
             t += Time.deltaTime;
-            line.widthMultiplier = Mathf.Lerp(activating ? 0f : scaleMultiplier, activating ? scaleMultiplier : 0f, Mathf.Clamp(t, 0f, 1f));
+            Line.widthMultiplier = Mathf.Lerp(activating ? 0f : scaleMultiplier, activating ? scaleMultiplier : 0f, Mathf.Clamp(t, 0f, 1f));
             yield return null;
         }
     }
@@ -34,24 +33,24 @@ public class Laser : MonoBehaviour
 
     public void Update()
     {
-        line.SetPosition(0, p2.transform.position);
+        Line.SetPosition(0, p2.transform.position);
         if (Physics.Raycast(p2.transform.position, p2.transform.forward, out var hit, maxDistance, layer))
         {
             if (hit.collider)
             {
-                line.SetPosition(1, hit.point);
+                Line.SetPosition(1, hit.point);
                 p1.transform.position = hit.point;
                 hitEvent.Invoke();
             }
         }
         else
         {
-            line.SetPosition(1, p2.transform.forward*maxDistance);
+            Line.SetPosition(1, p2.transform.forward*maxDistance);
             p1.transform.position = p2.transform.forward*maxDistance;
         }
     }
 
-    private LineRenderer line;
+    private LineRenderer Line;
     
     [Header("Line Settings")]
     

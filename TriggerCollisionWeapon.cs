@@ -1,26 +1,25 @@
 ﻿using Landfall.TABS;
 using UnityEngine;
 using UnityEngine.Events;
-using System.Reflection;
 
 namespace HiddenUnits {
     public class TriggerCollisionWeapon : MonoBehaviour {
         public void Start() {
             
-            collisionEffects = GetComponentsInChildren<CollisionWeaponEffect>();
+            CollisionEffects = GetComponentsInChildren<CollisionWeaponEffect>();
             
             if (meleeWeapon == null && GetComponent<MeleeWeapon>()) { meleeWeapon = GetComponent<MeleeWeapon>(); }
         }
 
         public void Update() {
             
-            if (startedCounting) { counter += Time.deltaTime; }
+            if (StartedCounting) { Counter += Time.deltaTime; }
             
-            if (counter >= cooldown) {
+            if (Counter >= cooldown) {
                 
-                counter = 0f;
-                startedCounting = false;
-                canDealDamage = true;
+                Counter = 0f;
+                StartedCounting = false;
+                CanDealDamage = true;
             }
         }
 
@@ -36,7 +35,7 @@ namespace HiddenUnits {
 
         public void DoDamage(Collider col)
         {
-            if (!col.attachedRigidbody || !col.attachedRigidbody.transform.root.GetComponent<Unit>() || !canDealDamage || (col.attachedRigidbody.transform.root.GetComponent<Unit>().Team == transform.root.GetComponent<Unit>().Team && !canDealDamageToTeammates) || col.attachedRigidbody.transform.root == transform.root) {
+            if (!col.attachedRigidbody || !col.attachedRigidbody.transform.root.GetComponent<Unit>() || !CanDealDamage || (col.attachedRigidbody.transform.root.GetComponent<Unit>().Team == transform.root.GetComponent<Unit>().Team && !canDealDamageToTeammates) || col.attachedRigidbody.transform.root == transform.root) {
                 return;
             }
             if (col.attachedRigidbody.transform.parent.name != "Rigidbodies") {
@@ -46,15 +45,15 @@ namespace HiddenUnits {
                 return;
             }
             
-            foreach (var effect in collisionEffects) { effect.DoEffect(col.transform, new Collision()); }
+            foreach (var effect in CollisionEffects) { effect.DoEffect(col.transform, new Collision()); }
             collisionEvent.Invoke();
             col.attachedRigidbody.transform.root.GetComponent<Unit>().data.healthHandler.TakeDamage(damage, Vector3.zero, transform.root.GetComponent<Unit>(), DamageType.Piercing);
             AddForceToTarget(col.attachedRigidbody);
             
             if (GetComponent<CollisionSound>()) { DoEffect(col.transform, col, 100f); }
             
-            startedCounting = true;
-            canDealDamage = false;
+            StartedCounting = true;
+            CanDealDamage = false;
         }
 
         public void AddForceToTarget(Rigidbody rig, float m = 1f) {
@@ -69,7 +68,7 @@ namespace HiddenUnits {
             
             if (GetComponent<CollisionSound>().onlySoundOnRig && !col.attachedRigidbody) { return; }
             
-            if (meleeWeapon) { ServiceLocator.GetService<SoundPlayer>().PlaySoundEffect(GetComponent<CollisionSound>().SoundEffectRef, impact * 0.5f, transform.position, SoundEffectVariations.GetMaterialType(col.gameObject, col.attachedRigidbody), null, 1f); }
+            if (meleeWeapon) { ServiceLocator.GetService<SoundPlayer>().PlaySoundEffect(GetComponent<CollisionSound>().SoundEffectRef, impact * 0.5f, transform.position, SoundEffectVariations.GetMaterialType(col.gameObject, col.attachedRigidbody)); }
         }
 
         public float damage = 100f;
@@ -80,15 +79,15 @@ namespace HiddenUnits {
 
         public float cooldown;
 
-        private float counter;
+        private float Counter;
 
-        private bool canDealDamage = true;
+        private bool CanDealDamage = true;
 
         public bool canDealDamageToTeammates;
 
-        private bool startedCounting;
+        private bool StartedCounting;
 
-        private CollisionWeaponEffect[] collisionEffects;
+        private CollisionWeaponEffect[] CollisionEffects;
 
         public UnityEvent collisionEvent;
 

@@ -1,9 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using BitCode.Debug.Commands;
-using BitCode.Networking;
 using UnityEngine;
-using Landfall.TABS;
 
 namespace HiddenUnits {
 
@@ -11,7 +8,7 @@ namespace HiddenUnits {
 
         public void Start()
         {
-            teamHolder = GetComponent<TeamHolder>() ?? gameObject.AddComponent<TeamHolder>();
+            TeamHolder = GetComponent<TeamHolder>() ?? gameObject.AddComponent<TeamHolder>();
             if (spawnOnStart)
             {
                 SpawnObjects();
@@ -28,14 +25,14 @@ namespace HiddenUnits {
                 var spawnedObject = Instantiate(objectsToSpawn[Random.Range(0, objectsToSpawn.Count)], point, Quaternion.LookRotation(Vector3.up));
                 
                 var team = spawnedObject.AddComponent<TeamHolder>();
-                team.team = teamHolder.team;
-                team.spawner = teamHolder.spawner;
+                team.team = TeamHolder.team;
+                team.spawner = TeamHolder.spawner;
                 
                 yield return new WaitForSeconds(delayPerSpawn);
             }
         }
 
-        private TeamHolder teamHolder;
+        private TeamHolder TeamHolder;
         
         public List<GameObject> objectsToSpawn = new List<GameObject>();
     

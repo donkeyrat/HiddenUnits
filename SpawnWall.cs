@@ -46,62 +46,62 @@ public class SpawnWall : MonoBehaviour, IRemotelyControllable
 
 	public float maxRange;
 
-	private bool didInitialize;
+	private bool DidInitialize;
 
 	public UnityEvent spawnEvent;
 
-	private ProjectilesSpawnManager projectilesSpawnManager;
+	private ProjectilesSpawnManager ProjectilesSpawnManager;
 
-	private bool isProjectile;
+	private bool IsProjectile;
 
-	private GameObject rootObject;
+	private GameObject RootObject;
 
-	private DataHandler data;
+	private DataHandler Data;
 
 	private CheckClosestUnitTargets TargetChecker;
 
-	private float allowedToSpawn = 1f;
+	private float AllowedToSpawn = 1f;
 
-	private float spawnedSinceDelay;
+	private float SpawnedSinceDelay;
 
-	private List<Unit> targets;
+	private List<Unit> Targets;
 
-	private Unit currentTarget;
+	private Unit CurrentTarget;
 
-	private List<AlternatingSpawnPos> altSpawnPos;
+	private List<AlternatingSpawnPos> AltSpawnPos;
 
-	private int targetPlace;
+	private int TargetPlace;
 
-	private int currentSpawnPosNumber;
+	private int CurrentSpawnPosNumber;
 
 	[HideInInspector]
 	public GameObject spawnerProjecile;
 
-	private bool didInitializeForMultiplayer;
+	private bool DidInitializeForMultiplayer;
 
-	private bool isUnit;
+	private bool IsUnit;
 
 	public bool IsRemotelyControlled { get; private set; }
 
 	private void Start()
 	{
-		data = base.transform.root.GetComponentInChildren<DataHandler>();
-		rootObject = base.transform.root.gameObject;
+		Data = transform.root.GetComponentInChildren<DataHandler>();
+		RootObject = transform.root.gameObject;
 		if (giveTarget)
 		{
 			TargetChecker = GetComponent<CheckClosestUnitTargets>();
 		}
 		if (spawnOnAwake)
 		{
-			StartCoroutine(SpawnUnit(base.transform.position, base.transform.rotation));
+			StartCoroutine(SpawnUnit(transform.position, transform.rotation));
 		}
 	}
 
 	public void SpawnUpwardsOnLastGroundPos()
 	{
-		if ((bool)data)
+		if ((bool)Data)
 		{
-			StartCoroutine(SpawnUnit(data.groundMapPosition, Quaternion.LookRotation(Vector3.up)));
+			StartCoroutine(SpawnUnit(Data.groundMapPosition, Quaternion.LookRotation(Vector3.up)));
 		}
 		else
 		{
@@ -111,15 +111,15 @@ public class SpawnWall : MonoBehaviour, IRemotelyControllable
 
 	public void SpawnUpwardsOnTarget()
 	{
-		Vector3 position = base.transform.position;
-		if (!data)
+		Vector3 position = transform.position;
+		if (!Data)
 		{
-			data = rootObject.GetComponent<Unit>().data;
+			Data = RootObject.GetComponent<Unit>().data;
 		}
-		if ((bool)data && (bool)data.targetData)
+		if ((bool)Data && (bool)Data.targetData)
 		{
-			position = data.targetData.mainRig.position;
-			if (maxRange != 0f && data.distanceToTarget > maxRange)
+			position = Data.targetData.mainRig.position;
+			if (maxRange != 0f && Data.distanceToTarget > maxRange)
 			{
 				return;
 			}
@@ -129,28 +129,28 @@ public class SpawnWall : MonoBehaviour, IRemotelyControllable
 
 	public void SpawnOnAndTowardsTarget()
 	{
-		Vector3 position = base.transform.position;
-		if (!data)
+		Vector3 position = transform.position;
+		if (!Data)
 		{
-			data = rootObject.GetComponent<Unit>().data;
+			Data = RootObject.GetComponent<Unit>().data;
 		}
-		if ((bool)data && (bool)data.targetData)
+		if ((bool)Data && (bool)Data.targetData)
 		{
-			position = data.targetData.mainRig.position;
-			if (maxRange != 0f && data.distanceToTarget > maxRange)
+			position = Data.targetData.mainRig.position;
+			if (maxRange != 0f && Data.distanceToTarget > maxRange)
 			{
 				return;
 			}
 		}
-		Vector3 vector = new Vector3(data.targetData.mainRig.position.x - data.mainRig.position.x, 0f, data.targetData.mainRig.position.z - data.mainRig.position.z);
+		Vector3 vector = new Vector3(Data.targetData.mainRig.position.x - Data.mainRig.position.x, 0f, Data.targetData.mainRig.position.z - Data.mainRig.position.z);
 		StartCoroutine(SpawnUnit(position, Quaternion.LookRotation(vector + Random.insideUnitSphere * spread * 0.01f)));
 	}
 
 	public void SpawnUpwardsOnSpawnerTarget()
 	{
-		Vector3 position = base.transform.position;
+		Vector3 position = transform.position;
 		DataHandler dataHandler = null;
-		TeamHolder component = base.transform.root.GetComponent<TeamHolder>();
+		TeamHolder component = transform.root.GetComponent<TeamHolder>();
 		if ((bool)component.spawner)
 		{
 			dataHandler = component.spawner.transform.root.GetComponent<Unit>().data;
@@ -168,42 +168,42 @@ public class SpawnWall : MonoBehaviour, IRemotelyControllable
 
 	public void SpawnUpwards()
 	{
-		StartCoroutine(SpawnUnit(base.transform.position, Quaternion.LookRotation(Vector3.up + Random.insideUnitSphere * spread * 0.01f)));
+		StartCoroutine(SpawnUnit(transform.position, Quaternion.LookRotation(Vector3.up + Random.insideUnitSphere * spread * 0.01f)));
 	}
 
 	public void SpawnAtObjectRotation()
 	{
-		Vector3 vector = base.transform.rotation * Vector3.forward;
-		StartCoroutine(SpawnUnit(base.transform.position, Quaternion.LookRotation(vector + Random.insideUnitSphere * spread * 0.01f)));
+		Vector3 vector = transform.rotation * Vector3.forward;
+		StartCoroutine(SpawnUnit(transform.position, Quaternion.LookRotation(vector + Random.insideUnitSphere * spread * 0.01f)));
 	}
 
 	public void SpawnTowardsTarget()
 	{
-		if (!data)
+		if (!Data)
 		{
-			data = rootObject.GetComponent<Unit>().data;
+			Data = RootObject.GetComponent<Unit>().data;
 		}
-		if ((bool)data.targetData)
+		if ((bool)Data.targetData)
 		{
-			StartCoroutine(SpawnUnit(base.transform.position, Quaternion.LookRotation((data.targetData.mainRig.position - data.mainRig.position).normalized + Random.insideUnitSphere * spread * 0.01f)));
+			StartCoroutine(SpawnUnit(transform.position, Quaternion.LookRotation((Data.targetData.mainRig.position - Data.mainRig.position).normalized + Random.insideUnitSphere * spread * 0.01f)));
 		}
 	}
 
 	public void SpawnTowardsTargetWithoutY()
 	{
-		if (!data)
+		if (!Data)
 		{
-			data = rootObject.GetComponent<Unit>().data;
+			Data = RootObject.GetComponent<Unit>().data;
 		}
-		if ((bool)data.targetData)
+		if ((bool)Data.targetData)
 		{
-			StartCoroutine(SpawnUnit(rotation: Quaternion.LookRotation(new Vector3(data.targetData.mainRig.position.x - data.mainRig.position.x, 0f, data.targetData.mainRig.position.z - data.mainRig.position.z).normalized + Random.insideUnitSphere * spread * 0.01f), position: Vector3.Lerp(data.targetData.mainRig.position, transform.position, percentage)));
+			StartCoroutine(SpawnUnit(rotation: Quaternion.LookRotation(new Vector3(Data.targetData.mainRig.position.x - Data.mainRig.position.x, 0f, Data.targetData.mainRig.position.z - Data.mainRig.position.z).normalized + Random.insideUnitSphere * spread * 0.01f), position: Vector3.Lerp(Data.targetData.mainRig.position, transform.position, percentage)));
 		}
 	}
 
 	public void SpawnCharacterForward()
 	{
-		StartCoroutine(SpawnUnit(base.transform.position, Quaternion.LookRotation(base.transform.root.GetComponent<Unit>().data.mainRig.transform.forward + Random.insideUnitSphere * spread * 0.01f)));
+		StartCoroutine(SpawnUnit(transform.position, Quaternion.LookRotation(transform.root.GetComponent<Unit>().data.mainRig.transform.forward + Random.insideUnitSphere * spread * 0.01f)));
 	}
 
 	public void Spawn(Vector3 position, Vector3 direction)
@@ -215,12 +215,12 @@ public class SpawnWall : MonoBehaviour, IRemotelyControllable
 	{
 		if ((bool)TargetChecker)
 		{
-			targets = new List<Unit>();
-			targets = TargetChecker.GetTargets(maxRange);
+			Targets = new List<Unit>();
+			Targets = TargetChecker.GetTargets(maxRange);
 		}
 		if (waitBeforeFirstSpawn)
 		{
-			spawnedSinceDelay = allowedToSpawn;
+			SpawnedSinceDelay = AllowedToSpawn;
 		}
 		int numberSpawned = 0;
 		while (numberSpawned < numberToSpawn)
@@ -230,74 +230,74 @@ public class SpawnWall : MonoBehaviour, IRemotelyControllable
 			{
 				yield return null;
 			}
-			if ((bool)data && data.Dead && !spawnIfUnitDead)
+			if ((bool)Data && Data.Dead && !spawnIfUnitDead)
 			{
 				yield return null;
 			}
 			if (useAlternatingSpawnPos)
 			{
-				altSpawnPos = new List<AlternatingSpawnPos>();
-				altSpawnPos.AddRange(base.transform.parent.GetComponentsInChildren<AlternatingSpawnPos>());
+				AltSpawnPos = new List<AlternatingSpawnPos>();
+				AltSpawnPos.AddRange(transform.parent.GetComponentsInChildren<AlternatingSpawnPos>());
 			}
-			if (spawnedSinceDelay < allowedToSpawn)
+			if (SpawnedSinceDelay < AllowedToSpawn)
 			{
-				if (useAlternatingSpawnPos && altSpawnPos.Count > 0)
+				if (useAlternatingSpawnPos && AltSpawnPos.Count > 0)
 				{
-					if (currentSpawnPosNumber > altSpawnPos.Count - 1)
+					if (CurrentSpawnPosNumber > AltSpawnPos.Count - 1)
 					{
-						currentSpawnPosNumber = 0;
+						CurrentSpawnPosNumber = 0;
 					}
-					position = altSpawnPos[currentSpawnPosNumber].transform.position;
-					if (numberToSpawn - numberSpawned <= altSpawnPos.Count && altSpawnPos[currentSpawnPosNumber].useLastSpawnEvent)
+					position = AltSpawnPos[CurrentSpawnPosNumber].transform.position;
+					if (numberToSpawn - numberSpawned <= AltSpawnPos.Count && AltSpawnPos[CurrentSpawnPosNumber].useLastSpawnEvent)
 					{
-						altSpawnPos[currentSpawnPosNumber].InvokeLastSpawnEvent();
+						AltSpawnPos[CurrentSpawnPosNumber].InvokeLastSpawnEvent();
 					}
 					else
 					{
-						altSpawnPos[currentSpawnPosNumber].InvokeSpawnEvent();
+						AltSpawnPos[CurrentSpawnPosNumber].InvokeSpawnEvent();
 					}
 				}
-				GameObject gameObject = ((!isProjectile || !(projectilesSpawnManager != null)) ? Object.Instantiate(objectToSpawn, position, rotation) : projectilesSpawnManager.SpawnProjectile(objectToSpawn, position, rotation));
-				TeamHolder.AddTeamHolder(gameObject, base.transform.gameObject);
+				GameObject gameObject = ((!IsProjectile || !(ProjectilesSpawnManager != null)) ? Instantiate(objectToSpawn, position, rotation) : ProjectilesSpawnManager.SpawnProjectile(objectToSpawn, position, rotation));
+				TeamHolder.AddTeamHolder(gameObject, transform.gameObject);
 				TeamHolder component = gameObject.GetComponent<TeamHolder>();
 				if (giveSpawnerWeapon)
 				{
-					component.spawnerWeapon = base.transform.GetComponentInParent<Weapon>().gameObject;
+					component.spawnerWeapon = transform.GetComponentInParent<Weapon>().gameObject;
 				}
-				spawnedSinceDelay += 1f;
+				SpawnedSinceDelay += 1f;
 				if (parentToMe)
 				{
-					gameObject.transform.SetParent(base.transform, worldPositionStays: true);
+					gameObject.transform.SetParent(transform, worldPositionStays: true);
 				}
 				if (followMe)
 				{
 					FollowTransform followTransform = gameObject.gameObject.AddComponent<FollowTransform>();
-					followTransform.target = base.transform;
+					followTransform.target = transform;
 					followTransform.destroyOnTargetNull = false;
 				}
 				if (useRootSizeOfSpawner)
 				{
-					gameObject.transform.localScale = base.transform.root.localScale;
+					gameObject.transform.localScale = transform.root.localScale;
 				}
 				SpellTarget component2 = gameObject.GetComponent<SpellTarget>();
-				if ((bool)TargetChecker && targets.Count > 0)
+				if ((bool)TargetChecker && Targets.Count > 0)
 				{
-					if (numberSpawned < targets.Count)
+					if (numberSpawned < Targets.Count)
 					{
-						targetPlace = numberSpawned;
+						TargetPlace = numberSpawned;
 					}
 					else
 					{
-						targetPlace = numberSpawned - targets.Count * Mathf.FloorToInt(numberSpawned / targets.Count);
+						TargetPlace = numberSpawned - Targets.Count * Mathf.FloorToInt(numberSpawned / Targets.Count);
 					}
 				}
 				if ((bool)component2)
 				{
-					if ((bool)TargetChecker && giveTarget && targetPlace < targets.Count)
+					if ((bool)TargetChecker && giveTarget && TargetPlace < Targets.Count)
 					{
-						currentTarget = targets[targetPlace];
-						DataHandler componentInChildren = currentTarget.GetComponentInChildren<DataHandler>();
-						Vector3 position2 = base.transform.position;
+						CurrentTarget = Targets[TargetPlace];
+						DataHandler componentInChildren = CurrentTarget.GetComponentInChildren<DataHandler>();
+						Vector3 position2 = transform.position;
 						Vector3 position3 = componentInChildren.mainRig.position;
 						Rigidbody mainRig = componentInChildren.mainRig;
 						component2.DoEffect(position2, position3, mainRig);
@@ -313,53 +313,53 @@ public class SpawnWall : MonoBehaviour, IRemotelyControllable
 					component3.maxTargetChecker = spawnerProjecile.transform.GetComponent<TeslaCannon>().maxTargetChecker;
 					if ((bool)TargetChecker && giveTarget && (bool)component3.maxTargetChecker && component3.maxTargetChecker.CheckIfAllowedToHit())
 					{
-						Unit component4 = base.transform.root.GetComponent<Unit>();
-						if (targets.Count > 0)
+						Unit component4 = transform.root.GetComponent<Unit>();
+						if (Targets.Count > 0)
 						{
-							if (!allowRootTarget && (bool)component4 && targets[targetPlace] == component4)
+							if (!allowRootTarget && (bool)component4 && Targets[TargetPlace] == component4)
 							{
-								targets.Remove(targets[targetPlace]);
+								Targets.Remove(Targets[TargetPlace]);
 							}
-							currentTarget = targets[targetPlace];
-							DataHandler componentInChildren2 = currentTarget.GetComponentInChildren<DataHandler>();
+							CurrentTarget = Targets[TargetPlace];
+							DataHandler componentInChildren2 = CurrentTarget.GetComponentInChildren<DataHandler>();
 							TeamHolder component5 = GetComponent<TeamHolder>();
 							component.team = component5.team;
 							component.spawner = component5.spawner;
-							component3.PlayEffect(componentInChildren2.mainRig.transform, base.transform, component5.spawner);
+							component3.PlayEffect(componentInChildren2.mainRig.transform, transform, component5.spawner);
 						}
 						else
 						{
-							Object.Destroy(base.gameObject);
+							Destroy(this.gameObject);
 						}
 					}
 					else
 					{
-						Object.Destroy(base.gameObject);
+						Destroy(this.gameObject);
 					}
 				}
 				numberSpawned++;
-				currentSpawnPosNumber++;
+				CurrentSpawnPosNumber++;
 				spawnEvent?.Invoke();
 			}
 			else
 			{
-				spawnedSinceDelay = 0f;
+				SpawnedSinceDelay = 0f;
 				float seconds = ((!useRandom) ? timeBetweenSpawns : Random.Range(timeBetweenSpawns * minRandom, timeBetweenSpawns * maxRandom));
 				yield return new WaitForSeconds(seconds);
 			}
 		}
-		targetPlace = 0;
+		TargetPlace = 0;
 	}
 
 	private void InitializeSpawn()
 	{
-		if (!didInitialize)
+		if (!DidInitialize)
 		{
-			didInitialize = true;
+			DidInitialize = true;
 			if (objectToSpawn != null && objectToSpawn.GetComponent<Projectile>() != null)
 			{
-				isProjectile = true;
-				projectilesSpawnManager = ServiceLocator.GetService<ProjectilesSpawnManager>();
+				IsProjectile = true;
+				ProjectilesSpawnManager = ServiceLocator.GetService<ProjectilesSpawnManager>();
 			}
 		}
 	}
@@ -372,7 +372,7 @@ public class SpawnWall : MonoBehaviour, IRemotelyControllable
 	private bool IsAllowedToSpawnInMultiplayer()
 	{
 		InitializeForMultiplayer();
-		if (!isUnit && !isProjectile)
+		if (!IsUnit && !IsProjectile)
 		{
 			return true;
 		}
@@ -381,12 +381,12 @@ public class SpawnWall : MonoBehaviour, IRemotelyControllable
 
 	private void InitializeForMultiplayer()
 	{
-		if (!didInitializeForMultiplayer)
+		if (!DidInitializeForMultiplayer)
 		{
-			didInitializeForMultiplayer = true;
+			DidInitializeForMultiplayer = true;
 			if (BoltNetwork.IsRunning && objectToSpawn != null)
 			{
-				isUnit = objectToSpawn.GetComponent<Unit>() != null;
+				IsUnit = objectToSpawn.GetComponent<Unit>() != null;
 			}
 		}
 	}

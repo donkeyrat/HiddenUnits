@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using InControl;
 using TFBGames;
 using UnityEngine;
 using UnityEngine.Events;
@@ -15,23 +14,23 @@ namespace HiddenUnits
         {
             base.OnEnterNewScene();
             
-            mainCam = ServiceLocator.GetService<PlayerCamerasManager>()?.GetMainCam(TFBGames.Player.One).transform;
-            save = ServiceLocator.GetService<ISaveLoaderService>();
-            if (GetComponentInChildren<RotationShake>()) rotationShake = GetComponentInChildren<RotationShake>();
-            if (GetComponentInChildren<Rigidbody>()) secretObject = GetComponentInChildren<Rigidbody>();
-            loopSource = GetComponent<AudioSource>();
+            MainCam = ServiceLocator.GetService<PlayerCamerasManager>()?.GetMainCam(TFBGames.Player.One).transform;
+            Save = ServiceLocator.GetService<ISaveLoaderService>();
+            if (GetComponentInChildren<RotationShake>()) RotationShake = GetComponentInChildren<RotationShake>();
+            if (GetComponentInChildren<Rigidbody>()) SecretObject = GetComponentInChildren<Rigidbody>();
+            LoopSource = GetComponent<AudioSource>();
 
             var keysToRemove = new List<BillyKey>();
             if (keys.Count > 0)
             {
                 for (int i = 0; i < keys.Count; i++)
                 {
-                    isUnlocking.Add(false);
-                    if (save.HasUnlockedSecret(toBeUnlocked[i]))
+                    IsUnlocking.Add(false);
+                    if (Save.HasUnlockedSecret(toBeUnlocked[i]))
                     {
                         keys[i].SetActive(true);
                         keys[i].GetComponent<Animator>().Play("BillyKey");
-                        keysToRemove.Add(new BillyKey(keys[i], alreadyUnlocked[i], toBeUnlocked[i], isUnlocking[i]));
+                        keysToRemove.Add(new BillyKey(keys[i], alreadyUnlocked[i], toBeUnlocked[i], IsUnlocking[i]));
                     }
                 }
             }
@@ -41,7 +40,7 @@ namespace HiddenUnits
                 keys.Remove(key.key);
                 alreadyUnlocked.Remove(key.alreadyUnlocked);
                 toBeUnlocked.Remove(key.toBeUnlocked);
-                isUnlocking.Remove(key.isUnlocking);
+                IsUnlocking.Remove(key.isUnlocking);
             }
 
             CheckUnlocks();
@@ -57,33 +56,33 @@ namespace HiddenUnits
 
         public void Update()
         {
-            if (save.HasUnlockedSecret(finalUnlock)) return;
+            if (Save.HasUnlockedSecret(finalUnlock)) return;
             
-            var num = Vector3.Distance(secretObject.worldCenterOfMass, mainCam.position);
-            float num2 = Vector3.Angle(mainCam.forward, secretObject.worldCenterOfMass - mainCam.position);
+            var num = Vector3.Distance(SecretObject.worldCenterOfMass, MainCam.position);
+            float num2 = Vector3.Angle(MainCam.forward, SecretObject.worldCenterOfMass - MainCam.position);
             var lookValue = 1000f / (num * num2);
-            loopSource.volume = Mathf.Pow(unlockValue * 0.25f, 1.3f);
-            loopSource.pitch = 1f + 1f * unlockValue;
-            if (done)
+            LoopSource.volume = Mathf.Pow(UnlockValue * 0.25f, 1.3f);
+            LoopSource.pitch = 1f + 1f * UnlockValue;
+            if (Done)
             {
-                if (unlockValue > 0f || lookValue > 10f) SetColor();
-                if (num > unlockDistance) unlockValue -= Time.unscaledDeltaTime * 0.2f;
+                if (UnlockValue > 0f || lookValue > 10f) SetColor();
+                if (num > unlockDistance) UnlockValue -= Time.unscaledDeltaTime * 0.2f;
                 else if (lookValue > 8f)
                 {
-                    unlockValue += Time.unscaledDeltaTime * 0.2f;
+                    UnlockValue += Time.unscaledDeltaTime * 0.2f;
                     UnlockProgressFeedback();
-                    if (unlockValue > 1f)
+                    if (UnlockValue > 1f)
                     {
                         UnlockSelf();
                     }
                 }
-                else unlockValue -= Time.unscaledDeltaTime * 0.2f;
+                else UnlockValue -= Time.unscaledDeltaTime * 0.2f;
             }
             else
             {
                 for (int i = 0; i < keys.Count; i++)
                 {
-                    if (save.HasUnlockedSecret(alreadyUnlocked[i]) && !save.HasUnlockedSecret(toBeUnlocked[i]) && !isUnlocking[i] && lookValue > 8f)
+                    if (Save.HasUnlockedSecret(alreadyUnlocked[i]) && !Save.HasUnlockedSecret(toBeUnlocked[i]) && !IsUnlocking[i] && lookValue > 8f)
                     {
                         StartCoroutine(UnlockKey(i));
                     }
@@ -93,62 +92,62 @@ namespace HiddenUnits
         
         public IEnumerator UnlockKey(int index)
         {
-            isUnlocking[index] = true;
+            IsUnlocking[index] = true;
             
             keys[index].SetActive(true);
             keys[index].GetComponent<Animator>().Play("BillyKey");
 
             yield return new WaitForSeconds(unlockDelay);
 
-            save.UnlockSecret(toBeUnlocked[index]);
+            Save.UnlockSecret(toBeUnlocked[index]);
             
-            loopSource.Stop();
-            loopSource.volume = 1f;
-            loopSource.PlayOneShot(hitClip);
+            LoopSource.Stop();
+            LoopSource.volume = 1f;
+            LoopSource.PlayOneShot(hitClip);
             
             CheckUnlocks();
         }
 
         public void CheckUnlocks()
         {
-            if (toBeUnlocked.TrueForAll(x => save.HasUnlockedSecret(toBeUnlocked[toBeUnlocked.IndexOf(x)])))
+            if (toBeUnlocked.TrueForAll(x => Save.HasUnlockedSecret(toBeUnlocked[toBeUnlocked.IndexOf(x)])))
             {
-                done = true;
-                loopSource.Play();
+                Done = true;
+                LoopSource.Play();
             }
         }
 
         public void UnlockSelf()
         {
-            if (save.HasUnlockedSecret(finalUnlock)) return;
-            save.UnlockSecret(finalUnlock);
+            if (Save.HasUnlockedSecret(finalUnlock)) return;
+            Save.UnlockSecret(finalUnlock);
             ServiceLocator.GetService<ModalPanel>().OpenUnlockPanel(unlockDescription, unlockImage);
             PlacementUI placementUI = FindObjectOfType<PlacementUI>();
             if (placementUI != null)
             {
                 placementUI.RedrawUI(finalUnlock);
             }
-            loopSource.PlayOneShot(hitClip);
+            LoopSource.PlayOneShot(hitClip);
             unlockAllEvent.Invoke();
             StartCoroutine(ShrinkUnlockValue());
         }
 
         public IEnumerator ShrinkUnlockValue()
         {
-            while (unlockValue > 0f)
+            while (UnlockValue > 0f)
             {
-                unlockValue -= Time.unscaledDeltaTime * 0.2f;
+                UnlockValue -= Time.unscaledDeltaTime * 0.2f;
                 SetColor();
                 UnlockProgressFeedback();
-                loopSource.volume = Mathf.Pow(unlockValue * 0.25f, 1.3f);
-                loopSource.pitch = 1f + 1f * unlockValue;
+                LoopSource.volume = Mathf.Pow(UnlockValue * 0.25f, 1.3f);
+                LoopSource.pitch = 1f + 1f * UnlockValue;
                 yield return null;
             }
          }
         
         private void SetColor()
         {
-            unlockValue = Mathf.Clamp(unlockValue, 0f, float.PositiveInfinity);
+            UnlockValue = Mathf.Clamp(UnlockValue, 0f, float.PositiveInfinity);
             var allRends = GetComponentsInChildren<Renderer>();
             foreach (var renderer in allRends)
             {
@@ -160,7 +159,7 @@ namespace HiddenUnits
                         if (materials[j].HasProperty("_EmissionColor"))
                         {
                             materials[j].EnableKeyword("_EMISSION");
-                            materials[j].SetColor("_EmissionColor", glowColor * unlockValue * 2f);
+                            materials[j].SetColor("_EmissionColor", glowColor * UnlockValue * 2f);
                         }
                     }
                     renderer.materials = materials;
@@ -170,33 +169,33 @@ namespace HiddenUnits
         
         private void UnlockProgressFeedback()
         {
-            if ((bool)rotationShake)
+            if ((bool)RotationShake)
             {
-                if (unlockValue <= 0f)
+                if (UnlockValue <= 0f)
                 {
-                    rotationShake.AddForce(Random.onUnitSphere * 2f);
-                    unlockValue = 0f;
+                    RotationShake.AddForce(Random.onUnitSphere * 2f);
+                    UnlockValue = 0f;
                 }
-                rotationShake.enabled = true;
-                rotationShake.AddForce(Random.onUnitSphere * unlockValue * Time.deltaTime * 50f);
+                RotationShake.enabled = true;
+                RotationShake.AddForce(Random.onUnitSphere * UnlockValue * Time.deltaTime * 50f);
             }
         }
         
-        private Transform mainCam;
+        private Transform MainCam;
         
-        private ISaveLoaderService save;
+        private ISaveLoaderService Save;
         
-        private List<bool> isUnlocking = new List<bool>();
+        private List<bool> IsUnlocking = new List<bool>();
 
-        private RotationShake rotationShake;
+        private RotationShake RotationShake;
         
-        private Rigidbody secretObject;
+        private Rigidbody SecretObject;
 
-        private AudioSource loopSource;
+        private AudioSource LoopSource;
 
-        private bool done;
+        private bool Done;
 
-        private float unlockValue;
+        private float UnlockValue;
         
         [Header("Keys")]
         

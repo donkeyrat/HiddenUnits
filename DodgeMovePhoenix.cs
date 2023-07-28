@@ -33,32 +33,32 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 	[Tooltip("See the comments in code.")]
 	protected bool allowForMartian;
 
-	private float randomSeed;
+	private float RandomSeed;
 
-	private DataHandler data;
+	private DataHandler Data;
 
-	private RigidbodyHolder allRigs;
+	private RigidbodyHolder AllRigs;
 
-	private CameraAbilityPossess possess;
+	private CameraAbilityPossess Possess;
 
 	public bool IsRemotelyControlled { get; private set; }
 
 	private void Start()
 	{
-		data = base.transform.root.GetComponentInChildren<DataHandler>();
-		allRigs = data.GetComponent<RigidbodyHolder>();
+		Data = transform.root.GetComponentInChildren<DataHandler>();
+		AllRigs = Data.GetComponent<RigidbodyHolder>();
 		for (int i = 0; i < moves.Length; i++)
 		{
 			if (moves[i].forceDirection == CombatMoveDataInstance.ForceDirection.RotateTowardsPossCamElseTarget)
 			{
-				possess = MainCam.instance.GetComponentInParent<CameraAbilityPossess>();
+				Possess = MainCam.instance.GetComponentInParent<CameraAbilityPossess>();
 			}
 		}
 		if (randomForceMultiplier)
 		{
-			randomSeed = Random.Range(-1, 1);
+			RandomSeed = Random.Range(-1, 1);
 			forceMultiplier = Random.Range(forceMultiplier * 0.7f, forceMultiplier);
-			if (randomSeed < 0f)
+			if (RandomSeed < 0f)
 			{
 				forceMultiplier = 0f - forceMultiplier;
 			}
@@ -73,12 +73,12 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 
 	public void DoMove()
 	{
-		if (!data)
+		if (!Data)
 		{
-			data = base.transform.root.GetComponentInChildren<DataHandler>();
-			allRigs = data.GetComponent<RigidbodyHolder>();
+			Data = transform.root.GetComponentInChildren<DataHandler>();
+			AllRigs = Data.GetComponent<RigidbodyHolder>();
 		}
-		DoMove(null, data.targetMainRig, data.targetData);
+		DoMove(null, Data.targetMainRig, Data.targetData);
 	}
 
 	public override void DoMove(Rigidbody enemyWeapon, Rigidbody enemyTorso, DataHandler targetData)
@@ -113,57 +113,57 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 		List<Rigidbody> rigs = new List<Rigidbody>();
 		if (move.rigidbodyToMove == CombatMoveDataInstance.RigidBodyToMove.Head)
 		{
-			rigs.Add(data.head.GetComponent<Rigidbody>());
+			rigs.Add(Data.head.GetComponent<Rigidbody>());
 		}
 		else if (move.rigidbodyToMove == CombatMoveDataInstance.RigidBodyToMove.Torso)
 		{
-			if ((bool)data.torso)
+			if ((bool)Data.torso)
 			{
-				rigs.Add(data.torso.GetComponent<Rigidbody>());
+				rigs.Add(Data.torso.GetComponent<Rigidbody>());
 			}
 		}
 		else if (move.rigidbodyToMove == CombatMoveDataInstance.RigidBodyToMove.Hip)
 		{
-			if ((bool)data.hip)
+			if ((bool)Data.hip)
 			{
-				rigs.Add(data.hip.GetComponent<Rigidbody>());
+				rigs.Add(Data.hip.GetComponent<Rigidbody>());
 			}
 		}
 		else if (move.rigidbodyToMove == CombatMoveDataInstance.RigidBodyToMove.FootLeft)
 		{
-			if ((bool)data.footLeft)
+			if ((bool)Data.footLeft)
 			{
-				rigs.Add(data.footLeft.GetComponent<Rigidbody>());
+				rigs.Add(Data.footLeft.GetComponent<Rigidbody>());
 			}
 		}
 		else if (move.rigidbodyToMove == CombatMoveDataInstance.RigidBodyToMove.FootRight)
 		{
-			if ((bool)data.footRight)
+			if ((bool)Data.footRight)
 			{
-				rigs.Add(data.footRight.GetComponent<Rigidbody>());
+				rigs.Add(Data.footRight.GetComponent<Rigidbody>());
 			}
 		}
 		else if (move.rigidbodyToMove == CombatMoveDataInstance.RigidBodyToMove.HandRight)
 		{
-			if ((bool)data.rightHand)
+			if ((bool)Data.rightHand)
 			{
-				rigs.Add(data.rightHand.GetComponent<Rigidbody>());
+				rigs.Add(Data.rightHand.GetComponent<Rigidbody>());
 			}
 		}
 		else if (move.rigidbodyToMove == CombatMoveDataInstance.RigidBodyToMove.HandLeft)
 		{
-			if ((bool)data.leftHand)
+			if ((bool)Data.leftHand)
 			{
-				rigs.Add(data.leftHand.GetComponent<Rigidbody>());
+				rigs.Add(Data.leftHand.GetComponent<Rigidbody>());
 			}
 		}
 		else if (move.rigidbodyToMove == CombatMoveDataInstance.RigidBodyToMove.AllRigs)
 		{
-			rigs.AddRange(allRigs.AllRigs);
+			rigs.AddRange(AllRigs.AllRigs);
 		}
 		else if (move.rigidbodyToMove == CombatMoveDataInstance.RigidBodyToMove.MainWeapon)
 		{
-			WeaponHandler weaponHandler = data.weaponHandler;
+			WeaponHandler weaponHandler = Data.weaponHandler;
 			if ((bool)weaponHandler)
 			{
 				if ((bool)weaponHandler.rightWeapon && (bool)weaponHandler.rightWeapon.rigidbody)
@@ -186,7 +186,7 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 		}
 		if (move.includeWeapons)
 		{
-			WeaponHandler weaponHandler2 = data.weaponHandler;
+			WeaponHandler weaponHandler2 = Data.weaponHandler;
 			if ((bool)weaponHandler2)
 			{
 				if ((bool)weaponHandler2.leftWeapon && (bool)weaponHandler2.leftWeapon.rigidbody)
@@ -231,7 +231,7 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 					{
 						forceDirection = GetDirection(move, enemyWeapon, enemyTorso, rigs[0], targetData);
 					}
-					if (!usedAsMovement || !data || !data.GetComponent<AnimationHandler>() || data.GetComponent<AnimationHandler>().currentState != 0)
+					if (!usedAsMovement || !Data || !Data.GetComponent<AnimationHandler>() || Data.GetComponent<AnimationHandler>().currentState != 0)
 					{
 						if (move.force != 0f && (bool)rigs[j])
 						{
@@ -258,11 +258,11 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 	private bool CheckConditions()
 	{
 		bool result = true;
-		if (maxRange != 0f && (bool)data && data.distanceToTarget > maxRange)
+		if (maxRange != 0f && (bool)Data && Data.distanceToTarget > maxRange)
 		{
 			result = false;
 		}
-		if (minRange != 0f && (bool)data && data.distanceToTarget < minRange)
+		if (minRange != 0f && (bool)Data && Data.distanceToTarget < minRange)
 		{
 			result = false;
 		}
@@ -273,7 +273,7 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 	{
 		if (!enemyTorso)
 		{
-			enemyTorso = data.targetData.mainRig;
+			enemyTorso = Data.targetData.mainRig;
 		}
 		Vector3 result = Vector3.zero;
 		if (ownRig == null)
@@ -313,9 +313,9 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 				{
 					result = new Vector3(result.x, 0f, result.y);
 				}
-				if (data.cantFallForSeconds < 0.5f)
+				if (Data.cantFallForSeconds < 0.5f)
 				{
-					data.cantFallForSeconds = 0.5f;
+					Data.cantFallForSeconds = 0.5f;
 				}
 			}
 			else if ((bool)enemyTorso)
@@ -329,11 +329,11 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 		}
 		if (move.forceDirection == CombatMoveDataInstance.ForceDirection.CharacterForward)
 		{
-			result = data.characterForwardObject.forward;
+			result = Data.characterForwardObject.forward;
 		}
 		else if (move.forceDirection == CombatMoveDataInstance.ForceDirection.CharacterRight)
 		{
-			result = data.characterForwardObject.right;
+			result = Data.characterForwardObject.right;
 		}
 		else if (move.forceDirection == CombatMoveDataInstance.ForceDirection.CrossUpAndAwayFromAttacker && (bool)ownRig && (bool)enemyTorso)
 		{
@@ -343,9 +343,9 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 				result = result.normalized;
 			}
 		}
-		else if (move.forceDirection == CombatMoveDataInstance.ForceDirection.CrossUpAndTowardsUnitTarget && (bool)ownRig && (bool)data.targetMainRig)
+		else if (move.forceDirection == CombatMoveDataInstance.ForceDirection.CrossUpAndTowardsUnitTarget && (bool)ownRig && (bool)Data.targetMainRig)
 		{
-			result = Vector3.Cross(Vector3.up, ownRig.position - data.targetMainRig.position);
+			result = Vector3.Cross(Vector3.up, ownRig.position - Data.targetMainRig.position);
 			if (move.normalize)
 			{
 				result = result.normalized;
@@ -357,7 +357,7 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 		}
 		else if (move.forceDirection == CombatMoveDataInstance.ForceDirection.RotateTowardsPossCamElseTarget && (bool)enemyTorso && (bool)ownRig)
 		{
-			result = ((!possess || !possess.currentUnit || !data || !data.unit || !(possess.currentUnit == data.unit)) ? (-Vector3.Cross(enemyTorso.position - ownRig.position, ownRig.transform.forward).normalized * Vector3.Angle(enemyTorso.position - ownRig.position, ownRig.transform.forward)) : (-Vector3.Cross(MainCam.instance.transform.forward, ownRig.transform.forward).normalized * Vector3.Angle(MainCam.instance.transform.forward, ownRig.transform.forward)));
+			result = ((!Possess || !Possess.currentUnit || !Data || !Data.unit || !(Possess.currentUnit == Data.unit)) ? (-Vector3.Cross(enemyTorso.position - ownRig.position, ownRig.transform.forward).normalized * Vector3.Angle(enemyTorso.position - ownRig.position, ownRig.transform.forward)) : (-Vector3.Cross(MainCam.instance.transform.forward, ownRig.transform.forward).normalized * Vector3.Angle(MainCam.instance.transform.forward, ownRig.transform.forward)));
 		}
 		else if (move.forceDirection == CombatMoveDataInstance.ForceDirection.RotateTowardsTarget && (bool)enemyTorso && (bool)ownRig)
 		{
@@ -385,11 +385,11 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 		}
 		else if (move.forceDirection == CombatMoveDataInstance.ForceDirection.InWalkDirection)
 		{
-			result = data.groundedMovementDirectionObject.forward;
+			result = Data.groundedMovementDirectionObject.forward;
 		}
 		else if (move.forceDirection == CombatMoveDataInstance.ForceDirection.RotateTowardsWalkDirection)
 		{
-			result = Vector3.Cross(ownRig.transform.forward, data.groundedMovementDirectionObject.forward).normalized * Vector3.Angle(ownRig.transform.forward, data.groundedMovementDirectionObject.forward);
+			result = Vector3.Cross(ownRig.transform.forward, Data.groundedMovementDirectionObject.forward).normalized * Vector3.Angle(ownRig.transform.forward, Data.groundedMovementDirectionObject.forward);
 		}
 		else if (move.randomizeDirection && Random.value > 0.5f)
 		{
