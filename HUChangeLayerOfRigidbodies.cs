@@ -43,7 +43,7 @@ namespace HiddenUnits
 
         public void ChangeLayer()
         {
-            for (int i = 0; i < Rigs.Count; i++)
+            for (var i = 0; i < Rigs.Count; i++)
             {
                 if ((bool)Rigs[i])
                 {
@@ -51,7 +51,7 @@ namespace HiddenUnits
                     Rigs[i].gameObject.layer = 20;
                 }
             }
-            for (int j = 0; j < Colliders.Length; j++)
+            for (var j = 0; j < Colliders.Length; j++)
             {
                 if ((bool)Colliders[j])
                 {
@@ -63,14 +63,14 @@ namespace HiddenUnits
 
         public void ResetLayer()
         {
-            for (int i = 0; i < Rigs.Count; i++)
+            for (var i = 0; i < Rigs.Count; i++)
             {
                 if ((bool)Rigs[i])
                 {
                     Rigs[i].gameObject.layer = Layers[i];
                 }
             }
-            for (int j = 0; j < Colliders.Length; j++)
+            for (var j = 0; j < Colliders.Length; j++)
             {
                 if ((bool)Colliders[j])
                 {

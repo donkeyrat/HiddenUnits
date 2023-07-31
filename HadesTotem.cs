@@ -21,7 +21,7 @@ namespace HiddenUnits {
             var targets = SetTargets();
             if (targets.Length > 0) 
             {
-                for (int i = 0; i < targets.Length; i++) 
+                for (var i = 0; i < targets.Length; i++) 
                 {
                     if (i >= limitPerDrain) yield break;
 

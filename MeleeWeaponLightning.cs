@@ -29,9 +29,9 @@ namespace HiddenUnits
 
         public IEnumerator DoLightning()
         {
-            for (int i = 0; i < chainCount; i++)
+            for (var i = 0; i < chainCount; i++)
             {
-                for (int j = 0; j < consecutiveChains; j++)
+                for (var j = 0; j < consecutiveChains; j++)
                 {
                     if (Target && Target.data && Target.data.healthHandler && lineObject && OldTarget)
                     {

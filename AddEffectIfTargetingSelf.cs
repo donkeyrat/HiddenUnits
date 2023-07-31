@@ -10,12 +10,12 @@ namespace HiddenUnits
         public void DoCheck()
         {
             var hits = Physics.SphereCastAll(transform.position, checkRadius, Vector3.up, 0.1f, LayerMask.GetMask(new string[] { "MainRig" }));
-            List<Unit> foundUnits = new List<Unit>();
+            var foundUnits = new List<Unit>();
             foreach (var hit in hits) {
                 
                 if (hit.transform.root.GetComponent<Unit>() && !foundUnits.Contains(hit.transform.root.GetComponent<Unit>())) foundUnits.Add(hit.rigidbody.transform.root.GetComponent<Unit>());
             }
-            Unit[] query
+            var query
                 = (
                     from Unit unit
                         in foundUnits
@@ -27,10 +27,10 @@ namespace HiddenUnits
             {
                 foreach (var unit in query)
                 {
-                    UnitEffectBase unitEffectBase = UnitEffectBase.AddEffectToTarget(unit.transform.gameObject, effect);
+                    var unitEffectBase = UnitEffectBase.AddEffectToTarget(unit.transform.gameObject, effect);
                     if (unitEffectBase == null) {
 
-                        GameObject obj = Instantiate(effect.gameObject, unit.transform.root);
+                        var obj = Instantiate(effect.gameObject, unit.transform.root);
                         obj.transform.position = unit.transform.position;
                         unitEffectBase = obj.GetComponent<UnitEffectBase>();
                         TeamHolder.AddTeamHolder(obj, transform.root.gameObject);

@@ -46,11 +46,11 @@ public class DreadSwords : MonoBehaviour
 	private void Start()
 	{
 		Data = transform.root.GetComponentInChildren<DataHandler>();
-		List<Renderer> list = new List<Renderer>();
-		for (int i = 0; i < SwordPoints.Length; i++)
+		var list = new List<Renderer>();
+		for (var i = 0; i < SwordPoints.Length; i++)
 		{
-			SpookySword spookySword = CreateNewSword(SwordPoints[i].transform.position + Vector3.up * 2f, SwordPoints[i].transform.rotation);
-			Renderer[] componentsInChildren = spookySword.gameObject.GetComponentsInChildren<Renderer>();
+			var spookySword = CreateNewSword(SwordPoints[i].transform.position + Vector3.up * 2f, SwordPoints[i].transform.rotation);
+			var componentsInChildren = spookySword.gameObject.GetComponentsInChildren<Renderer>();
 			if (componentsInChildren != null && componentsInChildren.Length != 0)
 			{
 				list.AddRange(componentsInChildren);
@@ -61,7 +61,7 @@ public class DreadSwords : MonoBehaviour
 		{
 			Data.unit.AddRenderersToShowHide(list.ToArray(), Data.unit.IsSpawnedInBlindPlacement);
 		}
-		for (int k = 0; k < Swords.Count; k++)
+		for (var k = 0; k < Swords.Count; k++)
 		{
 			if (!(Swords[k].gameObject == null))
 			{
@@ -80,25 +80,25 @@ public class DreadSwords : MonoBehaviour
 		if ((bool)Data && Data.Dead)
 		{
 			Done = true;
-			for (int i = 0; i < Swords.Count; i++)
+			for (var i = 0; i < Swords.Count; i++)
 			{
 				AttackID = i;
 				Attack(Data.mainRig, AttackID);
 			}
 		}
-		float num = Mathf.Clamp(Time.deltaTime, 0f, 0.02f);
+		var num = Mathf.Clamp(Time.deltaTime, 0f, 0.02f);
 		if ((bool)Data.weaponHandler)
 		{
 			AttackspeedMulti = Data.weaponHandler.attackSpeedMultiplier;
 		}
-		bool num2 = Data.unit == null || !Data.unit.IsRemotelyControlled;
+		var num2 = Data.unit == null || !Data.unit.IsRemotelyControlled;
 		Counter += Time.deltaTime * AttackspeedMulti;
 		if (num2 && (bool)Data.targetMainRig && Counter > attackRate)
 		{
-			float num3 = 999f;
-			for (int j = 0; j < SwordPoints.Length; j++)
+			var num3 = 999f;
+			for (var j = 0; j < SwordPoints.Length; j++)
 			{
-				float num4 = Vector3.Angle(Data.targetMainRig.position - transform.position, SwordPoints[j].gameObject.transform.position - transform.position);
+				var num4 = Vector3.Angle(Data.targetMainRig.position - transform.position, SwordPoints[j].gameObject.transform.position - transform.position);
 				if (num4 < num3 && Swords[j].sinceSpawn > 1.5f)
 				{
 					num3 = num4;
@@ -110,7 +110,7 @@ public class DreadSwords : MonoBehaviour
 				Attack(Data.targetMainRig, AttackID);
 			}
 		}
-		for (int k = 0; k < Swords.Count; k++)
+		for (var k = 0; k < Swords.Count; k++)
 		{
 			if (!(Swords[k].gameObject == null))
 			{
@@ -128,7 +128,7 @@ public class DreadSwords : MonoBehaviour
 		{
 			useAttackID = UnityEngine.Random.Range(0, Swords.Count);
 		}
-		SpookySword spookySword = Swords[useAttackID];
+		var spookySword = Swords[useAttackID];
 		if (spookySword != null)
 		{
 			StartCoroutine(DoAttack(spookySword, target));
@@ -148,7 +148,7 @@ public class DreadSwords : MonoBehaviour
 	private void OnDestroy()
 	{
 		StopAllCoroutines();
-		for (int i = 0; i < Swords.Count; i++)
+		for (var i = 0; i < Swords.Count; i++)
 		{
 			_ = Swords[i].gameObject != null;
 			Destroy(Swords[i].gameObject);
@@ -161,9 +161,9 @@ public class DreadSwords : MonoBehaviour
 		{
 			yield break;
 		}
-		float counter2 = 0f;
-		float t = throwCurve.keys[throwCurve.keys.Length - 1].time;
-		ProjectileStick stick = attackSword.gameObject.GetComponent<ProjectileStick>();
+		var counter2 = 0f;
+		var t = throwCurve.keys[throwCurve.keys.Length - 1].time;
+		var stick = attackSword.gameObject.GetComponent<ProjectileStick>();
 		attackSword.gameObject.GetComponent<RaycastTrail>().enabled = true;
 		while (counter2 < t && (!stick || !stick.stuck))
 		{
@@ -171,7 +171,7 @@ public class DreadSwords : MonoBehaviour
 			{
 				yield break;
 			}
-			float num = Mathf.Clamp(Time.deltaTime, 0f, 0.02f);
+			var num = Mathf.Clamp(Time.deltaTime, 0f, 0.02f);
 			counter2 += Time.deltaTime;
 			attackSword.move.velocity = Vector3.Lerp(attackSword.move.velocity, (targ.position - attackSword.gameObject.transform.position).normalized * throwSpeed * throwCurve.Evaluate(counter2), num * 8f);
 			attackSword.gameObject.transform.rotation = Quaternion.Lerp(attackSword.gameObject.transform.rotation, quaternion.LookRotation(targ.position - attackSword.gameObject.transform.position, Vector3.up), num * 7f);
@@ -180,7 +180,7 @@ public class DreadSwords : MonoBehaviour
 		counter2 = 0f;
 		while (counter2 < 0.5f && (!stick || !stick.stuck))
 		{
-			float num2 = Mathf.Clamp(Time.deltaTime, 0f, 0.02f);
+			var num2 = Mathf.Clamp(Time.deltaTime, 0f, 0.02f);
 			counter2 += Time.deltaTime;
 			if (attackSword.gameObject != null)
 			{
@@ -192,7 +192,7 @@ public class DreadSwords : MonoBehaviour
 
 	private SpookySword CreateNewSword(Vector3 pos, quaternion rot)
 	{
-		SpookySword obj = new SpookySword
+		var obj = new SpookySword
 		{
 			gameObject = Instantiate(sourceSword, pos, rot)
 		};

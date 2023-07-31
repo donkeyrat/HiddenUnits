@@ -29,8 +29,8 @@ public class ClubSpell : TargetableEffect
 
     private IEnumerator Go() 
     {
-	    float t2 = upCurve.keys[upCurve.keys.Length - 1].time;
-		float c2 = 0f;
+	    var t2 = upCurve.keys[upCurve.keys.Length - 1].time;
+		var c2 = 0f;
 		while (c2 < t2) 
 		{
 			c2 += Time.deltaTime;
@@ -71,7 +71,7 @@ public class ClubSpell : TargetableEffect
 
 	private void GetDirection(Vector3 startPoint, Vector3 endPoint, Rigidbody targetRig) 
 	{
-		Vector3 vector = endPoint;
+		var vector = endPoint;
 		vector += targetRig.velocity * (prediction * 0.1f * Vector3.Distance(startPoint, vector));
 		Direction = (vector - startPoint).normalized;
 	}

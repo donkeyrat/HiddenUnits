@@ -19,7 +19,7 @@ namespace HiddenUnits {
     
         public IEnumerator DoSpawning() {
     
-            for (int i = 0; i < amountToSpawn; i++) {
+            for (var i = 0; i < amountToSpawn; i++) {
     
                 var point = new Vector3(transform.position.x + Random.Range(-radius, radius), transform.position.y + 2f, transform.position.z + Random.Range(-radius, radius));
                 var spawnedObject = Instantiate(objectsToSpawn[Random.Range(0, objectsToSpawn.Count)], point, Quaternion.LookRotation(Vector3.up));

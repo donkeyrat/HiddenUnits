@@ -62,14 +62,14 @@ public class PhoenixWings : MonoBehaviour
 		{
 			HeadRig = Data.head.GetComponent<Rigidbody>();
 		}
-		AnimationHandler component = Data.GetComponent<AnimationHandler>();
+		var component = Data.GetComponent<AnimationHandler>();
 		if ((bool)component)
 		{
 			component.multiplier = 0.5f;
 		}
 		heightVariance *= Random.value;
 		Time = Random.Range(0f, 1000f);
-		Balance component2 = Data.GetComponent<Balance>();
+		var component2 = Data.GetComponent<Balance>();
 		if ((bool)component2)
 		{
 			component2.enabled = false;
@@ -87,11 +87,11 @@ public class PhoenixWings : MonoBehaviour
 		{
 			return;
 		}
-		bool value = Data.unit.m_PreferedDistance > Data.distanceToTarget;
+		var value = Data.unit.m_PreferedDistance > Data.distanceToTarget;
 		Physics.Raycast(new Ray(transform.position, Vector3.down), out var hitInfo, flightCurve.keys[flightCurve.keys.Length - 1].time, mask);
 		if ((bool)hitInfo.transform)
 		{
-			float num = hitInfo.distance + Mathf.Cos((UnityEngine.Time.time + Time) * variationSpeed) * heightVariance;
+			var num = hitInfo.distance + Mathf.Cos((UnityEngine.Time.time + Time) * variationSpeed) * heightVariance;
 			Data.mainRig.AddTorque(rotationTorque * Vector3.Angle(Data.mainRig.transform.up, Data.groundedMovementDirectionObject.forward) * Vector3.Cross(Data.mainRig.transform.up, Data.groundedMovementDirectionObject.forward), ForceMode.Acceleration);
 			if ((bool)HeadRig)
 			{

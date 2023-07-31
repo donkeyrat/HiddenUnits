@@ -55,15 +55,15 @@ namespace Landfall.TABS.AI.Systems.Modifiers {
 				
 				if (hasTargetTags[index].Target == Entity.Null) { return; }
 				
-				Entity e = entities[index];
-				Direction component = directions[index];
-				CircleTarget circleTarget = circleTargets[index];
+				var e = entities[index];
+				var component = directions[index];
+				var circleTarget = circleTargets[index];
 				if (targetDatas[index].DistanceToTarget <= circleTarget.circleDistance) {
 					
-					float3 initial = component.Value;
-					float3 better = new float3(initial.x, 0f, initial.z);
-					float3 right = math.cross(math.normalize(better), new float3(0, 1, 0));
-					float3 scaled = math.length(better) * right;
+					var initial = component.Value;
+					var better = new float3(initial.x, 0f, initial.z);
+					var right = math.cross(math.normalize(better), new float3(0, 1, 0));
+					var scaled = math.length(better) * right;
 					component.Value = new float3(scaled.x, initial.y, scaled.z);
 				}
 				commandBuffer.SetComponent(index, e, component);

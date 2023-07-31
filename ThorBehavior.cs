@@ -96,10 +96,10 @@ public class ThorBehavior : MonoBehaviour
 
 	public Weapon SetWeapon(Unit unit, Team team, GameObject weaponObject, PropItemData weaponData, HoldingHandler.HandType handType, Quaternion rotation, List<GameObject> objects, bool isUnitEditor = false)
 	{
-		WeaponHandler componentInChildren = unit.GetComponentInChildren<WeaponHandler>();
+		var componentInChildren = unit.GetComponentInChildren<WeaponHandler>();
 		if (!componentInChildren)
 		{
-			MultipleWeaponHandler componentInChildren2 = unit.GetComponentInChildren<MultipleWeaponHandler>();
+			var componentInChildren2 = unit.GetComponentInChildren<MultipleWeaponHandler>();
 			if ((bool)componentInChildren2)
 			{
 				componentInChildren2.SetWeapon(weaponObject, handType, false);
@@ -110,19 +110,19 @@ public class ThorBehavior : MonoBehaviour
 		//{
 		//	componentInChildren.fistRefernce = unit.unitBlueprint.fistRef;
 		//}
-		Torso componentInChildren3 = unit.GetComponentInChildren<Torso>();
+		var componentInChildren3 = unit.GetComponentInChildren<Torso>();
 		if ((bool)weaponObject)
 		{
-			GameObject gameObject = weaponObject;
+			var gameObject = weaponObject;
 			gameObject.transform.position = componentInChildren3.transform.position + componentInChildren3.transform.forward * 0.5f;
 			gameObject.transform.rotation = rotation;
 			gameObject.gameObject.transform.SetParent(unit.transform);
 			objects.Add(gameObject);
-			Weapon component = gameObject.GetComponent<Weapon>();
-			WeaponItem component2 = gameObject.GetComponent<WeaponItem>();
-			Holdable component3 = gameObject.GetComponent<Holdable>();
+			var component = gameObject.GetComponent<Weapon>();
+			var component2 = gameObject.GetComponent<WeaponItem>();
+			var component3 = gameObject.GetComponent<Holdable>();
 			gameObject.GetComponent<MeleeWeapon>();
-			RangeWeapon component4 = gameObject.GetComponent<RangeWeapon>();
+			var component4 = gameObject.GetComponent<RangeWeapon>();
 			if (unit.unitBlueprint.removeCloseRangeMiss && (bool)component4)
 			{
 				component4.extraCDInMelee = 0f;

@@ -23,7 +23,7 @@ namespace HiddenUnits
             var keysToRemove = new List<BillyKey>();
             if (keys.Count > 0)
             {
-                for (int i = 0; i < keys.Count; i++)
+                for (var i = 0; i < keys.Count; i++)
                 {
                     IsUnlocking.Add(false);
                     if (Save.HasUnlockedSecret(toBeUnlocked[i]))
@@ -59,7 +59,7 @@ namespace HiddenUnits
             if (Save.HasUnlockedSecret(finalUnlock)) return;
             
             var num = Vector3.Distance(SecretObject.worldCenterOfMass, MainCam.position);
-            float num2 = Vector3.Angle(MainCam.forward, SecretObject.worldCenterOfMass - MainCam.position);
+            var num2 = Vector3.Angle(MainCam.forward, SecretObject.worldCenterOfMass - MainCam.position);
             var lookValue = 1000f / (num * num2);
             LoopSource.volume = Mathf.Pow(UnlockValue * 0.25f, 1.3f);
             LoopSource.pitch = 1f + 1f * UnlockValue;
@@ -80,7 +80,7 @@ namespace HiddenUnits
             }
             else
             {
-                for (int i = 0; i < keys.Count; i++)
+                for (var i = 0; i < keys.Count; i++)
                 {
                     if (Save.HasUnlockedSecret(alreadyUnlocked[i]) && !Save.HasUnlockedSecret(toBeUnlocked[i]) && !IsUnlocking[i] && lookValue > 8f)
                     {
@@ -122,7 +122,7 @@ namespace HiddenUnits
             if (Save.HasUnlockedSecret(finalUnlock)) return;
             Save.UnlockSecret(finalUnlock);
             ServiceLocator.GetService<ModalPanel>().OpenUnlockPanel(unlockDescription, unlockImage);
-            PlacementUI placementUI = FindObjectOfType<PlacementUI>();
+            var placementUI = FindObjectOfType<PlacementUI>();
             if (placementUI != null)
             {
                 placementUI.RedrawUI(finalUnlock);
@@ -153,8 +153,8 @@ namespace HiddenUnits
             {
                 if (!renderer.GetComponent<ParticleSystemRenderer>())
                 {
-                    Material[] materials = renderer.materials;
-                    for (int j = 0; j < materials.Length; j++)
+                    var materials = renderer.materials;
+                    for (var j = 0; j < materials.Length; j++)
                     {
                         if (materials[j].HasProperty("_EmissionColor"))
                         {

@@ -26,7 +26,7 @@ namespace HiddenUnits
             
             var maps = ((MapAsset[])typeof(LandfallContentDatabase).GetField("m_orderedMapAssets", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(TGMain.landfallDb)).ToList();
 
-            for (int i = 0; i < 29; i++)
+            for (var i = 0; i < 29; i++)
             {
                 newMapList.Add(maps[i]);
             }

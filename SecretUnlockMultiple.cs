@@ -68,17 +68,17 @@ namespace HiddenUnits
 			{
 				SetColor();
 			}
-			float num = Vector3.Distance(MSecretObject.worldCenterOfMass, MMainCamTransform.position);
+			var num = Vector3.Distance(MSecretObject.worldCenterOfMass, MMainCamTransform.position);
 			if (num > distanceToUnlock)
 			{
 				MUnlockValue -= Time.unscaledDeltaTime * 0.2f;
 				return;
 			}
-			float num2 = Vector3.Angle(MMainCamTransform.forward, MSecretObject.worldCenterOfMass - MMainCamTransform.position);
+			var num2 = Vector3.Angle(MMainCamTransform.forward, MSecretObject.worldCenterOfMass - MMainCamTransform.position);
 			MLookValue = 1000f / (num * num2);
 			if (MLookValue > 8f)
 			{
-				float num3 = 0.2f;
+				var num3 = 0.2f;
 				MUnlockValue += num3 * Time.unscaledDeltaTime;
 				UnlockProgressFeedback();
 				if (MUnlockValue > 1f)
@@ -109,11 +109,11 @@ namespace HiddenUnits
 		private void SetColor()
 		{
 			MUnlockValue = Mathf.Clamp(MUnlockValue, 0f, float.PositiveInfinity);
-			Renderer[] componentsInChildren = MSecretObject.GetComponentsInChildren<Renderer>();
-			for (int i = 0; i < componentsInChildren.Length; i++)
+			var componentsInChildren = MSecretObject.GetComponentsInChildren<Renderer>();
+			for (var i = 0; i < componentsInChildren.Length; i++)
 			{
-				Material[] materials = componentsInChildren[i].materials;
-				for (int j = 0; j < materials.Length; j++)
+				var materials = componentsInChildren[i].materials;
+				for (var j = 0; j < materials.Length; j++)
 				{
 					if (materials[j].HasProperty("_EmissionColor"))
 					{
@@ -137,12 +137,12 @@ namespace HiddenUnits
 			}
 			if ((bool)unlockSparkEffect)
 			{
-				GameObject gameObject = Instantiate(unlockSparkEffect, MSecretObject.transform.position, MSecretObject.transform.rotation);
+				var gameObject = Instantiate(unlockSparkEffect, MSecretObject.transform.position, MSecretObject.transform.rotation);
 				gameObject.AddComponent<RemoveAfterSeconds>().seconds = 5f;
-				MeshRenderer componentInChildren = MSecretObject.GetComponentInChildren<MeshRenderer>();
+				var componentInChildren = MSecretObject.GetComponentInChildren<MeshRenderer>();
 				if ((bool)componentInChildren)
 				{
-					ParticleSystem.ShapeModule shape = gameObject.GetComponent<ParticleSystem>().shape;
+					var shape = gameObject.GetComponent<ParticleSystem>().shape;
 					shape.meshRenderer = componentInChildren;
 				}
 			}
@@ -153,7 +153,7 @@ namespace HiddenUnits
 			LoopSource.PlayOneShot(hitClip);
 			Done = true;
 			ServiceLocator.GetService<ISaveLoaderService>().UnlockSecret(secretKey);
-			for (int i = 0; i < secretDescriptions.Count; i++)
+			for (var i = 0; i < secretDescriptions.Count; i++)
 			{
 				ServiceLocator.GetService<ModalPanel>().OpenUnlockPanel(secretDescriptions[i], secretIcon);
 				yield return new WaitForSeconds(0.1f);
@@ -184,7 +184,7 @@ namespace HiddenUnits
 				enabled = false;
 				hideEvent?.Invoke();
 			}
-			MainCam mainCam = ServiceLocator.GetService<PlayerCamerasManager>()?.GetMainCam(TFBGames.Player.One);
+			var mainCam = ServiceLocator.GetService<PlayerCamerasManager>()?.GetMainCam(TFBGames.Player.One);
 			MMainCamTransform = ((mainCam != null) ? mainCam.transform : null);
 		}
 	
@@ -198,8 +198,8 @@ namespace HiddenUnits
 	
 		public static void CheckAchievements()
 		{
-			AchievementService service = ServiceLocator.GetService<AchievementService>();
-			ISaveLoaderService secretService = ServiceLocator.GetService<ISaveLoaderService>();
+			var service = ServiceLocator.GetService<AchievementService>();
+			var secretService = ServiceLocator.GetService<ISaveLoaderService>();
 			if (HasUnlockedFaction(874593522))
 			{
 				service.UnlockAchievement("UNLOCKED_ALL_SECRET");
@@ -210,10 +210,10 @@ namespace HiddenUnits
 			}
 			bool HasUnlockedFaction(int factionId)
 			{
-				UnitBlueprint[] units = LandfallUnitDatabase.GetDatabase().GetFactionByGUID(new DatabaseID(-1, factionId)).Units;
-				for (int i = 0; i < units.Length; i++)
+				var units = LandfallUnitDatabase.GetDatabase().GetFactionByGUID(new DatabaseID(-1, factionId)).Units;
+				for (var i = 0; i < units.Length; i++)
 				{
-					string unlockKey = units[i].Entity.UnlockKey;
+					var unlockKey = units[i].Entity.UnlockKey;
 					if (!string.IsNullOrEmpty(unlockKey) && !secretService.HasUnlockedSecret(unlockKey))
 					{
 						return false;

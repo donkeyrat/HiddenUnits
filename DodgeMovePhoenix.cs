@@ -47,7 +47,7 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 	{
 		Data = transform.root.GetComponentInChildren<DataHandler>();
 		AllRigs = Data.GetComponent<RigidbodyHolder>();
-		for (int i = 0; i < moves.Length; i++)
+		for (var i = 0; i < moves.Length; i++)
 		{
 			if (moves[i].forceDirection == CombatMoveDataInstance.ForceDirection.RotateTowardsPossCamElseTarget)
 			{
@@ -91,9 +91,9 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 		{
 			return;
 		}
-		for (int i = 0; i < moves.Length; i++)
+		for (var i = 0; i < moves.Length; i++)
 		{
-			CombatMoveDataInstance move = moves[i];
+			var move = moves[i];
 			if (IsAllowedToDoMoveInMultiplayer(move))
 			{
 				StartCoroutine(DoMoveSequence(move, enemyWeapon, enemyTorso, targetData));
@@ -103,14 +103,14 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 
 	private IEnumerator DoMoveSequence(CombatMoveDataInstance move, Rigidbody enemyWeapon, Rigidbody enemyTorso, DataHandler targetData)
 	{
-		float t = move.forceCurve.keys[move.forceCurve.keys.Length - 1].time;
-		float c = 0f;
+		var t = move.forceCurve.keys[move.forceCurve.keys.Length - 1].time;
+		var c = 0f;
 		if (move.useAlternateForceProjectMarsClient && BoltNetwork.IsClient)
 		{
 			move.force = move.alternateClientForce;
 		}
 		move.randomMultiplier = move.randomCurve.Evaluate(Random.value);
-		List<Rigidbody> rigs = new List<Rigidbody>();
+		var rigs = new List<Rigidbody>();
 		if (move.rigidbodyToMove == CombatMoveDataInstance.RigidBodyToMove.Head)
 		{
 			rigs.Add(Data.head.GetComponent<Rigidbody>());
@@ -163,7 +163,7 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 		}
 		else if (move.rigidbodyToMove == CombatMoveDataInstance.RigidBodyToMove.MainWeapon)
 		{
-			WeaponHandler weaponHandler = Data.weaponHandler;
+			var weaponHandler = Data.weaponHandler;
 			if ((bool)weaponHandler)
 			{
 				if ((bool)weaponHandler.rightWeapon && (bool)weaponHandler.rightWeapon.rigidbody)
@@ -186,7 +186,7 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 		}
 		if (move.includeWeapons)
 		{
-			WeaponHandler weaponHandler2 = Data.weaponHandler;
+			var weaponHandler2 = Data.weaponHandler;
 			if ((bool)weaponHandler2)
 			{
 				if ((bool)weaponHandler2.leftWeapon && (bool)weaponHandler2.leftWeapon.rigidbody)
@@ -199,11 +199,11 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 				}
 			}
 		}
-		Vector3 forceDirection = Vector3.zero;
+		var forceDirection = Vector3.zero;
 		if (rigs.Count >= 1)
 		{
 			forceDirection = GetDirection(move, enemyWeapon, enemyTorso, rigs[0], targetData);
-			for (int num = rigs.Count - 1; num >= 0; num--)
+			for (var num = rigs.Count - 1; num >= 0; num--)
 			{
 				if (rigs[num] == null)
 				{
@@ -211,11 +211,11 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 				}
 			}
 		}
-		float massM = 1f;
+		var massM = 1f;
 		if (divideForceByMass)
 		{
-			float num2 = 0f;
-			for (int i = 0; i < rigs.Count; i++)
+			var num2 = 0f;
+			for (var i = 0; i < rigs.Count; i++)
 			{
 				num2 += rigs[i].mass / (float)rigs.Count;
 			}
@@ -225,7 +225,7 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 		{
 			if (CheckConditions())
 			{
-				for (int j = 0; j < rigs.Count; j++)
+				for (var j = 0; j < rigs.Count; j++)
 				{
 					if (move.setDirectionContiniouiouss)
 					{
@@ -244,7 +244,7 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 					}
 				}
 			}
-			float num3 = 1f;
+			var num3 = 1f;
 			num3 *= animationSpeed;
 			if (move.forceCurve.Evaluate(c) > 0f)
 			{
@@ -257,7 +257,7 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 
 	private bool CheckConditions()
 	{
-		bool result = true;
+		var result = true;
 		if (maxRange != 0f && (bool)Data && Data.distanceToTarget > maxRange)
 		{
 			result = false;
@@ -275,7 +275,7 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 		{
 			enemyTorso = Data.targetData.mainRig;
 		}
-		Vector3 result = Vector3.zero;
+		var result = Vector3.zero;
 		if (ownRig == null)
 		{
 			return result;

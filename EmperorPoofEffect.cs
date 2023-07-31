@@ -87,77 +87,77 @@ namespace HiddenUnits
 	
 		private IEnumerator DoPoof()
 		{
-			if ((bool)Part)
-			{
-				Part.Emit(25);
-			}
+			if (Part) Part.Emit(25);
+			
 			yield return new WaitForSeconds(moveDelay);
-			List<Unit> list = ((Unit.Team == Team.Blue) ? MTeamSystem.GetTeamUnits(Team.Red) : MTeamSystem.GetTeamUnits(Team.Blue));
+			
+			var list = Unit.Team == Team.Blue ? MTeamSystem.GetTeamUnits(Team.Red) : MTeamSystem.GetTeamUnits(Team.Blue);
 			Unit unit = null;
-			for (int i = 0; i < list.Count; i++)
+			
+			foreach (var enemy in list)
 			{
-				float num = Vector3.Distance(transform.position, list[i].data.mainRig.position);
-				if ((bool)unit)
+				var num = Vector3.Distance(transform.position, enemy.data.mainRig.position);
+				if (unit)
 				{
-					if (!(Random.value > 0.2f) || !useRandom)
+					if (Random.value <= 0.2f || !useRandom)
 					{
-						if (unitTarget == UnitTarget.Furthest && num > CurrentDistance)
+						switch (unitTarget)
 						{
-							CurrentDistance = num;
-							unit = list[i];
-						}
-						if (unitTarget == UnitTarget.Closest && num < CurrentDistance)
-						{
-							CurrentDistance = num;
-							unit = list[i];
+							case UnitTarget.Furthest when num > CurrentDistance:
+								CurrentDistance = num;
+								unit = enemy;
+								break;
+							case UnitTarget.Closest when num < CurrentDistance:
+								CurrentDistance = num;
+								unit = enemy;
+								break;
 						}
 					}
 				}
 				else
 				{
 					CurrentDistance = num;
-					unit = list[i];
+					unit = enemy;
 				}
 			}
-			if ((bool)unit)
+			if (unit)
 			{
-				_ = transform.root.position - Unit.data.mainRig.position;
-				Vector3 vector = (unit.data.mainRig.transform.position - Unit.data.mainRig.position).normalized * ((unit.data.mainRig.transform.position - Unit.data.mainRig.position).magnitude + distanceFromUnit);
+				var vector = (unit.data.mainRig.transform.position - Unit.data.mainRig.position).normalized * ((unit.data.mainRig.transform.position - Unit.data.mainRig.position).magnitude + distanceFromUnit);
 				Debug.DrawLine(transform.position, unit.data.mainRig.transform.position, Color.blue, 1.5f);
-				DataHandler componentInChildren = transform.root.GetComponentInChildren<DataHandler>();
-				for (int j = 0; j < componentInChildren.transform.childCount; j++)
+				var componentInChildren = transform.root.GetComponentInChildren<DataHandler>();
+				for (var j = 0; j < componentInChildren.transform.childCount; j++)
 				{
-					Transform child = componentInChildren.transform.GetChild(j);
+					var child = componentInChildren.transform.GetChild(j);
 					child.position += vector + Vector3.up * distanceAboveUnit;
 					if (unitTarget == UnitTarget.Furthest)
 					{
 						child.Rotate(Vector3.up * 180f);
 					}
 				}
-				WeaponHandler component = componentInChildren.GetComponent<WeaponHandler>();
-				if ((bool)component)
+				var component = componentInChildren.GetComponent<WeaponHandler>();
+				if (component)
 				{
-					if ((bool)component.rightWeapon)
+					if (component.rightWeapon)
 					{
 						component.rightWeapon.transform.position += vector + Vector3.up * distanceAboveUnit;
 					}
-					if ((bool)component.leftWeapon)
+					if (component.leftWeapon)
 					{
 						component.leftWeapon.transform.position += vector + Vector3.up * distanceAboveUnit;
 					}
 				}
+				
 				Followers = new List<PhysicsFollowBodyPart>();
 				Followers.AddRange(transform.root.GetComponentsInChildren<PhysicsFollowBodyPart>());
-				for (int k = 0; k < Followers.Count; k++)
+				
+				foreach (var follower in Followers)
 				{
-					Followers[k].transform.position += vector + Vector3.up * distanceAboveUnit;
+					follower.transform.position += vector + Vector3.up * distanceAboveUnit;
 				}
 			}
+			
 			poofEvent?.Invoke();
-			if ((bool)Part)
-			{
-				Part.Play();
-			}
+			if (Part) Part.Play();
 		}
 	
 		public void DoThePoof()

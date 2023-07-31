@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Landfall.TABS;
+using TGCore.Library;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -17,18 +18,30 @@ namespace HiddenUnits
             AllRigs = OwnUnit.data.allRigs;
             OriginalDrags = OwnUnit.data.allRigs.defaultDrags.ToList();
 
-            TrueDelay = Mathf.Clamp(unPetrifyDelay - OwnUnit.data.maxHealth / 100 + 1f, 2f, unPetrifyDelay);
+            var multi = OwnUnit.data.GetComponent<HoldingHandlerMulti>();
+            if (OwnUnit.data.weaponHandler)
+            {
+                if (OwnUnit.data.weaponHandler.rightWeapon) Weapons.Add(OwnUnit.data.weaponHandler.rightWeapon.rigidbody);
+                if (OwnUnit.data.weaponHandler.leftWeapon) Weapons.Add(OwnUnit.data.weaponHandler.leftWeapon.rigidbody);
+            }
+            else if (multi)
+            {
+                Weapons.AddRange(multi.spawnedWeapons.Select(x => x.GetComponent<Rigidbody>()));
+            }
+
+            TrueDelay = Mathf.Clamp(unPetrifyDelay - OwnUnit.data.maxHealth / 250 + 0.4f, 1f, unPetrifyDelay);
 
             StartCoroutine(DoPetrifying());
         }
 
         public override void Ping()
         {
+            pingEvent.Invoke();
         }
 
         private IEnumerator DoPetrifying()
         {
-            if (OwnUnit.data.Dead) yield break;
+            if (OwnUnit.data.Dead || OwnUnit.data.healthHandler.willBeRewived) yield break;
             
             petrifyEvent.Invoke();
             
@@ -56,21 +69,24 @@ namespace HiddenUnits
             }
 
             OriginalDrags = AllRigs.AllDrags.ToList();
+            OwnUnit.WeaponHandler.StopAttacksFor(TrueDelay);
+            
             foreach (var rig in AllRigs.AllRigs) rig.isKinematic = true;
-            OwnUnit.WeaponHandler.StopAttacksFor(unPetrifyDelay);
+            foreach (var weapon in Weapons) weapon.isKinematic = true;
 
             StartCoroutine(DoUnPetrifying());
         }
 
         private IEnumerator DoUnPetrifying()
         {
-            yield return new WaitForSeconds(unPetrifyDelay);
+            yield return new WaitForSeconds(TrueDelay);
             
             if (OwnUnit.data.Dead) yield break;
             
             unPetrifyEvent.Invoke();
 
             foreach (var rig in AllRigs.AllRigs) rig.isKinematic = false;
+            foreach (var weapon in Weapons) weapon.isKinematic = false;
             
             var t = 0f;
             while (t < 1f && !OwnUnit.data.Dead)
@@ -88,8 +104,6 @@ namespace HiddenUnits
 
                 yield return null;
             }
-
-            if (OwnUnit.data.Dead) ResetUnit();
         }
 
         private void ResetUnit()
@@ -107,6 +121,7 @@ namespace HiddenUnits
         private DragHandler DragHandler;
         private RigidbodyHolder AllRigs;
         private List<Vector2> OriginalDrags;
+        private List<Rigidbody> Weapons = new List<Rigidbody>();
         private float TrueDelay;
 
         [Header("Petrification")]
@@ -123,5 +138,9 @@ namespace HiddenUnits
         
         public float unPetrifyDelay = 4f;
         public float unPetrifySpeed = 4f;
+        
+        [Header("Ping")]
+        
+        public UnityEvent pingEvent = new UnityEvent();
     }
 }

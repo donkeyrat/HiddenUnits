@@ -111,7 +111,7 @@ public class SpawnWall : MonoBehaviour, IRemotelyControllable
 
 	public void SpawnUpwardsOnTarget()
 	{
-		Vector3 position = transform.position;
+		var position = transform.position;
 		if (!Data)
 		{
 			Data = RootObject.GetComponent<Unit>().data;
@@ -129,7 +129,7 @@ public class SpawnWall : MonoBehaviour, IRemotelyControllable
 
 	public void SpawnOnAndTowardsTarget()
 	{
-		Vector3 position = transform.position;
+		var position = transform.position;
 		if (!Data)
 		{
 			Data = RootObject.GetComponent<Unit>().data;
@@ -142,15 +142,15 @@ public class SpawnWall : MonoBehaviour, IRemotelyControllable
 				return;
 			}
 		}
-		Vector3 vector = new Vector3(Data.targetData.mainRig.position.x - Data.mainRig.position.x, 0f, Data.targetData.mainRig.position.z - Data.mainRig.position.z);
+		var vector = new Vector3(Data.targetData.mainRig.position.x - Data.mainRig.position.x, 0f, Data.targetData.mainRig.position.z - Data.mainRig.position.z);
 		StartCoroutine(SpawnUnit(position, Quaternion.LookRotation(vector + Random.insideUnitSphere * spread * 0.01f)));
 	}
 
 	public void SpawnUpwardsOnSpawnerTarget()
 	{
-		Vector3 position = transform.position;
+		var position = transform.position;
 		DataHandler dataHandler = null;
-		TeamHolder component = transform.root.GetComponent<TeamHolder>();
+		var component = transform.root.GetComponent<TeamHolder>();
 		if ((bool)component.spawner)
 		{
 			dataHandler = component.spawner.transform.root.GetComponent<Unit>().data;
@@ -173,7 +173,7 @@ public class SpawnWall : MonoBehaviour, IRemotelyControllable
 
 	public void SpawnAtObjectRotation()
 	{
-		Vector3 vector = transform.rotation * Vector3.forward;
+		var vector = transform.rotation * Vector3.forward;
 		StartCoroutine(SpawnUnit(transform.position, Quaternion.LookRotation(vector + Random.insideUnitSphere * spread * 0.01f)));
 	}
 
@@ -222,7 +222,7 @@ public class SpawnWall : MonoBehaviour, IRemotelyControllable
 		{
 			SpawnedSinceDelay = AllowedToSpawn;
 		}
-		int numberSpawned = 0;
+		var numberSpawned = 0;
 		while (numberSpawned < numberToSpawn)
 		{
 			InitializeSpawn();
@@ -257,9 +257,9 @@ public class SpawnWall : MonoBehaviour, IRemotelyControllable
 						AltSpawnPos[CurrentSpawnPosNumber].InvokeSpawnEvent();
 					}
 				}
-				GameObject gameObject = ((!IsProjectile || !(ProjectilesSpawnManager != null)) ? Instantiate(objectToSpawn, position, rotation) : ProjectilesSpawnManager.SpawnProjectile(objectToSpawn, position, rotation));
+				var gameObject = ((!IsProjectile || !(ProjectilesSpawnManager != null)) ? Instantiate(objectToSpawn, position, rotation) : ProjectilesSpawnManager.SpawnProjectile(objectToSpawn, position, rotation));
 				TeamHolder.AddTeamHolder(gameObject, transform.gameObject);
-				TeamHolder component = gameObject.GetComponent<TeamHolder>();
+				var component = gameObject.GetComponent<TeamHolder>();
 				if (giveSpawnerWeapon)
 				{
 					component.spawnerWeapon = transform.GetComponentInParent<Weapon>().gameObject;
@@ -271,7 +271,7 @@ public class SpawnWall : MonoBehaviour, IRemotelyControllable
 				}
 				if (followMe)
 				{
-					FollowTransform followTransform = gameObject.gameObject.AddComponent<FollowTransform>();
+					var followTransform = gameObject.gameObject.AddComponent<FollowTransform>();
 					followTransform.target = transform;
 					followTransform.destroyOnTargetNull = false;
 				}
@@ -279,7 +279,7 @@ public class SpawnWall : MonoBehaviour, IRemotelyControllable
 				{
 					gameObject.transform.localScale = transform.root.localScale;
 				}
-				SpellTarget component2 = gameObject.GetComponent<SpellTarget>();
+				var component2 = gameObject.GetComponent<SpellTarget>();
 				if ((bool)TargetChecker && Targets.Count > 0)
 				{
 					if (numberSpawned < Targets.Count)
@@ -296,10 +296,10 @@ public class SpawnWall : MonoBehaviour, IRemotelyControllable
 					if ((bool)TargetChecker && giveTarget && TargetPlace < Targets.Count)
 					{
 						CurrentTarget = Targets[TargetPlace];
-						DataHandler componentInChildren = CurrentTarget.GetComponentInChildren<DataHandler>();
-						Vector3 position2 = transform.position;
-						Vector3 position3 = componentInChildren.mainRig.position;
-						Rigidbody mainRig = componentInChildren.mainRig;
+						var componentInChildren = CurrentTarget.GetComponentInChildren<DataHandler>();
+						var position2 = transform.position;
+						var position3 = componentInChildren.mainRig.position;
+						var mainRig = componentInChildren.mainRig;
 						component2.DoEffect(position2, position3, mainRig);
 					}
 					else
@@ -307,13 +307,13 @@ public class SpawnWall : MonoBehaviour, IRemotelyControllable
 						component2.GetTarget();
 					}
 				}
-				TeslaCannon component3 = gameObject.GetComponent<TeslaCannon>();
+				var component3 = gameObject.GetComponent<TeslaCannon>();
 				if ((bool)component3 && (bool)spawnerProjecile)
 				{
 					component3.maxTargetChecker = spawnerProjecile.transform.GetComponent<TeslaCannon>().maxTargetChecker;
 					if ((bool)TargetChecker && giveTarget && (bool)component3.maxTargetChecker && component3.maxTargetChecker.CheckIfAllowedToHit())
 					{
-						Unit component4 = transform.root.GetComponent<Unit>();
+						var component4 = transform.root.GetComponent<Unit>();
 						if (Targets.Count > 0)
 						{
 							if (!allowRootTarget && (bool)component4 && Targets[TargetPlace] == component4)
@@ -321,8 +321,8 @@ public class SpawnWall : MonoBehaviour, IRemotelyControllable
 								Targets.Remove(Targets[TargetPlace]);
 							}
 							CurrentTarget = Targets[TargetPlace];
-							DataHandler componentInChildren2 = CurrentTarget.GetComponentInChildren<DataHandler>();
-							TeamHolder component5 = GetComponent<TeamHolder>();
+							var componentInChildren2 = CurrentTarget.GetComponentInChildren<DataHandler>();
+							var component5 = GetComponent<TeamHolder>();
 							component.team = component5.team;
 							component.spawner = component5.spawner;
 							component3.PlayEffect(componentInChildren2.mainRig.transform, transform, component5.spawner);
@@ -344,7 +344,7 @@ public class SpawnWall : MonoBehaviour, IRemotelyControllable
 			else
 			{
 				SpawnedSinceDelay = 0f;
-				float seconds = ((!useRandom) ? timeBetweenSpawns : Random.Range(timeBetweenSpawns * minRandom, timeBetweenSpawns * maxRandom));
+				var seconds = ((!useRandom) ? timeBetweenSpawns : Random.Range(timeBetweenSpawns * minRandom, timeBetweenSpawns * maxRandom));
 				yield return new WaitForSeconds(seconds);
 			}
 		}
