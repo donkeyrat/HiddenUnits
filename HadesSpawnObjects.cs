@@ -8,7 +8,7 @@ namespace HiddenUnits {
 
         public void Start()
         {
-            TeamHolder = GetComponent<TeamHolder>() ?? gameObject.AddComponent<TeamHolder>();
+            TeamHolder = GetComponentInParent<TeamHolder>() ?? gameObject.AddComponent<TeamHolder>();
             if (spawnOnStart)
             {
                 SpawnObjects();

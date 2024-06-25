@@ -20,7 +20,6 @@ namespace HiddenUnits
             
             MaxArmorHealth = armorHealth;
             ArmorListeners = Unit.GetComponentsInChildren<AchillesArmorEvent>();
-            foreach (var armor in ArmorListeners) armor.OnArmorActivated();
         }
 
         public void Armor(float damage)

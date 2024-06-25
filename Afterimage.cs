@@ -10,27 +10,36 @@ namespace HiddenUnits
     {
         public void Start()
         {
-            GetComponent<UnitSpawner>().unitBlueprint = transform.root.GetComponent<Unit>().unitBlueprint;
+            Spawner = GetComponent<UnitSpawner>();
+            Spawner.unitBlueprint = transform.root.GetComponent<Unit>().unitBlueprint;
+            Spawner.spawnUnitAction += SpawnAfterimage;
         }
 
-        public void SpawnAfterimage()
+        public void SpawnAfterimage(GameObject unit)
         {
-            StartCoroutine(Spawn());
+            StartCoroutine(Spawn(unit));
         }
 
-        public IEnumerator Spawn() 
+        private IEnumerator Spawn(GameObject u) 
         {
-            transform.position = transform.root.GetComponent<Unit>().data.mainRig.position;
-            
-            var u = GetComponent<UnitSpawner>().Spawn();
             u.name = "AFTERIMAGE";
-            u.transform.position = new Vector3(transform.root.GetComponent<Unit>().data.mainRig.position.x, transform.root.GetComponent<Unit>().data.mainRig.position.y - 1.353508f, transform.root.GetComponent<Unit>().data.mainRig.position.z);
-            u.data.GetComponent<UnitColorHandler>().SetMaterial(imgMaterial);
-            u.GetComponent<UnitAPI>().forceSupressFromWinCondition = true;
-            u.targetingPriorityMultiplier = 0.1f;
-            foreach (var move in u.GetComponentsInChildren<ConditionalEvent>()) Destroy(move.gameObject);
 
-            Instantiate(poofEffect, u.data.mainRig.position, poofEffect.transform.rotation);
+            var unit = u.GetComponent<Unit>();
+
+            unit.data.GetComponent<UnitColorHandler>().SetMaterial(imgMaterial);
+            u.GetComponent<UnitAPI>().forceSupressFromWinCondition = true;
+            unit.targetingPriorityMultiplier = 0.1f;
+            
+            foreach (var move in u.GetComponentsInChildren<ConditionalEvent>())
+            {
+                Destroy(move.gameObject);
+            }
+            foreach (var projectileDodge in u.GetComponentsInChildren<ProjectileDodgeMove>())
+            {
+                Destroy(projectileDodge.gameObject);
+            }
+
+            Instantiate(poofEffect, unit.data.mainRig.position, poofEffect.transform.rotation);
 
             yield return new WaitForSeconds(0.1f);
             
@@ -38,7 +47,7 @@ namespace HiddenUnits
 
             yield return new WaitForSeconds(fadeTime - 0.1f);
             
-            Instantiate(poofEffect, u.data.mainRig.position, poofEffect.transform.rotation);
+            Instantiate(poofEffect, unit.data.mainRig.position, poofEffect.transform.rotation);
 
             yield return new WaitForSeconds(destroyDelay);
             
@@ -49,15 +58,15 @@ namespace HiddenUnits
                 trail.gameObject.AddComponent<RemoveAfterSeconds>().seconds = trail.time * 1.5f;
             }
             
-            u.DestroyUnit();
+            unit.DestroyUnit();
         }
 
-        public Material imgMaterial;
+        private UnitSpawner Spawner;
 
+        public Material imgMaterial;
         public GameObject poofEffect;
 
         public float fadeTime = 5f;
-        
         public float destroyDelay = 0.2f;
     }
 }

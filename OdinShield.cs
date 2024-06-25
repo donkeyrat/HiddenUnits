@@ -8,7 +8,6 @@ namespace HiddenUnits
         public void Start()
         {
             Health = maxHealth;
-            ReflectionRune();
         }
 
         public void ReflectionRune()

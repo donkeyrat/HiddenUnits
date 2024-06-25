@@ -11,54 +11,58 @@ namespace Landfall.TABS.AI.Systems.Modifiers {
 	
 	[UpdateAfter(typeof(UpdateBarrier))]
 	[UpdateBefore(typeof(PreLateUpdateBarrier))]
-	public class CircleTargetSystem : JobComponentSystem {
-		
+	public class CircleTargetSystem : JobComponentSystem 
+	{
 		protected override JobHandle OnUpdate(JobHandle inputDeps) {
 			
-			return new Job {
-				entities = MFilter.entities,
-				directions = MFilter.directions,
-				circleTargets = MFilter.circleTargets,
-				targetDatas = MFilter.targetDatas,
-				hasTargetTags = MFilter.hasTargetTags,
-				commandBuffer = MBarrier.CreateCommandBuffer().ToConcurrent()
-			}.Schedule(MFilter.length, 12, inputDeps);
+			Job jobData = default(Job);
+			jobData.Entities = m_filter.Entities;
+			jobData.Directions = m_filter.Directions;
+			jobData.CircleTargets = m_filter.CircleTargets;
+			jobData.TargetDatas = m_filter.TargetDatas;
+			jobData.HasTargetTags = m_filter.HasTargetTags;
+			jobData.CommandBuffer = m_barrier.CreateCommandBuffer().ToConcurrent();
+			return jobData.Schedule(m_filter.Length, 12, inputDeps);
 		}
 
 		[Inject]
-		private Filter MFilter;
+		private Filter m_filter;
 
 		[Inject]
-		private PreLateUpdateBarrier MBarrier;
+		private PreLateUpdateBarrier m_barrier;
 
 		private struct Filter {
 			
-			public EntityArray entities;
+			public EntityArray Entities;
 
-			public ComponentDataArray<Direction> directions;
-
-			[ReadOnly]
-			public ComponentDataArray<CircleTarget> circleTargets;
+			public ComponentDataArray<Direction> Directions;
 
 			[ReadOnly]
-			public ComponentDataArray<HasTargetTag> hasTargetTags;
+			public ComponentDataArray<CircleTarget> CircleTargets;
 
 			[ReadOnly]
-			public ComponentDataArray<TargetData> targetDatas;
+			public ComponentDataArray<HasTargetTag> HasTargetTags;
 
-			public readonly int length;
+			[ReadOnly]
+			public ComponentDataArray<TargetData> TargetDatas;
+
+			[ReadOnly]
+			public SubtractiveComponent<IsInPool> IsInPool;
+
+			public readonly int Length;
 		}
 
 		private struct Job : IJobParallelFor {
 			
 			public void Execute(int index) {
 				
-				if (hasTargetTags[index].Target == Entity.Null) { return; }
+				if (HasTargetTags[index].Target == Entity.Null) { return; }
 				
-				var e = entities[index];
-				var component = directions[index];
-				var circleTarget = circleTargets[index];
-				if (targetDatas[index].DistanceToTarget <= circleTarget.circleDistance) {
+				var e = Entities[index];
+				var component = Directions[index];
+				var circleTarget = CircleTargets[index];
+				var distanceToTarget = TargetDatas[index].DistanceToTarget;
+				if (distanceToTarget <= circleTarget.maxCircleDistance && distanceToTarget >= circleTarget.minCircleDistance) {
 					
 					var initial = component.Value;
 					var better = new float3(initial.x, 0f, initial.z);
@@ -66,23 +70,26 @@ namespace Landfall.TABS.AI.Systems.Modifiers {
 					var scaled = math.length(better) * right;
 					component.Value = new float3(scaled.x, initial.y, scaled.z);
 				}
-				commandBuffer.SetComponent(index, e, component);
+				CommandBuffer.SetComponent(index, e, component);
 			}
 
-			public EntityArray entities;
+			public EntityArray Entities;
 
-			public ComponentDataArray<Direction> directions;
-
-			[ReadOnly]
-			public ComponentDataArray<CircleTarget> circleTargets;
+			public ComponentDataArray<Direction> Directions;
 
 			[ReadOnly]
-			public ComponentDataArray<HasTargetTag> hasTargetTags;
+			public ComponentDataArray<CircleTarget> CircleTargets;
 
 			[ReadOnly]
-			public ComponentDataArray<TargetData> targetDatas;
+			public ComponentDataArray<HasTargetTag> HasTargetTags;
 
-			public EntityCommandBuffer.Concurrent commandBuffer;
+			[ReadOnly]
+			public ComponentDataArray<TargetData> TargetDatas;
+
+			[ReadOnly]
+			public SubtractiveComponent<IsInPool> IsInPool;
+
+			public EntityCommandBuffer.Concurrent CommandBuffer;
 		}
 	}
 }

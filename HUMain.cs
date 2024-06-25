@@ -18,8 +18,8 @@ namespace HiddenUnits
     {
         public HUMain()
         {
-            //AssetBundle.LoadFromMemory(Properties.Resources.egyptmap);
-            //AssetBundle.LoadFromMemory(Properties.Resources.egyptmap2);
+            AssetBundle.LoadFromMemory(Properties.Resources.egyptmap);
+            AssetBundle.LoadFromMemory(Properties.Resources.egyptmap2);
             
             var newMapList = new List<MapAsset>();
             var newMapDict = new Dictionary<DatabaseID, int>();
@@ -144,10 +144,10 @@ namespace HiddenUnits
                 var totalSubmeshes =
                     prop.GetComponentsInChildren<MeshFilter>().Where(rend =>
                             rend && rend.gameObject.activeSelf && rend.gameObject.activeInHierarchy &&
-                            rend.mesh.subMeshCount > 0 &&
+                            rend.mesh && rend.mesh.subMeshCount > 0 &&
                             rend.GetComponent<MeshRenderer>() && rend.GetComponent<MeshRenderer>().enabled)
                         .Sum(rend => rend.mesh.subMeshCount) + prop.GetComponentsInChildren<SkinnedMeshRenderer>()
-                        .Where(rend => rend && rend.gameObject.activeSelf && rend.sharedMesh.subMeshCount > 0 && rend.enabled)
+                        .Where(rend => rend && rend.gameObject.activeSelf && rend.sharedMesh && rend.sharedMesh.subMeshCount > 0 && rend.enabled)
                         .Sum(rend => rend.sharedMesh.subMeshCount);
                 if (totalSubmeshes > 0) 
                 {
@@ -166,10 +166,10 @@ namespace HiddenUnits
                 var totalSubmeshes =
                     weapon.GetComponentsInChildren<MeshFilter>().Where(rend =>
                             rend && rend.gameObject.activeSelf && rend.gameObject.activeInHierarchy &&
-                            rend.mesh.subMeshCount > 0 &&
+                            rend.mesh && rend.mesh.subMeshCount > 0 &&
                             rend.GetComponent<MeshRenderer>() && rend.GetComponent<MeshRenderer>().enabled)
                         .Sum(rend => rend.mesh.subMeshCount) + weapon.GetComponentsInChildren<SkinnedMeshRenderer>()
-                        .Where(rend => rend && rend.gameObject.activeSelf && rend.sharedMesh.subMeshCount > 0 && rend.enabled)
+                        .Where(rend => rend && rend.gameObject.activeSelf && rend.sharedMesh && rend.sharedMesh.subMeshCount > 0 && rend.enabled)
                         .Sum(rend => rend.sharedMesh.subMeshCount);
                 if (totalSubmeshes > 0)
                 {
@@ -197,8 +197,8 @@ namespace HiddenUnits
 
         public static bool InfiniteScalingEnabled => HULauncher.configInfiniteScalingEnabled.Value;
 
-        public static AssetBundle hiddenUnits;// = AssetBundle.LoadFromMemory(Properties.Resources.hiddenunits);
+        public static AssetBundle hiddenUnits = AssetBundle.LoadFromMemory(Properties.Resources.hiddenunits);
 
-        public static AssetBundle huMaps;// = AssetBundle.LoadFromMemory(Properties.Resources.humaps);
+        public static AssetBundle huMaps = AssetBundle.LoadFromMemory(Properties.Resources.humaps);
     }
 }

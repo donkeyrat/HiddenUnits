@@ -7,19 +7,22 @@ namespace HiddenUnits {
 
     public class HadesEgg : MonoBehaviour {
 
-        public void AddHealth(float amount) {
-
-            if (hasHatched) { return; }
+        public void AddHealth(float amount)
+        {
+            if (hasHatched) return;
 
             currentHealth += amount;
 
             var emit = souls.emission;
 
             if (currentHealth >= requiredHealth) {
-                emit.rateOverTime = requiredHealth / 10; 
+                emit.rateOverTime = requiredHealth * particleMultiplier; 
                 HatchEgg(); 
             }
-            else { emit.rateOverTime = emit.rateOverTime.constant + amount / 10; }
+            else
+            {
+                emit.rateOverTime = emit.rateOverTime.constant + amount * particleMultiplier;
+            }
         }
 
         public void HatchEgg() {
@@ -34,12 +37,12 @@ namespace HiddenUnits {
         public UnityEvent hatchEvent = new UnityEvent();
 
         public ParticleSystem souls;
+        public float particleMultiplier = 0.05f;
 
         public float currentHealth;
-
         public float requiredHealth = 777f;
 
         [HideInInspector]
-        public List<Unit> hitList = new List<Unit>();
+        public List<Unit> hitList = new();
     }
 }

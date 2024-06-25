@@ -4,6 +4,7 @@ namespace Landfall.TABS.AI.Components.Modifiers {
 	
 	public struct CircleTarget : IMovementComponent, IComponentData {
 		
-		public float circleDistance;
+		public float minCircleDistance;
+		public float maxCircleDistance;
 	}
 }
