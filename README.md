@@ -75,6 +75,7 @@ To unlock the secret units, you'll have to find them first.
 | **Aetherian** | *Fantasy Good* | A cultist of the Elder Gods. They wield an Aether ring, using it as it spins around and shreds units it runs into, like a beyblade of doom. |
 | **Pegasus** | *Fantasy Good* | A cultist of the Elder Gods riding a blessed stallion. This steed hovers above the battlefield, while its riders summons fairies, which propel themselves into enemy units, before exploding, blasting enemies away. |
 | ***SERAPHIM*** | *Fantasy Good* | The last God Beast, a race of eldritch demigods born from the Void, in this realm. It strikes down any opponents with the very blades used to seal its power, and can rain Judgement on its opponents. It cannot be Judged, for it is the Judge. |
+| ***CTHULHU*** | *Fantasy Evil* | The primordial Elder God of Chaos, Cthulhu wields ancient and forbidden powers. His powers were feared by the other Elder Gods, leading to his banishment upon a deeper Realm of the world. A group of loyal followers joined him in the depths, but today, he has succumbed to entropy and remains entombed in stone. |
 | **Business Man** | *Fantasy Evil* | From the bowls of hell rises the Business Man, here to buy your soul. They shoot rolled-up dollar bills from an Uzi covered in money, and throw a brief case filled with cash. The greedy enemy units run over to collect the cash, but this only leads to their demise. |
 | **Pot Thrower** | *Egypt 1* | An ordinary potter, except with pots filled with cobras. The cobras infect units with poison, and come in 8 variants! Wow! |
 | **Mummy** | *Egypt 1* | An undead pharaoh which rises from its sarcophagus to spread its deadly illness. It can also summon skeleton soldiers from the sands to protect itself. |
@@ -237,6 +238,17 @@ The mod's [**Github**](https://github.com/donkeyrat/HiddenUnits) is now the only
 ### 1.2.2
 
  - Fixed a bug where the Warlord was naked when UFoxLib was installed.
+ 
+ ### 1.3.0
+
+ - Added Cthulhu.
+ - Reworked Pegasus (revamped attacks).
+ - Reworked Hades (rebalance and mechanical changes).
+ - Tweaked Angel.
+ - Tweaked Ares.
+ - Tweaked other units, I forgot which.
+ - Gave the Merchant some props that fall off when it dies.
+ - Fixed many many bugs.
 
 ## Credits
 
