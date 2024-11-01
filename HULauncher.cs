@@ -278,6 +278,7 @@ namespace HiddenUnits
                     name = "Secrets"
                 };
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("BusinessMan_Unlock"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Cthulhu_Unlock"), secrets.transform, true);
                 if (ServiceLocator.GetService<ISaveLoaderService>().HasUnlockedSecret("BILLY_SWORD"))
                     Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("BillyKey_Unlock3"), secrets.transform, true);
             }
