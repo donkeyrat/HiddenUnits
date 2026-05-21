@@ -3,6 +3,7 @@ using Landfall.TABS;
 using UnityEngine.Events;
 using System.Collections.Generic;
 using System.Linq;
+using TGCore.Library;
 
 namespace HiddenUnits {
     
@@ -11,9 +12,11 @@ namespace HiddenUnits {
         public void Start()
         {
             OwnRig = GetComponent<Rigidbody>();
-            OwnUnit = transform.root.GetComponent<Unit>();
+            OwnTeam = transform.root.GetComponent<Unit>().Team;
             Weapon = transform.GetComponentInParent<Weapon>() ? transform.GetComponentInParent<Weapon>() : transform.root.GetComponent<Unit>().WeaponHandler.rightWeapon;
             ReturnObject = Weapon.transform.FindChildRecursive(objectToReturnTo);
+            
+            transform.SetParent(null);
             
             SetTarget(100f);
         }
@@ -21,7 +24,7 @@ namespace HiddenUnits {
         public void Update()
         {
             Counter += Time.deltaTime;
-            if (!Target && !Returning) SetTarget();
+            if (!Target && !Finished) SetTarget();
             else if (Target)
             {
                 var targetPos = Target.data.mainRig.position - transform.position;
@@ -29,11 +32,12 @@ namespace HiddenUnits {
                 OwnRig.MoveRotation(Quaternion.LookRotation(Vector3.RotateTowards(transform.forward, targetPos, Time.deltaTime * rotationSpeed, 0f)));
             }
 
-            if (Returning)
+            if (Returning && Weapon && ReturnObject)
             {
                 if (ReturnCounter >= 1f)
                 {
-                    Weapon.GetComponent<DelayEvent>().Go();
+                    var returnEvent = Weapon.GetComponent<ReturnableProjectileEvent>();
+                    if (returnEvent) returnEvent.Go();
                     Destroy(gameObject);
                     Returning = false;
                     return;
@@ -42,15 +46,24 @@ namespace HiddenUnits {
                 transform.rotation = Quaternion.Lerp(ReturnRotation, ReturnObject.rotation, ReturnCounter);
                 ReturnCounter += Time.deltaTime * returnSpeed;
             }
+            else if (Returning && (!Weapon || !ReturnObject))
+            {
+                Returning = false;
+                returnFailedEvent.Invoke();
+                Target = null;
+            }
         }
 
         public void OnCollisionEnter(Collision col) {
 
             var enemyUnit = col.transform.root.GetComponent<Unit>();
-            if (Counter < cooldown || !enemyUnit || !col.rigidbody || (enemyUnit && HitList.Contains(enemyUnit)) || (enemyUnit && enemyUnit.Team == GetComponent<TeamHolder>().team)) return;
+            if (Counter < cooldown || !enemyUnit || !col.rigidbody 
+                || (enemyUnit && HitList.Contains(enemyUnit)) 
+                || (enemyUnit && enemyUnit.Team == GetComponent<TeamHolder>().team)
+                || Finished) return;
             Counter = 0f;
 
-            var flag = col.transform.IsChildOf(enemyUnit.data.transform);
+            var flag = col.transform.IsChildOf(enemyUnit.data.transform) || col.gameObject.GetComponentInParent<Weapon>();
             
             enemyUnit.data.healthHandler.TakeDamage(damage * (flag ? 1f : 0f), Vector3.zero);
 
@@ -64,10 +77,13 @@ namespace HiddenUnits {
 
             HitCount += 1 * (!col.transform.name.Contains("Mjolnir") ? 1 : hitLimit);
             HitList.Add(enemyUnit);
-            SetTarget();
             if (HitCount >= hitLimit)
             {
                 Finish();
+            }
+            else
+            {
+                SetTarget();
             }
         }
         
@@ -76,7 +92,7 @@ namespace HiddenUnits {
             var hits = Physics.SphereCastAll(transform.position, radius != 0f ? radius : maxRange, Vector3.up, 0.1f, LayerMask.GetMask(new string[] { "MainRig" }));
             var foundUnits = hits
                 .Select(hit => hit.transform.root.GetComponent<Unit>())
-                .Where(x => x && !x.data.Dead && x.Team != OwnUnit.Team && !HitList.Contains(x))
+                .Where(x => x && !x.data.Dead && x.Team != OwnTeam && !HitList.Contains(x))
                 .OrderBy(x => (x.data.mainRig.transform.position - transform.position).magnitude)
                 .Distinct()
                 .ToArray();
@@ -103,7 +119,7 @@ namespace HiddenUnits {
         private float Counter;
         private Rigidbody OwnRig;
         private Unit Target;
-        private Unit OwnUnit;
+        private Team OwnTeam;
         private List<Unit> HitList = new List<Unit>();
         private int HitCount;
         private bool Finished;
@@ -133,6 +149,7 @@ namespace HiddenUnits {
         private Quaternion ReturnRotation;
         
         public UnityEvent finishEvent = new UnityEvent();
+        public UnityEvent returnFailedEvent;
         
         [Header("Damage Settings")]
         

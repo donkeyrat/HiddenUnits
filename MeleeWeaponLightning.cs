@@ -27,7 +27,7 @@ namespace HiddenUnits
             StartCoroutine(DoLightning());
         }
 
-        public IEnumerator DoLightning()
+        private IEnumerator DoLightning()
         {
             for (var i = 0; i < chainCount; i++)
             {

@@ -4,6 +4,8 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Events;
 
+namespace HiddenUnits;
+
 public class DreadSwords : MonoBehaviour
 {
 	public delegate void AttackedEventHandler(Rigidbody target, int useAttackID);

@@ -1,6 +1,7 @@
+using Landfall.TABS.AI.Components.Modifiers;
 using Unity.Entities;
 
-namespace Landfall.TABS.AI.Components.Modifiers {
+namespace HiddenUnits {
 	
 	public struct CircleTarget : IMovementComponent, IComponentData {
 		

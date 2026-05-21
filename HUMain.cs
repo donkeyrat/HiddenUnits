@@ -19,28 +19,35 @@ namespace HiddenUnits
         public HUMain()
         {
             AssetBundle.LoadFromMemory(Properties.Resources.egyptmap);
-            AssetBundle.LoadFromMemory(Properties.Resources.egyptmap2);
+            AssetBundle.LoadFromMemory(Properties.Resources.egyptmap2); 
+            AssetBundle.LoadFromMemory(Properties.Resources.steampunkmap);
             
             var newMapList = new List<MapAsset>();
             var newMapDict = new Dictionary<DatabaseID, int>();
             
             var maps = ((MapAsset[])typeof(LandfallContentDatabase).GetField("m_orderedMapAssets", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(TGMain.landfallDb)).ToList();
 
-            for (var i = 0; i < 29; i++)
-            {
-                newMapList.Add(maps[i]);
-            }
+            newMapList.AddRange(maps);
             newMapList.Add(huMaps.LoadAsset<MapAsset>("Egypt1"));
             newMapList.Add(huMaps.LoadAsset<MapAsset>("Egypt2"));
-            maps.RemoveRange(0, 29);
-            newMapList.AddRange(maps);
+            newMapList.Add(huMaps.LoadAsset<MapAsset>("Steampunk"));
+            newMapList = newMapList.OrderBy(x => x.m_mapIndex).ToList();
             
-            foreach (var map in huMaps.LoadAllAssets<MapAsset>()) 
-            {
-                if (!map.name.Contains("Egypt")) {
-                    newMapList.Add(map);
-                }
-            }
+           //for (var i = 0; i < 29; i++)
+           //{
+           //    newMapList.Add(maps[i]);
+           //}
+           //newMapList.Add(huMaps.LoadAsset<MapAsset>("Egypt1"));
+           //newMapList.Add(huMaps.LoadAsset<MapAsset>("Egypt2"));
+           //maps.RemoveRange(0, 29);
+           //newMapList.AddRange(maps);
+            
+            //foreach (var map in huMaps.LoadAllAssets<MapAsset>()) 
+            //{
+            //    if (!map.name.Contains("Egypt")) {
+            //        newMapList.Add(map);
+            //    }
+            //}
 
             foreach (var map in newMapList)
             {
@@ -135,50 +142,6 @@ namespace HiddenUnits
                 
                 lvl.AllowedFactions = allowed.ToArray();
                 lvl.AllowedUnits = allowedU.ToArray();
-            }
-
-            foreach (var prop in hiddenUnits.LoadAllAssets<GameObject>().Where(x => x.GetComponent<PropItem>()).Select(x => x.GetComponent<PropItem>()))
-            {
-                if (!prop) continue;
-                
-                var totalSubmeshes =
-                    prop.GetComponentsInChildren<MeshFilter>().Where(rend =>
-                            rend && rend.gameObject.activeSelf && rend.gameObject.activeInHierarchy &&
-                            rend.mesh && rend.mesh.subMeshCount > 0 &&
-                            rend.GetComponent<MeshRenderer>() && rend.GetComponent<MeshRenderer>().enabled)
-                        .Sum(rend => rend.mesh.subMeshCount) + prop.GetComponentsInChildren<SkinnedMeshRenderer>()
-                        .Where(rend => rend && rend.gameObject.activeSelf && rend.sharedMesh && rend.sharedMesh.subMeshCount > 0 && rend.enabled)
-                        .Sum(rend => rend.sharedMesh.subMeshCount);
-                if (totalSubmeshes > 0) 
-                {
-                    var average = 1f / totalSubmeshes;
-                    var averageList = new List<float>();
-                    for (var i = 0; i < totalSubmeshes - 1; i++) averageList.Add(average);
-                    
-                    prop.SubmeshArea = averageList.ToArray();
-                }
-            }
-            
-            foreach (var weapon in hiddenUnits.LoadAllAssets<GameObject>().Where(x => x.GetComponent<WeaponItem>()).Select(x => x.GetComponent<WeaponItem>()))
-            {
-                if (!weapon) continue;
-                
-                var totalSubmeshes =
-                    weapon.GetComponentsInChildren<MeshFilter>().Where(rend =>
-                            rend && rend.gameObject.activeSelf && rend.gameObject.activeInHierarchy &&
-                            rend.mesh && rend.mesh.subMeshCount > 0 &&
-                            rend.GetComponent<MeshRenderer>() && rend.GetComponent<MeshRenderer>().enabled)
-                        .Sum(rend => rend.mesh.subMeshCount) + weapon.GetComponentsInChildren<SkinnedMeshRenderer>()
-                        .Where(rend => rend && rend.gameObject.activeSelf && rend.sharedMesh && rend.sharedMesh.subMeshCount > 0 && rend.enabled)
-                        .Sum(rend => rend.sharedMesh.subMeshCount);
-                if (totalSubmeshes > 0)
-                {
-                    var average = 1f / totalSubmeshes;
-                    var averageList = new List<float>();
-                    for (var i = 0; i < totalSubmeshes - 1; i++) averageList.Add(average);
-                    
-                    weapon.SubmeshArea = averageList.ToArray();
-                }
             }
 
             foreach (var audio in hiddenUnits.LoadAllAssets<AudioSource>())

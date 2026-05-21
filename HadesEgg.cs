@@ -37,6 +37,7 @@ namespace HiddenUnits {
         public UnityEvent hatchEvent = new UnityEvent();
 
         public ParticleSystem souls;
+        public ParticleSystemForceField soulField;
         public float particleMultiplier = 0.05f;
 
         public float currentHealth;

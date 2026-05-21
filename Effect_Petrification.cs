@@ -17,6 +17,7 @@ namespace HiddenUnits
             DragHandler = OwnUnit.data.GetComponent<DragHandler>();
             AllRigs = OwnUnit.data.allRigs;
             OriginalDrags = OwnUnit.data.allRigs.defaultDrags.ToList();
+            OriginalTargetingPriority = OwnUnit.targetingPriorityMultiplier;
 
             var multi = OwnUnit.data.GetComponent<HoldingHandlerMulti>();
             if (OwnUnit.data.weaponHandler)
@@ -41,9 +42,11 @@ namespace HiddenUnits
 
         private IEnumerator DoPetrifying()
         {
-            if (OwnUnit.data.Dead || OwnUnit.data.healthHandler.willBeRewived) yield break;
+            if (!OwnUnit || !ColorHandler || !DragHandler || OwnUnit.data.Dead || OwnUnit.data.healthHandler.willBeRewived) yield break;
             
             petrifyEvent.Invoke();
+            OwnUnit.targetingPriorityMultiplier = targetingPriority;
+            OwnUnit.api.UpdateECSValues();
             
             var t = 0f;
             while (t < 1f && !OwnUnit.data.Dead)
@@ -69,7 +72,7 @@ namespace HiddenUnits
             }
 
             OriginalDrags = AllRigs.AllDrags.ToList();
-            OwnUnit.WeaponHandler.StopAttacksFor(TrueDelay);
+            if (OwnUnit.WeaponHandler) OwnUnit.WeaponHandler.StopAttacksFor(TrueDelay);
             
             foreach (var rig in AllRigs.AllRigs) rig.isKinematic = true;
             foreach (var weapon in Weapons) weapon.isKinematic = true;
@@ -87,6 +90,8 @@ namespace HiddenUnits
 
             foreach (var rig in AllRigs.AllRigs) rig.isKinematic = false;
             foreach (var weapon in Weapons) weapon.isKinematic = false;
+            
+            OwnUnit.targetingPriorityMultiplier = OriginalTargetingPriority;
             
             var t = 0f;
             while (t < 1f && !OwnUnit.data.Dead)
@@ -114,6 +119,7 @@ namespace HiddenUnits
                 AllRigs.AllDrags[i].x = OwnUnit.data.allRigs.defaultDrags[i].x;
                 AllRigs.AllDrags[i].y = OwnUnit.data.allRigs.defaultDrags[i].y;
             }
+            OwnUnit.targetingPriorityMultiplier = OriginalTargetingPriority;
         }
 
         private Unit OwnUnit;
@@ -123,6 +129,7 @@ namespace HiddenUnits
         private List<Vector2> OriginalDrags;
         private List<Rigidbody> Weapons = new List<Rigidbody>();
         private float TrueDelay;
+        private float OriginalTargetingPriority;
 
         [Header("Petrification")]
         
@@ -131,6 +138,7 @@ namespace HiddenUnits
         public UnitColorInstance petrifyColor;
         
         public float petrifySpeed = 2f;
+        public float targetingPriority = 0.5f;
 
         [Header("De-Petrification")] 
         

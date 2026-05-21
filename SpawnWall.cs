@@ -6,6 +6,8 @@ using TFBGames;
 using UnityEngine;
 using UnityEngine.Events;
 
+namespace HiddenUnits;
+
 public class SpawnWall : MonoBehaviour, IRemotelyControllable
 {
 	public GameObject objectToSpawn;

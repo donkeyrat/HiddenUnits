@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Landfall.TABS;
 using UnityEngine;
-using System.Linq;
+
+namespace HiddenUnits;
 
 public class HadezHands : MonoBehaviour
 {
@@ -142,20 +144,20 @@ public class HadezHands : MonoBehaviour
 	public Unit SetTarget()
 	{
 		var query
-		= (
-		  from Unit unit
-		  in FindObjectsOfType<Unit>()
-		  where !unit.data.Dead && unit.Team != transform.root.GetComponent<Unit>().Team && !HitList.Contains(unit) && (unit.data.mainRig.transform.position - transform.position).magnitude <= 10f
-		  orderby (unit.data.mainRig.transform.position - transform.position).magnitude
-		  select unit
-		).ToArray();
+			= (
+				from Unit unit
+					in FindObjectsOfType<Unit>()
+				where !unit.data.Dead && unit.Team != transform.root.GetComponent<Unit>().Team && !HitList.Contains(unit) && (unit.data.mainRig.transform.position - transform.position).magnitude <= 10f
+				orderby (unit.data.mainRig.transform.position - transform.position).magnitude
+				select unit
+			).ToArray();
 		if (query.Length > 0)
 		{
 			return query[0];
 		}
 		else
-        {
+		{
 			return null;
-        }
+		}
 	}
 }

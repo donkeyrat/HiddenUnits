@@ -25,7 +25,7 @@ namespace HiddenUnits
 	
 		public float distanceFromUnit = 2f;
 	
-		public float distanceAboveUnit = 1.5f;
+		public float distanceAboveGround = 1.5f;
 	
 		public bool useRandom = true;
 	
@@ -35,6 +35,9 @@ namespace HiddenUnits
 		public bool setUnitMainRigKinematic;
 	
 		public UnityEvent poofEvent;
+	
+		public bool playAfterTeleport;
+		public LayerMask groundMask;
 	
 		private TeamSystem MTeamSystem;
 	
@@ -87,17 +90,17 @@ namespace HiddenUnits
 	
 		private IEnumerator DoPoof()
 		{
-			if (Part) Part.Emit(25);
+			if (Part) Part.Play();
 			
 			yield return new WaitForSeconds(moveDelay);
 			
 			var list = Unit.Team == Team.Blue ? MTeamSystem.GetTeamUnits(Team.Red) : MTeamSystem.GetTeamUnits(Team.Blue);
-			Unit unit = null;
+			Unit chosenUnit = null;
 			
 			foreach (var enemy in list)
 			{
 				var num = Vector3.Distance(transform.position, enemy.data.mainRig.position);
-				if (unit)
+				if (chosenUnit)
 				{
 					if (Random.value <= 0.2f || !useRandom)
 					{
@@ -105,11 +108,11 @@ namespace HiddenUnits
 						{
 							case UnitTarget.Furthest when num > CurrentDistance:
 								CurrentDistance = num;
-								unit = enemy;
+								chosenUnit = enemy;
 								break;
 							case UnitTarget.Closest when num < CurrentDistance:
 								CurrentDistance = num;
-								unit = enemy;
+								chosenUnit = enemy;
 								break;
 						}
 					}
@@ -117,18 +120,28 @@ namespace HiddenUnits
 				else
 				{
 					CurrentDistance = num;
-					unit = enemy;
+					chosenUnit = enemy;
 				}
 			}
-			if (unit)
+			if (chosenUnit)
 			{
-				var vector = (unit.data.mainRig.transform.position - Unit.data.mainRig.position).normalized * ((unit.data.mainRig.transform.position - Unit.data.mainRig.position).magnitude + distanceFromUnit);
-				Debug.DrawLine(transform.position, unit.data.mainRig.transform.position, Color.blue, 1.5f);
+				var vector = (chosenUnit.data.mainRig.transform.position - Unit.data.mainRig.position).normalized 
+				             * ((chosenUnit.data.mainRig.transform.position - Unit.data.mainRig.position).magnitude 
+				                + distanceFromUnit);
+	
+				var distanceToGround = 0f;
+				if (Physics.Raycast(new Ray(Unit.data.mainRig.position + vector, Vector3.down), out var ray, 10f, groundMask))
+				{
+					distanceToGround = Vector3.Distance(Unit.data.mainRig.position + vector, ray.point);
+				}
+	
+				distanceToGround = distanceAboveGround - distanceToGround;
+				
 				var componentInChildren = transform.root.GetComponentInChildren<DataHandler>();
 				for (var j = 0; j < componentInChildren.transform.childCount; j++)
 				{
 					var child = componentInChildren.transform.GetChild(j);
-					child.position += vector + Vector3.up * distanceAboveUnit;
+					child.position += vector + Vector3.up * distanceToGround;
 					if (unitTarget == UnitTarget.Furthest)
 					{
 						child.Rotate(Vector3.up * 180f);
@@ -139,11 +152,11 @@ namespace HiddenUnits
 				{
 					if (component.rightWeapon)
 					{
-						component.rightWeapon.transform.position += vector + Vector3.up * distanceAboveUnit;
+						component.rightWeapon.transform.position += vector + Vector3.up * distanceToGround;
 					}
 					if (component.leftWeapon)
 					{
-						component.leftWeapon.transform.position += vector + Vector3.up * distanceAboveUnit;
+						component.leftWeapon.transform.position += vector + Vector3.up * distanceToGround;
 					}
 				}
 				
@@ -152,12 +165,12 @@ namespace HiddenUnits
 				
 				foreach (var follower in Followers)
 				{
-					follower.transform.position += vector + Vector3.up * distanceAboveUnit;
+					follower.transform.position += vector + Vector3.up * distanceToGround;
 				}
 			}
 			
 			poofEvent?.Invoke();
-			if (Part) Part.Play();
+			if (Part && playAfterTeleport) Part.Play();
 		}
 	
 		public void DoThePoof()

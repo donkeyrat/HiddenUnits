@@ -1,6 +1,8 @@
 ﻿using System.Collections;
-using UnityEngine;
 using Landfall.TABS;
+using UnityEngine;
+
+namespace HiddenUnits;
 
 public class ClubSpell : TargetableEffect 
 {
@@ -27,9 +29,9 @@ public class ClubSpell : TargetableEffect
 		StartPos = transform.position;
 	}
 
-    private IEnumerator Go() 
-    {
-	    var t2 = upCurve.keys[upCurve.keys.Length - 1].time;
+	private IEnumerator Go() 
+	{
+		var t2 = upCurve.keys[upCurve.keys.Length - 1].time;
 		var c2 = 0f;
 		while (c2 < t2) 
 		{

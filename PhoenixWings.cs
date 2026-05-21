@@ -2,6 +2,8 @@
 using Photon.Bolt;
 using UnityEngine;
 
+namespace HiddenUnits;
+
 public class PhoenixWings : MonoBehaviour
 {
 	public LayerMask mask;

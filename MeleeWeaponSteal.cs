@@ -1,22 +1,35 @@
 ﻿using System.Collections.Generic;
 using Landfall.TABS;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace HiddenUnits
 {
     public class MeleeWeaponSteal : CollisionWeaponEffect
     {
+        private Unit OwnUnit;
+        
+        public float chance = 1f;
+        public float minimumHealthToSteal = 600f;
+        public UnityEvent stealEvent;
+
+        private void Start()
+        {
+            OwnUnit = transform.root.GetComponent<Unit>();
+        }
+        
         public override void DoEffect(Transform hitTransform, Collision collision)
         {
-            if (hitTransform.GetComponent<Rigidbody>() && hitTransform.root.GetComponent<Unit>() && hitTransform.root.GetComponent<Unit>().Team != GetComponent<Weapon>().connectedData.unit.Team && !hitTransform.root.GetComponent<Unit>().data.Dead)
+            var enemy = hitTransform.root.GetComponent<Unit>();
+            if (collision.rigidbody && enemy && enemy.Team != GetComponent<Weapon>().connectedData.unit.Team && !enemy.data.Dead)
             {
                 GameObject stolenWeapon = null;
                 var handType = HoldingHandler.HandType.Right;
-                var enemy = hitTransform.root.GetComponent<Unit>();
-                if (enemy.data.health > 600f || enemy.data.Dead)
+                if (enemy.data.health > minimumHealthToSteal || enemy.data.Dead || Random.value > chance)
                 {
                     return;
                 }
+                stealEvent.Invoke();
                 var hold = enemy.GetComponentInChildren<HoldingHandler>();
                 if (hold)
                 {
@@ -39,12 +52,13 @@ namespace HiddenUnits
                 if (stolenWeapon != null)
                 {
                     stolenWeapon.transform.SetParent(null);
-                    if (transform.root.GetComponentInChildren<HoldingHandler>())
+                    if (OwnUnit.holdingHandler && OwnUnit.WeaponHandler)
                     {
-                        transform.root.GetComponentInChildren<HoldingHandler>().LetGoOfWeapon(gameObject);
+                        OwnUnit.WeaponHandler.fistRefernce = null;
+                        OwnUnit.holdingHandler.LetGoOfWeapon(gameObject);
                         gameObject.AddComponent<RemoveAfterSeconds>().shrink = true;
-                        var w = transform.root.GetComponent<Unit>().unitBlueprint.SetWeapon(transform.root.GetComponent<Unit>(), transform.root.GetComponent<Unit>().Team, stolenWeapon, new PropItemData(), handType, transform.root.GetComponent<Unit>().data.mainRig.rotation, new List<GameObject>());
-                        transform.root.GetComponentInChildren<HoldingHandler>().leftHandActivity = hold.leftHandActivity;
+                        var w = OwnUnit.unitBlueprint.SetWeapon(OwnUnit, OwnUnit.Team, stolenWeapon, new PropItemData(), handType, OwnUnit.data.mainRig.rotation, new List<GameObject>());
+                        OwnUnit.holdingHandler.leftHandActivity = hold.leftHandActivity;
                         if (w.GetComponent<ConfigurableJoint>())
                         {
                             foreach (var joint in w.GetComponentsInChildren<ConfigurableJoint>())

@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 
 namespace HiddenUnits 
 {
-    [BepInPlugin("teamgrad.hiddenunits", "Hidden Units", "1.2.2")]
+    [BepInPlugin("teamgrad.hiddenunits", "Hidden Units", "1.3.0")]
     [BepInDependency("teamgrad.core")]
 	public class HULauncher : TGMod
 	{
@@ -45,7 +45,7 @@ namespace HiddenUnits
             {
                 if (scene.name == "SG_Egypt" && ServiceLocator.GetService<ISaveLoaderService>().HasUnlockedSecret("BILLY_SWORD"))
                     Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("BillyKey_Unlock4"), null, true);
-                
+
                 GameObject astar = null;
                 GameObject map = null;
                 foreach (var obj in scene.GetRootGameObjects())

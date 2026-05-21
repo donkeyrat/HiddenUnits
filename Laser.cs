@@ -1,6 +1,8 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.Events;
+
+namespace HiddenUnits;
 
 public class Laser : MonoBehaviour
 {

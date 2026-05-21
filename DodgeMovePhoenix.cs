@@ -4,6 +4,8 @@ using Photon.Bolt;
 using TFBGames;
 using UnityEngine;
 
+namespace HiddenUnits;
+
 public class DodgeMovePhoenix : Move, IRemotelyControllable
 {
 	[HideInInspector]
@@ -87,10 +89,10 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 		{
 			StopAllCoroutines();
 		}
-		if (!enemyWeapon && !enemyTorso)
-		{
-			return;
-		}
+		//if (!enemyWeapon && !enemyTorso)
+		//{
+		//	return;
+		//}
 		for (var i = 0; i < moves.Length; i++)
 		{
 			var move = moves[i];
@@ -280,29 +282,32 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 		{
 			return result;
 		}
-		if (move.forceDirection == CombatMoveDataInstance.ForceDirection.Up)
+		switch (move.forceDirection)
 		{
-			result = Vector3.up;
-		}
-		if (move.forceDirection == CombatMoveDataInstance.ForceDirection.TorwardTarget && (bool)ownRig && (bool)enemyTorso)
-		{
-			result = enemyTorso.position - ownRig.position;
-			if (move.normalize)
+			case CombatMoveDataInstance.ForceDirection.Up:
+				result = Vector3.up;
+				break;
+			case CombatMoveDataInstance.ForceDirection.TorwardTarget when (bool)ownRig && (bool)enemyTorso:
 			{
-				result = result.normalized;
+				result = enemyTorso.position - ownRig.position;
+				if (move.normalize)
+				{
+					result = result.normalized;
+				}
+
+				break;
 			}
-		}
-		if (move.forceDirection == CombatMoveDataInstance.ForceDirection.TowardsTargetHead && (bool)ownRig && (bool)targetData && (bool)targetData.head)
-		{
-			result = targetData.head.position + targetData.head.transform.forward * 0.1f + targetData.head.transform.up * 0.15f - ownRig.position;
-			if (move.normalize)
+			case CombatMoveDataInstance.ForceDirection.TowardsTargetHead when (bool)ownRig && (bool)targetData && (bool)targetData.head:
 			{
-				result = result.normalized;
+				result = targetData.head.position + targetData.head.transform.forward * 0.1f + targetData.head.transform.up * 0.15f - ownRig.position;
+				if (move.normalize)
+				{
+					result = result.normalized;
+				}
+
+				break;
 			}
-		}
-		if (move.forceDirection == CombatMoveDataInstance.ForceDirection.AwayFromTargetWeapon)
-		{
-			if ((bool)enemyWeapon)
+			case CombatMoveDataInstance.ForceDirection.AwayFromTargetWeapon when (bool)enemyWeapon:
 			{
 				result = ownRig.position - (enemyWeapon.worldCenterOfMass + enemyWeapon.velocity * move.predictionAmount);
 				if (move.normalize)
@@ -317,87 +322,99 @@ public class DodgeMovePhoenix : Move, IRemotelyControllable
 				{
 					Data.cantFallForSeconds = 0.5f;
 				}
+
+				break;
 			}
-			else if ((bool)enemyTorso)
+			case CombatMoveDataInstance.ForceDirection.AwayFromTargetWeapon:
 			{
-				result = -(enemyTorso.position - ownRig.position);
+				if ((bool)enemyTorso)
+				{
+					result = -(enemyTorso.position - ownRig.position);
+					if (move.normalize)
+					{
+						result = result.normalized;
+					}
+				}
+
+				break;
+			}
+			case CombatMoveDataInstance.ForceDirection.CharacterForward:
+				result = Data.characterForwardObject.forward;
+				break;
+			case CombatMoveDataInstance.ForceDirection.CharacterRight:
+				result = Data.characterForwardObject.right;
+				break;
+			case CombatMoveDataInstance.ForceDirection.CrossUpAndAwayFromAttacker when (bool)ownRig && (bool)enemyTorso:
+			{
+				result = Vector3.Cross(Vector3.up, ownRig.position - enemyTorso.position);
 				if (move.normalize)
 				{
 					result = result.normalized;
 				}
+
+				break;
 			}
-		}
-		if (move.forceDirection == CombatMoveDataInstance.ForceDirection.CharacterForward)
-		{
-			result = Data.characterForwardObject.forward;
-		}
-		else if (move.forceDirection == CombatMoveDataInstance.ForceDirection.CharacterRight)
-		{
-			result = Data.characterForwardObject.right;
-		}
-		else if (move.forceDirection == CombatMoveDataInstance.ForceDirection.CrossUpAndAwayFromAttacker && (bool)ownRig && (bool)enemyTorso)
-		{
-			result = Vector3.Cross(Vector3.up, ownRig.position - enemyTorso.position);
-			if (move.normalize)
+			case CombatMoveDataInstance.ForceDirection.CrossUpAndTowardsUnitTarget when (bool)ownRig && (bool)Data.targetMainRig:
 			{
-				result = result.normalized;
+				result = Vector3.Cross(Vector3.up, ownRig.position - Data.targetMainRig.position);
+				if (move.normalize)
+				{
+					result = result.normalized;
+				}
+
+				break;
 			}
-		}
-		else if (move.forceDirection == CombatMoveDataInstance.ForceDirection.CrossUpAndTowardsUnitTarget && (bool)ownRig && (bool)Data.targetMainRig)
-		{
-			result = Vector3.Cross(Vector3.up, ownRig.position - Data.targetMainRig.position);
-			if (move.normalize)
+			case CombatMoveDataInstance.ForceDirection.RigUp when (bool)ownRig:
+				result = ownRig.transform.up;
+				break;
+			case CombatMoveDataInstance.ForceDirection.RotateTowardsPossCamElseTarget when (bool)enemyTorso && (bool)ownRig:
+				result = ((!Possess || !Possess.currentUnit || !Data || !Data.unit || !(Possess.currentUnit == Data.unit)) ? (-Vector3.Cross(enemyTorso.position - ownRig.position, ownRig.transform.forward).normalized * Vector3.Angle(enemyTorso.position - ownRig.position, ownRig.transform.forward)) : (-Vector3.Cross(MainCam.instance.transform.forward, ownRig.transform.forward).normalized * Vector3.Angle(MainCam.instance.transform.forward, ownRig.transform.forward)));
+				break;
+			case CombatMoveDataInstance.ForceDirection.RotateTowardsTarget when (bool)enemyTorso && (bool)ownRig:
+				result = -Vector3.Cross(enemyTorso.position - ownRig.position, ownRig.transform.forward).normalized * Vector3.Angle(enemyTorso.position - ownRig.position, ownRig.transform.forward);
+				break;
+			case CombatMoveDataInstance.ForceDirection.RotateTowardsTargetHead when (bool)targetData && (bool)targetData.head && (bool)ownRig:
+				result = -Vector3.Cross(targetData.head.position + targetData.head.transform.forward * 0.1f + targetData.head.transform.up * 0.15f - ownRig.position, ownRig.transform.forward).normalized * Vector3.Angle(targetData.head.position + targetData.head.transform.forward * 0.1f + targetData.head.transform.up * 0.15f - ownRig.position, ownRig.transform.forward);
+				break;
+			case CombatMoveDataInstance.ForceDirection.AwayFromTargetObject when (bool)targetObject && (bool)ownRig:
 			{
-				result = result.normalized;
+				result = ownRig.transform.position - targetObject.transform.position;
+				if (move.normalize)
+				{
+					result = result.normalized;
+				}
+
+				break;
 			}
-		}
-		else if (move.forceDirection == CombatMoveDataInstance.ForceDirection.RigUp && (bool)ownRig)
-		{
-			result = ownRig.transform.up;
-		}
-		else if (move.forceDirection == CombatMoveDataInstance.ForceDirection.RotateTowardsPossCamElseTarget && (bool)enemyTorso && (bool)ownRig)
-		{
-			result = ((!Possess || !Possess.currentUnit || !Data || !Data.unit || !(Possess.currentUnit == Data.unit)) ? (-Vector3.Cross(enemyTorso.position - ownRig.position, ownRig.transform.forward).normalized * Vector3.Angle(enemyTorso.position - ownRig.position, ownRig.transform.forward)) : (-Vector3.Cross(MainCam.instance.transform.forward, ownRig.transform.forward).normalized * Vector3.Angle(MainCam.instance.transform.forward, ownRig.transform.forward)));
-		}
-		else if (move.forceDirection == CombatMoveDataInstance.ForceDirection.RotateTowardsTarget && (bool)enemyTorso && (bool)ownRig)
-		{
-			result = -Vector3.Cross(enemyTorso.position - ownRig.position, ownRig.transform.forward).normalized * Vector3.Angle(enemyTorso.position - ownRig.position, ownRig.transform.forward);
-		}
-		else if (move.forceDirection == CombatMoveDataInstance.ForceDirection.RotateTowardsTargetHead && (bool)targetData && (bool)targetData.head && (bool)ownRig)
-		{
-			result = -Vector3.Cross(targetData.head.position + targetData.head.transform.forward * 0.1f + targetData.head.transform.up * 0.15f - ownRig.position, ownRig.transform.forward).normalized * Vector3.Angle(targetData.head.position + targetData.head.transform.forward * 0.1f + targetData.head.transform.up * 0.15f - ownRig.position, ownRig.transform.forward);
-		}
-		else if (move.forceDirection == CombatMoveDataInstance.ForceDirection.AwayFromTargetObject && (bool)targetObject && (bool)ownRig)
-		{
-			result = ownRig.transform.position - targetObject.transform.position;
-			if (move.normalize)
+			case CombatMoveDataInstance.ForceDirection.CrossUpAndAwayFromTargetObject when (bool)targetObject && (bool)ownRig:
 			{
-				result = result.normalized;
+				result = Vector3.Cross(Vector3.up, ownRig.position - targetObject.position);
+				if (move.normalize)
+				{
+					result = result.normalized;
+				}
+
+				break;
 			}
-		}
-		else if (move.forceDirection == CombatMoveDataInstance.ForceDirection.CrossUpAndAwayFromTargetObject && (bool)targetObject && (bool)ownRig)
-		{
-			result = Vector3.Cross(Vector3.up, ownRig.position - targetObject.position);
-			if (move.normalize)
+			case CombatMoveDataInstance.ForceDirection.InWalkDirection:
+				result = Data.groundedMovementDirectionObject.forward;
+				break;
+			case CombatMoveDataInstance.ForceDirection.RotateTowardsWalkDirection:
+				result = Vector3.Cross(ownRig.transform.forward, Data.groundedMovementDirectionObject.forward).normalized * Vector3.Angle(ownRig.transform.forward, Data.groundedMovementDirectionObject.forward);
+				break;
+			default:
 			{
-				result = result.normalized;
+				if (move.randomizeDirection && Random.value > 0.5f)
+				{
+					result *= -1f;
+				}
+				else if (move.forceDirection == CombatMoveDataInstance.ForceDirection.TowardTargetWithoutY && (bool)ownRig && (bool)enemyTorso)
+				{
+					result = new Vector3(enemyTorso.position.x - ownRig.position.x, 0f, enemyTorso.position.z - ownRig.position.z);
+				}
+
+				break;
 			}
-		}
-		else if (move.forceDirection == CombatMoveDataInstance.ForceDirection.InWalkDirection)
-		{
-			result = Data.groundedMovementDirectionObject.forward;
-		}
-		else if (move.forceDirection == CombatMoveDataInstance.ForceDirection.RotateTowardsWalkDirection)
-		{
-			result = Vector3.Cross(ownRig.transform.forward, Data.groundedMovementDirectionObject.forward).normalized * Vector3.Angle(ownRig.transform.forward, Data.groundedMovementDirectionObject.forward);
-		}
-		else if (move.randomizeDirection && Random.value > 0.5f)
-		{
-			result *= -1f;
-		}
-		else if (move.forceDirection == CombatMoveDataInstance.ForceDirection.TowardTargetWithoutY && (bool)ownRig && (bool)enemyTorso)
-		{
-			result = new Vector3(enemyTorso.position.x - ownRig.position.x, 0f, enemyTorso.position.z - ownRig.position.z);
 		}
 		return result;
 	}

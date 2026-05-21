@@ -73,6 +73,11 @@ namespace HiddenUnits
             }
         }
         
+        private void OnDestroy()
+        {
+            if (ArmoredUnit) Destroy(ArmoredUnit);
+        }
+        
         private Unit Unit;
         private UnitIsArmored ArmoredUnit;
 

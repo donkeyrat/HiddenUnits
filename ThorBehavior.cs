@@ -1,15 +1,17 @@
-﻿using Landfall.TABS;
+﻿using System.Collections.Generic;
+using Landfall.TABS;
+using TGCore.Library;
 using UnityEngine;
 using UnityEngine.Events;
-using System.Collections.Generic;
-using TGCore.Library;
+
+namespace HiddenUnits;
 
 public class ThorBehavior : MonoBehaviour
 {
-    void Start()
-    {
-        Unit = transform.root.GetComponent<Unit>();
-    }
+	void Start()
+	{
+		Unit = transform.root.GetComponent<Unit>();
+	}
 
 	public void GrabHammerRight()
 	{
@@ -76,23 +78,23 @@ public class ThorBehavior : MonoBehaviour
 	}
 
 	public void UnGrabHammer()
-    {
-        if (HoldingLeft || HoldingRight)
-        {
+	{
+		if (HoldingLeft || HoldingRight)
+		{
 			HoldingLeft = false;
 			HoldingRight = false;
 			ungrabEvent.Invoke();
-            if (Unit.holdingHandler)
-            {
-                Unit.holdingHandler.LetGoOfWeapon(weaponToGrab);
-            }
-            else if (Unit.GetComponentInChildren<HoldingHandlerMulti>())
-            {
-                var multi = Unit.GetComponentInChildren<HoldingHandlerMulti>();
-                multi.LetGoOfAll();
-            }
-        }
-    }
+			if (Unit.holdingHandler)
+			{
+				Unit.holdingHandler.LetGoOfWeapon(weaponToGrab);
+			}
+			else if (Unit.GetComponentInChildren<HoldingHandlerMulti>())
+			{
+				var multi = Unit.GetComponentInChildren<HoldingHandlerMulti>();
+				multi.LetGoOfAll();
+			}
+		}
+	}
 
 	public Weapon SetWeapon(Unit unit, Team team, GameObject weaponObject, PropItemData weaponData, HoldingHandler.HandType handType, Quaternion rotation, List<GameObject> objects, bool isUnitEditor = false)
 	{
@@ -175,13 +177,13 @@ public class ThorBehavior : MonoBehaviour
 
 	private Unit Unit;
 
-    private bool HoldingRight;
+	private bool HoldingRight;
 
 	private bool HoldingLeft;
 
-    public GameObject weaponToGrab;
+	public GameObject weaponToGrab;
 
-    public UnityEvent grabEvent = new UnityEvent();
+	public UnityEvent grabEvent = new UnityEvent();
 
-    public UnityEvent ungrabEvent = new UnityEvent();
+	public UnityEvent ungrabEvent = new UnityEvent();
 }

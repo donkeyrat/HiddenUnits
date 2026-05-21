@@ -26,10 +26,10 @@ namespace HiddenUnits
         private IEnumerator DoScaling(HitData hit)
         {
             hit.transform.gameObject.AddComponent<Scaling>();
-
-            yield return new WaitForSeconds(scaleDelay);
             
             scaleEvent.Invoke();
+
+            yield return new WaitForSeconds(scaleDelay);
 
             var t = 0f;
             var originalVector = hit.transform.localScale;
@@ -41,7 +41,7 @@ namespace HiddenUnits
             }
 
             ScaleCount++;
-            if (ScaleCount >= scaleLimit) Destroy(hit.transform.GetComponent<Scaling>());
+            if (ScaleCount < scaleLimit) Destroy(hit.transform.GetComponent<Scaling>());
         }
 
         private int ScaleCount;
