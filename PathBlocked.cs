@@ -1,5 +1,4 @@
-﻿using Landfall.TABS.AI.Components.Modifiers;
-using Unity.Entities;
+﻿using Unity.Entities;
 
 namespace HiddenUnits;
 

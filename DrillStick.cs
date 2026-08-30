@@ -31,6 +31,8 @@ public class DrillStick : CollisionWeaponEffect
 	public float time = 3f;
 
 	public UnityEvent stickEvent;
+	
+	public int stickLayer;
 
 	private void Start()
 	{
@@ -67,7 +69,7 @@ public class DrillStick : CollisionWeaponEffect
 
 	public override void DoEffect(Transform hitTransform, Collision collision)
 	{
-		if (joint)
+		if (joint || !collision.rigidbody || collision.gameObject.layer != stickLayer)
 		{
 			return;
 		}
@@ -83,7 +85,7 @@ public class DrillStick : CollisionWeaponEffect
 		}
 
 		var sqrMagnitude = (StickPosition.transform.position - collision.GetContact(0).point).sqrMagnitude;
-		if ((bool)collision.rigidbody && sqrMagnitude < StickPosition.radius * StickPosition.radius)
+		if (sqrMagnitude < StickPosition.radius * StickPosition.radius)
 		{
 			joint = AttachJoint(Rig, collision.rigidbody, collision.GetContact(0).point, fixPositionAmount,
 				StickPosition.transform, hardStick);

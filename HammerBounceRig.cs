@@ -12,9 +12,18 @@ namespace HiddenUnits {
         public void Start()
         {
             OwnRig = GetComponent<Rigidbody>();
-            OwnTeam = transform.root.GetComponent<Unit>().Team;
-            Weapon = transform.GetComponentInParent<Weapon>() ? transform.GetComponentInParent<Weapon>() : transform.root.GetComponent<Unit>().WeaponHandler.rightWeapon;
-            ReturnObject = Weapon.transform.FindChildRecursive(objectToReturnTo);
+            TeamHolder = GetComponent<TeamHolder>();
+            var rootWeapon = transform.GetComponentInParent<Weapon>();
+            var rootUnit = transform.root.GetComponent<Unit>();
+            if (rootWeapon)
+            {
+                Weapon = rootWeapon;
+            }
+            else if (rootUnit)
+            {
+                Weapon = rootUnit.WeaponHandler?.rightWeapon;
+            }
+            if (Weapon) ReturnObject = Weapon.transform.FindChildRecursive(objectToReturnTo);
             
             transform.SetParent(null);
             
@@ -59,7 +68,7 @@ namespace HiddenUnits {
             var enemyUnit = col.transform.root.GetComponent<Unit>();
             if (Counter < cooldown || !enemyUnit || !col.rigidbody 
                 || (enemyUnit && HitList.Contains(enemyUnit)) 
-                || (enemyUnit && enemyUnit.Team == GetComponent<TeamHolder>().team)
+                || (enemyUnit && TeamHolder && enemyUnit.Team == TeamHolder.team)
                 || Finished) return;
             Counter = 0f;
 
@@ -92,7 +101,7 @@ namespace HiddenUnits {
             var hits = Physics.SphereCastAll(transform.position, radius != 0f ? radius : maxRange, Vector3.up, 0.1f, LayerMask.GetMask(new string[] { "MainRig" }));
             var foundUnits = hits
                 .Select(hit => hit.transform.root.GetComponent<Unit>())
-                .Where(x => x && !x.data.Dead && x.Team != OwnTeam && !HitList.Contains(x))
+                .Where(x => x && !x.data.Dead && (!TeamHolder || x.Team != TeamHolder.team) && !HitList.Contains(x))
                 .OrderBy(x => (x.data.mainRig.transform.position - transform.position).magnitude)
                 .Distinct()
                 .ToArray();
@@ -119,7 +128,7 @@ namespace HiddenUnits {
         private float Counter;
         private Rigidbody OwnRig;
         private Unit Target;
-        private Team OwnTeam;
+        private TeamHolder TeamHolder;
         private List<Unit> HitList = new List<Unit>();
         private int HitCount;
         private bool Finished;

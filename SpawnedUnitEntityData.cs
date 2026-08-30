@@ -12,10 +12,28 @@ public class SpawnedUnitEntityData : MonoBehaviour
     private UnitAPI UnitAPI;
     
     public UnitSpawner spawner;
+
+    public UnitBlueprint failBlueprint;
     
     public void Start()
     {
-        UnitAPI = (transform.root.GetComponent<Unit>()? transform.root.GetComponent<Unit>() : GetComponent<TeamHolder>().spawner.transform.root.GetComponent<Unit>()).api;
+        var rootUnit = transform.root.GetComponent<Unit>();
+        var teamHolder = GetComponent<TeamHolder>();
+        if (rootUnit)
+        {
+            UnitAPI = rootUnit.api;
+        }
+        else if (teamHolder)
+        {
+            UnitAPI = teamHolder.spawner.transform.root.GetComponent<Unit>().api;
+        }
+        else
+        {
+            spawner.unitBlueprint = failBlueprint;
+            Destroy(this);
+            return;
+        }
+        
         spawner.spawnUnitAction += SetEntityData;
     }
 

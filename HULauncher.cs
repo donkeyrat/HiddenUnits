@@ -4,14 +4,16 @@ using BepInEx;
 using BepInEx.Configuration;
 using Landfall.TABS;
 using Pathfinding;
+using TFBGames;
 using TGCore;
 using TGCore.Localization;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace HiddenUnits 
 {
-    [BepInPlugin("teamgrad.hiddenunits", "Hidden Units", "1.3.0")]
+    [BepInPlugin("teamgrad.hiddenunits", "Hidden Units", "2.0.0")]
     [BepInDependency("teamgrad.core")]
 	public class HULauncher : TGMod
 	{
@@ -22,41 +24,48 @@ namespace HiddenUnits
 
 		public override void AddSettings()
 		{
-			configInfiniteScalingEnabled = Config.Bind("Bug", "InfiniteScalingEnabled", true, "Enables/disables Mathematician/Philosopher projectiles infinitely scaling unit parts.");
+            configInfiniteScalingEnabled = Config.Bind("Bug", "InfiniteScalingEnabled", false, "Toggles Mathematician/Philosopher projectiles infinitely scaling unit parts.");
+            var infiniteScaling = TGAddons.CreateSetting(SettingsInstance.SettingsType.Options, "Infinite scaling science", "Toggles Mathematician/Philosopher projectiles infinitely scaling unit parts.", "BUG", 0f, configInfiniteScalingEnabled.Value ? 1 : 0, new[] { "Off", "On" });
+            infiniteScaling.OnValueChanged += delegate(int value)
+            {
+                configInfiniteScalingEnabled.Value = value == 1;
+            };
+            
+            configEvilBeesEnabled = Config.Bind("Bug", "EvilBeesEnabled", false, "The bees are filled with a blood-red rage.");
 			
-			var infiniteScaling = TGAddons.CreateSetting(SettingsInstance.SettingsType.Options, "Toggle infinite projectile scaling", "Enables/disables Mathematician/Philosopher projectiles infinitely scaling unit parts.", "BUG", 0f, configInfiniteScalingEnabled.Value ? 0 : 1, new[] { "Disabled", "Enabled" });
-			infiniteScaling.OnValueChanged += delegate(int value)
-			{
-				configInfiniteScalingEnabled.Value = value == 1;
-			};
+            var evilBees = TGAddons.CreateSetting(SettingsInstance.SettingsType.Options, "Make bees very angry", "The bees are filled with a blood-red rage.", "BUG", 0f, configEvilBeesEnabled.Value ? 1 : 0, new[] { "Off", "On" });
+            evilBees.OnValueChanged += delegate(int value)
+            {
+                configEvilBeesEnabled.Value = value == 1;
+            };
 		}
 
 		public override void SceneManager(Scene scene, LoadSceneMode laodSceneMode)
 		{
-            if (scene.path == "Assets/11 Scenes/MainMenu.unity") {
+            if (scene.path == "Assets/11 Scenes/MainMenu.unity")
+            {
 
-                if (!ServiceLocator.GetService<ISaveLoaderService>().HasUnlockedSecret("SECRET_EGYPT")) {
+                var saveLoader = ServiceLocator.GetService<ISaveLoaderService>();
+                if (!saveLoader.HasUnlockedSecret("SECRET_EGYPT")) {
 
-                    ServiceLocator.GetService<ISaveLoaderService>().UnlockSecret("SECRET_EGYPT");
+                    saveLoader.UnlockSecret("SECRET_EGYPT");
                     ServiceLocator.GetService<ModalPanel>().OpenUnlockPanel("You unlocked the Egypt faction!", HUMain.hiddenUnits.LoadAsset<Sprite>("egypt"));
+                }
+                if (!saveLoader.HasUnlockedSecret("SECRET_STEAMPUNK")) {
+
+                    saveLoader.UnlockSecret("SECRET_STEAMPUNK");
+                    ServiceLocator.GetService<ModalPanel>().OpenUnlockPanel("You unlocked the Steampunk faction!", HUMain.hiddenUnits.LoadAsset<Sprite>("steampunk"));
                 }
             }
             else if (scene.name.Contains("SG_"))
             {
                 if (scene.name == "SG_Egypt" && ServiceLocator.GetService<ISaveLoaderService>().HasUnlockedSecret("BILLY_SWORD"))
                     Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("BillyKey_Unlock4"), null, true);
-
-                GameObject astar = null;
-                GameObject map = null;
+                
                 foreach (var obj in scene.GetRootGameObjects())
                 {
-                    if (obj.name == "AStar_Lvl1_Grid")
-                    {
-                        astar = obj;
-                    }
                     if (obj.name == "Map")
                     {
-                        map = obj;
                         var shadersToReplace = new List<MeshRenderer>(obj.GetComponentsInChildren<MeshRenderer>(true)
                             .ToList().FindAll(x => x.name.Contains("_ReplaceMe")));
                         foreach (var rend in shadersToReplace)
@@ -80,30 +89,6 @@ namespace HiddenUnits
                         obj.GetComponent<PirateWaterManager>().WaterMaterial = obj.GetComponent<MeshRenderer>().material;
                     }
                 }
-                if (astar != null && map != null)
-                {
-                    var path = astar.GetComponentInChildren<AstarPath>(true);
-                    astar.SetActive(true);
-                    if (path.data.graphs.Length > 0) { path.data.RemoveGraph(path.data.graphs[0]); }
-                    path.data.AddGraph(typeof(RecastGraph));
-                    path.data.recastGraph.minRegionSize = 0.1f;
-                    path.data.recastGraph.characterRadius = 0.3f;
-                    path.data.recastGraph.cellSize = 0.2f;
-                    path.data.recastGraph.forcedBoundsSize = new Vector3(map.GetComponent<MapSettings>().m_mapRadius * 2f, map.GetComponent<MapSettings>().m_mapRadius * map.GetComponent<MapSettings>().mapRadiusYMultiplier * 2f, map.GetComponent<MapSettings>().m_mapRadius * 2f);
-                    path.data.recastGraph.rasterizeMeshes = false;
-                    path.data.recastGraph.rasterizeColliders = true;
-                    path.data.recastGraph.mask = HUMain.hiddenUnits.LoadAsset<GameObject>("AStarDummy").GetComponent<Explosion>().layerMask;
-                    path.Scan();
-
-                    //path.data.GetNodes(delegate (GraphNode node)
-                    //{
-                    //    GameObject gameObject = GameCreatePrimitive(PrimitiveType.Cube);
-                    //    gametransform.position = (Vector3)node.position;
-                    //    gameGetComponent<Renderer>().material.color = Color.green;
-                    //    gameGetComponent<Collider>().enabled = false;
-                    //    gametransform.localScale *= 0.5f;
-                    //});
-                }
             }
             else if (scene.name == "00_Simulation_Day_VC")
             {
@@ -113,13 +98,21 @@ namespace HiddenUnits
                 };
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Saitama_Unlock"), secrets.transform, true);
             }
-            else if (scene.name == "00_Lvl2_Halloween_VC")
+            else if (scene.name == "00_Lvl1_Halloween_VC")
             {
                 var secrets = new GameObject()
                 {
                     name = "Secrets"
                 };
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Hadez_Unlock"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("TwinOgre_Unlock"), secrets.transform, true);
+            }
+            else if (scene.name == "00_Lvl2_Halloween_VC")
+            {
+                var secrets = new GameObject()
+                {
+                    name = "Secrets"
+                };
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("EmpSword_Unlock1"), secrets.transform, true);
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("EmpSword_Unlock2"), secrets.transform, true);
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("EmpSword_Unlock3"), secrets.transform, true);
@@ -134,7 +127,7 @@ namespace HiddenUnits
                 {
                     name = "Secrets"
                 };
-                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("WD_Unlock"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("CMM_Unlock4"), secrets.transform, true);
             }
             else if (scene.name == "01_Lvl2_Tribal_VC")
             {
@@ -145,6 +138,7 @@ namespace HiddenUnits
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Shaman_Unlock"), secrets.transform, true);
                 if (ServiceLocator.GetService<ISaveLoaderService>().HasUnlockedSecret("BILLY_SWORD"))
                     Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("BillyKey_Unlock2"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("WD_Unlock"), secrets.transform, true);
             }
             else if (scene.name == "01_Sandbox_Tribal_01_VC")
             {
@@ -162,6 +156,7 @@ namespace HiddenUnits
                     name = "Secrets"
                 };
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Butcher_Unlock"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("CMM_Unlock2"), secrets.transform, true);
             }
             else if (scene.name == "02_Lvl2_Farmer_VC")
             {
@@ -174,6 +169,7 @@ namespace HiddenUnits
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Chicken_Unlock3"), secrets.transform, true);
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Chicken_Unlock4"), secrets.transform, true);
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Chicken_Unlock5"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Beekeeper_Unlock"), secrets.transform, true);
             }
             else if (scene.name == "03_Lvl1_Ancient_VC")
             {
@@ -182,6 +178,7 @@ namespace HiddenUnits
                     name = "Secrets"
                 };
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Helicopter_Unlock"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Hephaestus_Unlock"), secrets.transform, true);
             }
             else if (scene.name == "03_Lvl2_Ancient_VC")
             {
@@ -192,6 +189,12 @@ namespace HiddenUnits
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Mathematician_Unlock"), secrets.transform, true);
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Philosopher_Unlock"), secrets.transform, true);
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Apollo_Unlock"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Gorgon_Unlock"), secrets.transform, true);
+                foreach (var obj in scene.GetRootGameObjects())
+                {
+                    var head = obj.transform.FindChildRecursive("Head");
+                    if (head) head.gameObject.SetActive(false);
+                }
             }
             else if (scene.name == "03_Sandbox_Ancient_01_VC")
             {
@@ -223,6 +226,7 @@ namespace HiddenUnits
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("DreadKing_Unlock"), secrets.transform, true);
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Thor_Unlock"), secrets.transform, true);
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Odin_Unlock"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("FireGiant_Unlock"), secrets.transform, true);
             }
             else if (scene.name == "05_Lvl1_Medieval_VC")
             {
@@ -232,6 +236,7 @@ namespace HiddenUnits
                 };
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Tower_Unlock"), secrets.transform, true);
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Thief_Unlock"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Warhorn_Unlock"), secrets.transform, true);
             }
             else if (scene.name == "05_Lvl2_Medieval_VC")
             {
@@ -242,6 +247,24 @@ namespace HiddenUnits
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Ignislasher_Unlock"), secrets.transform, true);
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Templar_Unlock"), secrets.transform, true);
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Bishop_Unlock"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Blacksmith_Unlock"), secrets.transform, true);
+            }
+            else if (scene.name == "05_AsiaTemple_VC")
+            {
+                var secrets = new GameObject()
+                {
+                    name = "Secrets"
+                };
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("TheSage_Unlock"), secrets.transform, true);
+            }
+            else if (scene.name == "07_lvl1_Renaissance_VC")
+            {
+                var secrets = new GameObject()
+                {
+                    name = "Secrets"
+                };
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("TheQueen_Unlock"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("CMM_Unlock1"), secrets.transform, true);
             }
             else if (scene.name == "08_Lvl1_Pirate_VC")
             {
@@ -251,6 +274,10 @@ namespace HiddenUnits
                 };
                 if (ServiceLocator.GetService<ISaveLoaderService>().HasUnlockedSecret("BILLY_SWORD"))
                     Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("BillyKey_Unlock1"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Triton_Unlock"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("SeaKnight_Unlock"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Crab_Unlock"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Whale_Unlock"), secrets.transform, true);
             }
             else if (scene.name == "09_Lvl1_Western_VC")
             {
@@ -259,6 +286,8 @@ namespace HiddenUnits
                     name = "Secrets"
                 };
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Prospector_Unlock"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("OilArcher_Unlock"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("CMM_Unlock3"), secrets.transform, true);
             }
             else if (scene.name == "05_Sandbox_Medieval_VC")
             {
@@ -270,6 +299,7 @@ namespace HiddenUnits
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("SpiderMage_Unlock"), secrets.transform, true);
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("MayhemGunner_Unlock"), secrets.transform, true);
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Billy_Unlock"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("BoxCannon_Unlock"), secrets.transform, true);
             }
             else if (scene.name == "09_Lvl1_Fantasy_Evil_VC")
             {
@@ -279,6 +309,11 @@ namespace HiddenUnits
                 };
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("BusinessMan_Unlock"), secrets.transform, true);
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Cthulhu_Unlock"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("GrakaThor_Unlock1"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Blaze_Unlock"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Manticore_Unlock"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Sanguinarian_Unlock"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("StormKing_Unlock"), secrets.transform, true);
                 if (ServiceLocator.GetService<ISaveLoaderService>().HasUnlockedSecret("BILLY_SWORD"))
                     Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("BillyKey_Unlock3"), secrets.transform, true);
             }
@@ -292,12 +327,19 @@ namespace HiddenUnits
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Angel_Unlock"), secrets.transform, true);
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Pegasus_Unlock"), secrets.transform, true);
                 Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("Seraphim_Unlock"), secrets.transform, true);
+                Instantiate(HUMain.hiddenUnits.LoadAsset<GameObject>("GrakaThor_Unlock2"), secrets.transform, true);
             }
         }
 
-        public override void Localize(LocalizationHolder holder) => holder.languages.AddRange(HUMain.hiddenUnits
-            .LoadAsset<GameObject>("Lang").GetComponent<LocalizationHolder>().languages);
+        public override void Localize(LocalizationHolder holder)
+        {
+            holder.languages.AddRange(HUMain.hiddenUnits
+                .LoadAsset<GameObject>("Lang").GetComponent<LocalizationHolder>().languages);
+            holder.languages.AddRange(HUMain.huMaps
+                .LoadAsset<GameObject>("MapLang").GetComponent<LocalizationHolder>().languages);
+        }
 		
-		public static ConfigEntry<bool> configInfiniteScalingEnabled;
+        public static ConfigEntry<bool> configInfiniteScalingEnabled;
+        public static ConfigEntry<bool> configEvilBeesEnabled;
 	}
 }

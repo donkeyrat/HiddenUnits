@@ -1,4 +1,5 @@
-﻿using TGCore.Library;
+﻿using Landfall.TABS;
+using TGCore.Library;
 using UnityEngine;
 
 namespace HiddenUnits;
@@ -7,6 +8,7 @@ public class AnchorBehavior : MonoBehaviour
 {
 	private Rope Rope;
 	private TeamHolder Team;
+	private Unit SpawnerUnit;
 	private Rigidbody OwnRig;
 	private CollisionStick Stick;
 	private AudioSource Audio;
@@ -24,6 +26,7 @@ public class AnchorBehavior : MonoBehaviour
 		Team = GetComponent<TeamHolder>();
 		Rope = GetComponentInChildren<Rope>();
 		OwnRig = GetComponent<Rigidbody>();
+		SpawnerUnit = Team?.spawner?.GetComponent<Unit>();
 		
 		Audio = GetComponent<AudioSource>();
 		Audio.volume = 0f;
@@ -42,10 +45,10 @@ public class AnchorBehavior : MonoBehaviour
 	private void LateUpdate()
 	{
 		var weaponTransform = Team.spawnerWeapon.transform;
-		if (!Rope || !weaponTransform) return;
+		if (!Rope) return;
 
 		Counter += Time.deltaTime;
-		if (Counter > timeTillDisable)
+		if (Counter > timeTillDisable || !Team.spawnerWeapon || !SpawnerUnit || (SpawnerUnit && SpawnerUnit.data.Dead))
 		{
 			Rope.done = true;
 			return;

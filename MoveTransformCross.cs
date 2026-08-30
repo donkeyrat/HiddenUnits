@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using TGCore.Library;
+using UnityEngine;
+using UnityEngine.Events;
 
 namespace HiddenUnits
 {
@@ -15,6 +17,8 @@ namespace HiddenUnits
             {
                 TrackedPosition = transform.position;
             }
+
+            MoveTransform = GetComponent<MoveTransform>();
         }
 
         private void Update()
@@ -27,30 +31,33 @@ namespace HiddenUnits
             }
         
             var direction = (TrackedPosition - transform.position).normalized;
-            direction.y = 0f;
+            if (setYPosition) direction.y = TrackedPosition.y;
             var rotation = Quaternion.LookRotation(direction);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, rotation,
                 rotationSpeedOverTime.Evaluate(Counter) * rotationForce * Time.deltaTime);
         
-            projectile.velocity += transform.forward * (force * Time.deltaTime);
-            projectile.velocity -= projectile.velocity * (drag * Time.deltaTime);
+            MoveTransform.velocity += transform.forward * (force * Time.deltaTime);
+            MoveTransform.velocity -= MoveTransform.velocity * (drag * Time.deltaTime);
 
             if (Counter > returnDelay && Vector3.Distance(transform.position, TrackedPosition) < returnThreshold)
             {
-                if (Target != null) Target.GetComponent<DelayEvent>().Go();
-                delayEvent.Go();
+                if (Target != null)
+                {
+                    var returnableProjectileEvent = Target.GetComponentInParent<ReturnableProjectileEvent>();
+                    if (returnableProjectileEvent) returnableProjectileEvent.Go();
+                }
+                returnEvent.Invoke();
             }
         }
-
 
         private float Counter;
         private Transform Target;
         private Vector3 TrackedPosition;
+        private MoveTransform MoveTransform;
 
         public bool updatePosition;
         
-        public MoveTransform projectile;
-        public DelayEvent delayEvent;
+        public UnityEvent returnEvent;
         public AnimationCurve rotationSpeedOverTime;
     
         [Header("Movement")]
@@ -58,6 +65,7 @@ namespace HiddenUnits
         public float force = 1f;
         public float rotationForce = 1f;
         public float drag = 0.9f;
+        public bool setYPosition;
     
         [Header("Return")]
     

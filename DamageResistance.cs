@@ -49,5 +49,4 @@ public class DamageResistance : MonoBehaviour
     public List<DamageResistPart> damageResistParts = new List<DamageResistPart>();
 
     public float resistPercentage = 0.5f;
-    public float chanceForPartToFall = 0.5f;
 }

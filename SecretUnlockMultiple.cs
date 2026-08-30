@@ -10,42 +10,28 @@ namespace HiddenUnits
 {
 	public class SecretUnlockMultiple : GameStateListener
 	{
-		public string secretKey;
-	
-		public List<string> secretDescriptions = new List<string>();
-	
-		public Sprite secretIcon;
-	
-		public float distanceToUnlock = 5f;
-	
-		private RotationShake MRotationShake;
-	
-		private Rigidbody MSecretObject;
-	
-		private float MLookValue;
-	
-		private float MUnlockValue;
-	
-		public AudioClip hitClip;
-	
+		private RotationShake RotationShake;
+		private Rigidbody SecretObject;
+		private float LookValue;
+		private float UnlockValue;
 		private AudioSource LoopSource;
-	
-		private Transform MMainCamTransform;
-	
-		public UnityEvent unlockEvent;
-	
-		public UnityEvent hideEvent;
-	
+		private Transform MainCamTransform;
 		private bool Done;
-	
+		
+		public string secretKey;
+		public List<string> secretDescriptions;
+		public Sprite secretIcon;
+		public float distanceToUnlock = 5f;
+		public AudioClip hitClip;
+		public UnityEvent unlockEvent;
+		public UnityEvent hideEvent;
 		public Color glowColor;
-	
 		public GameObject unlockSparkEffect;
 	
 		protected override void Awake()
 		{
 			base.Awake();
-			if (MMainCamTransform == null)
+			if (MainCamTransform == null)
 			{
 				OnEnterNewScene();
 			}
@@ -53,63 +39,63 @@ namespace HiddenUnits
 	
 		private void Update()
 		{
-			if (!(MMainCamTransform != null) || !MSecretObject || Done)
+			if (!(MainCamTransform != null) || !SecretObject || Done)
 			{
 				return;
 			}
-			LoopSource.volume = MUnlockValue <= 0f ? 0f : Mathf.Pow(MUnlockValue * 0.25f, 1.3f);
+			LoopSource.volume = UnlockValue <= 0f ? 0f : Mathf.Pow(UnlockValue * 0.25f, 1.3f);
 			if (float.IsNaN(LoopSource.volume))
 			{
 				LoopSource.volume = 0f;
 			}
-			var pitch = 1f + 1f * MUnlockValue;
+			var pitch = 1f + 1f * UnlockValue;
 			LoopSource.pitch = (pitch >= 0f ? pitch : 0f);
-			if (MUnlockValue > 0f || MLookValue > 10f)
+			if (UnlockValue > 0f || LookValue > 10f)
 			{
 				SetColor();
 			}
-			var num = Vector3.Distance(MSecretObject.worldCenterOfMass, MMainCamTransform.position);
+			var num = Vector3.Distance(SecretObject.worldCenterOfMass, MainCamTransform.position);
 			if (num > distanceToUnlock)
 			{
-				MUnlockValue -= Time.unscaledDeltaTime * 0.2f;
+				UnlockValue -= Time.unscaledDeltaTime * 0.2f;
 				return;
 			}
-			var num2 = Vector3.Angle(MMainCamTransform.forward, MSecretObject.worldCenterOfMass - MMainCamTransform.position);
-			MLookValue = 1000f / (num * num2);
-			if (MLookValue > 8f)
+			var num2 = Vector3.Angle(MainCamTransform.forward, SecretObject.worldCenterOfMass - MainCamTransform.position);
+			LookValue = 1000f / (num * num2);
+			if (LookValue > 8f)
 			{
 				var num3 = 0.2f;
-				MUnlockValue += num3 * Time.unscaledDeltaTime;
+				UnlockValue += num3 * Time.unscaledDeltaTime;
 				UnlockProgressFeedback();
-				if (MUnlockValue > 1f)
+				if (UnlockValue > 1f)
 				{
 					StartCoroutine(UnlockSecret());
 				}
 			}
 			else
 			{
-				MUnlockValue -= Time.unscaledDeltaTime * 0.2f;
+				UnlockValue -= Time.unscaledDeltaTime * 0.2f;
 			}
 		}
 	
 		private void UnlockProgressFeedback()
 		{
-			if ((bool)MRotationShake)
+			if ((bool)RotationShake)
 			{
-				if (MUnlockValue <= 0f)
+				if (UnlockValue <= 0f)
 				{
-					MRotationShake.AddForce(Random.onUnitSphere * 2f);
-					MUnlockValue = 0f;
+					RotationShake.AddForce(Random.onUnitSphere * 2f);
+					UnlockValue = 0f;
 				}
-				MRotationShake.enabled = true;
-				MRotationShake.AddForce(Random.onUnitSphere * MUnlockValue * Time.deltaTime * 50f);
+				RotationShake.enabled = true;
+				RotationShake.AddForce(Random.onUnitSphere * UnlockValue * Time.deltaTime * 50f);
 			}
 		}
 	
 		private void SetColor()
 		{
-			MUnlockValue = Mathf.Clamp(MUnlockValue, 0f, float.PositiveInfinity);
-			var componentsInChildren = MSecretObject.GetComponentsInChildren<Renderer>();
+			UnlockValue = Mathf.Clamp(UnlockValue, 0f, float.PositiveInfinity);
+			var componentsInChildren = SecretObject.GetComponentsInChildren<Renderer>();
 			for (var i = 0; i < componentsInChildren.Length; i++)
 			{
 				var materials = componentsInChildren[i].materials;
@@ -118,7 +104,7 @@ namespace HiddenUnits
 					if (materials[j].HasProperty("_EmissionColor"))
 					{
 						materials[j].EnableKeyword("_EMISSION");
-						materials[j].SetColor("_EmissionColor", glowColor * MUnlockValue * 2f);
+						materials[j].SetColor("_EmissionColor", glowColor * UnlockValue * 2f);
 					}
 				}
 				componentsInChildren[i].materials = materials;
@@ -133,20 +119,20 @@ namespace HiddenUnits
 			}
 			if ((bool)ScreenShake.Instance)
 			{
-				ScreenShake.Instance.AddForce(Vector3.up * 8f, MSecretObject.transform.position);
+				ScreenShake.Instance.AddForce(Vector3.up * 8f, SecretObject.transform.position);
 			}
 			if ((bool)unlockSparkEffect)
 			{
-				var gameObject = Instantiate(unlockSparkEffect, MSecretObject.transform.position, MSecretObject.transform.rotation);
+				var gameObject = Instantiate(unlockSparkEffect, SecretObject.transform.position, SecretObject.transform.rotation);
 				gameObject.AddComponent<RemoveAfterSeconds>().seconds = 5f;
-				var componentInChildren = MSecretObject.GetComponentInChildren<MeshRenderer>();
+				var componentInChildren = SecretObject.GetComponentInChildren<MeshRenderer>();
 				if ((bool)componentInChildren)
 				{
 					var shape = gameObject.GetComponent<ParticleSystem>().shape;
 					shape.meshRenderer = componentInChildren;
 				}
 			}
-			MSecretObject.gameObject.SetActive(value: false);
+			SecretObject.gameObject.SetActive(value: false);
 			unlockEvent?.Invoke();
 			LoopSource.Stop();
 			LoopSource.volume = 1f;
@@ -168,24 +154,24 @@ namespace HiddenUnits
 			{
 				LoopSource.volume = 0f;
 			}
-			MRotationShake = GetComponentInChildren<RotationShake>();
-			MSecretObject = GetComponentInChildren<Rigidbody>();
-			if ((bool)MSecretObject)
+			RotationShake = GetComponentInChildren<RotationShake>();
+			SecretObject = GetComponentInChildren<Rigidbody>();
+			if ((bool)SecretObject)
 			{
-				MSecretObject.isKinematic = true;
+				SecretObject.isKinematic = true;
 			}
 			
 			if (!string.IsNullOrWhiteSpace(secretKey) && ServiceLocator.GetService<ISaveLoaderService>().HasUnlockedSecret(secretKey))
 			{
-				if ((bool)MSecretObject)
+				if ((bool)SecretObject)
 				{
-					MSecretObject.gameObject.SetActive(value: false);
+					SecretObject.gameObject.SetActive(value: false);
 				}
 				enabled = false;
 				hideEvent?.Invoke();
 			}
 			var mainCam = ServiceLocator.GetService<PlayerCamerasManager>()?.GetMainCam(TFBGames.Player.One);
-			MMainCamTransform = ((mainCam != null) ? mainCam.transform : null);
+			MainCamTransform = ((mainCam != null) ? mainCam.transform : null);
 		}
 	
 		public override void OnEnterPlacementState()
@@ -194,33 +180,6 @@ namespace HiddenUnits
 	
 		public override void OnEnterBattleState()
 		{
-		}
-	
-		public static void CheckAchievements()
-		{
-			var service = ServiceLocator.GetService<AchievementService>();
-			var secretService = ServiceLocator.GetService<ISaveLoaderService>();
-			if (HasUnlockedFaction(874593522))
-			{
-				service.UnlockAchievement("UNLOCKED_ALL_SECRET");
-			}
-			if (HasUnlockedFaction(673578412))
-			{
-				service.UnlockAchievement("UNLOCKED_ALL_LEGACY");
-			}
-			bool HasUnlockedFaction(int factionId)
-			{
-				var units = LandfallUnitDatabase.GetDatabase().GetFactionByGUID(new DatabaseID(-1, factionId)).Units;
-				for (var i = 0; i < units.Length; i++)
-				{
-					var unlockKey = units[i].Entity.UnlockKey;
-					if (!string.IsNullOrEmpty(unlockKey) && !secretService.HasUnlockedSecret(unlockKey))
-					{
-						return false;
-					}
-				}
-				return true;
-			}
 		}
 	}
 }

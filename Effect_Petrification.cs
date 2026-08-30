@@ -49,7 +49,7 @@ namespace HiddenUnits
             OwnUnit.api.UpdateECSValues();
             
             var t = 0f;
-            while (t < 1f && !OwnUnit.data.Dead)
+            while (t < 1f && (!OwnUnit.data.healthHandler.willBeRewived || OwnUnit.data.Dead))
             {
                 t += Time.deltaTime * petrifySpeed;
                 
@@ -65,17 +65,26 @@ namespace HiddenUnits
                 yield return null;
             }
 
-            if (OwnUnit.data.Dead)
+            if (OwnUnit.data.Dead && OwnUnit.data.healthHandler.willBeRewived)
             {
                 ResetUnit();
                 yield break;
             }
+            
+            OwnUnit.data.healthHandler.TakeDamage(petrifyDamage, Vector3.zero);
 
             OriginalDrags = AllRigs.AllDrags.ToList();
             if (OwnUnit.WeaponHandler) OwnUnit.WeaponHandler.StopAttacksFor(TrueDelay);
-            
-            foreach (var rig in AllRigs.AllRigs) rig.isKinematic = true;
-            foreach (var weapon in Weapons) weapon.isKinematic = true;
+
+            foreach (var rig in AllRigs.AllRigs)
+            {
+                if (!rig) continue;
+                rig.isKinematic = true;
+            }
+            foreach (var weapon in Weapons.Where(weapon => weapon))
+            {
+                weapon.isKinematic = true;
+            }
 
             StartCoroutine(DoUnPetrifying());
         }
@@ -131,6 +140,8 @@ namespace HiddenUnits
         private float TrueDelay;
         private float OriginalTargetingPriority;
 
+        public float petrifyDamage = 100f;
+        
         [Header("Petrification")]
         
         public UnityEvent petrifyEvent = new UnityEvent();

@@ -35,7 +35,7 @@ public class ChainUnits : ProjectileHitEffect
     {
         OldTarget = hit.transform.root.GetComponent<Unit>();
         if (!OldTarget || 
-            OldTarget.Team == TeamHolder.team || 
+            (TeamHolder && OldTarget.Team == TeamHolder.team) || 
             OldTarget.data.Dead)
         {
             return false;
@@ -52,13 +52,13 @@ public class ChainUnits : ProjectileHitEffect
         
             StartCoroutine(DoChains());
         }
-        else
+        else if (hasChain.effect && hasChain.effect.GetComponent<Effect_ShareDamage>())
         {
-            foreach (var effect in hasChain.effect.GetComponent<Effect_ShareDamage>().connectedUnits)
+            foreach (var affectedUnit in hasChain.effect.GetComponent<Effect_ShareDamage>().connectedUnits)
             {
-                if (effect != null)
+                if (affectedUnit)
                 {
-                    CreateEffect(effect.unit.transform, igniteEffect, false);
+                    CreateEffect(affectedUnit.unit.transform, igniteEffect, false);
                 }
             }
         }
@@ -116,7 +116,7 @@ public class ChainUnits : ProjectileHitEffect
         var hits = Physics.SphereCastAll(transform.position, chainRadius, Vector3.up, 0.1f, LayerMask.GetMask(new string[] { "MainRig" }));
         var foundUnits = hits
             .Select(hit => hit.transform.root.GetComponent<Unit>())
-            .Where(x => x && !x.data.Dead && x.Team != TeamHolder.team && !x.data.mainRig.GetComponent<IsChained>())
+            .Where(x => x && !x.data.Dead && (!TeamHolder || x.Team != TeamHolder.team) && !x.data.mainRig.GetComponent<IsChained>())
             .OrderBy(x => (x.data.mainRig.transform.position - source).magnitude)
             .Distinct()
             .ToArray();
@@ -135,11 +135,8 @@ public class ChainUnits : ProjectileHitEffect
             else effect.GetComponent<UnitEffectBase>().DoEffect();
             return effect.gameObject;
         }
-        else
-        {
-            foundEffect.Ping();
-            return foundEffect.gameObject;
-        }
+
+        return foundEffect.gameObject;
     }
 
     public class IsChained : MonoBehaviour
@@ -162,16 +159,15 @@ public class ChainUnits : ProjectileHitEffect
 
         private void OnJointBreak(float breakForce)
         {
-            Debug.Log("Break the chain");
             BreakChain();
         }
 
         private void BreakChain()
         {
-            if (effect) Destroy(effect);
-            foreach (var line in lines)
+            if (effect) effect.GetComponent<Effect_ShareDamage>().Finish();
+            foreach (var line in lines.Where(line => line))
             {
-                if (line != null) Destroy(line);
+                Destroy(line);
             }
             Destroy(this);
         }

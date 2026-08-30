@@ -15,11 +15,11 @@ public class SendUnitsElsewhere : MonoBehaviour
     private Dictionary<UnitEffectBase, float> AddedEffects = new Dictionary<UnitEffectBase, float>();
     
     public float radius;
-    //public float delayToSpit = 2f;
     public LayerMask layer;
     public UnitEffectBase effectToGive;
     public Transform placeToSendTo;
     public UnityEvent sendUnitsEvent;
+    
     public float maximumHealthToSuck = 500f;
 
     private void Start()
@@ -32,7 +32,7 @@ public class SendUnitsElsewhere : MonoBehaviour
         var unitsToEat = Physics.SphereCastAll(transform.position, radius, Vector3.up, 0.1f, layer)
             .Select(hit => hit.transform.root.GetComponent<Unit>())
             .Where(x => !x.data.Dead)
-            .Where(x => x && !x.data.Dead && x.Team != OwnUnit.Team && !x.GetComponentInChildren<FreezeBody>() && x.data.maxHealth < maximumHealthToSuck)
+            .Where(x => x && !x.data.Dead && x.Team != OwnUnit.Team && !x.GetComponentInChildren<FreezeRigs>() && x.data.maxHealth < maximumHealthToSuck)
             .OrderBy(x => (x.data.mainRig.transform.position - transform.position).magnitude)
             .Distinct()
             .ToArray();
@@ -45,21 +45,25 @@ public class SendUnitsElsewhere : MonoBehaviour
 
     public void SpitOutUnits()
     {
+        var spatOutUnits = false;
         foreach (var unit in SuckedUpUnits.Where(unit => unit))
         {
+            spatOutUnits = true;
+            unit.data.sinceGrounded = 0f;
+            unit.data.fallTime = 0f;
+            
             var vector = placeToSendTo.position - unit.data.mainRig.transform.position;
             
-            var componentInChildren = unit.GetComponentInChildren<DataHandler>();
-            for (var j = 0; j < componentInChildren.transform.childCount; j++)
+            for (var j = 0; j < unit.data.transform.childCount; j++)
             {
-                var child = componentInChildren.transform.GetChild(j);
+                var child = unit.data.transform.GetChild(j);
                 child.position += vector;
             }
         }
         SuckedUpUnits.Clear();
         ReleaseSuckedUpUnits();
         
-        sendUnitsEvent.Invoke();
+        if (spatOutUnits) sendUnitsEvent.Invoke();
     }
     
 
@@ -67,8 +71,9 @@ public class SendUnitsElsewhere : MonoBehaviour
     {
         foreach (var effect in AddedEffects.Where(effect => effect.Key))
         {
-            effect.Key.GetComponent<FreezeBody>().UnFreeze();
+            effect.Key.GetComponent<FreezeRigs>().UnFreeze();
             effect.Key.GetComponent<HideRenderers>().UnHideAll();
+            effect.Key.GetComponent<SendRootUnitToHell>().EnablePossession();
             var entity = effect.Key.transform.root.GetComponent<GameObjectEntity>();
             if (World.Active != null && entity && entity.EntityManager != null) effect.Key.GetComponent<SetTargetingPriority>().SetPriority(effect.Value);
             effect.Key.GetComponent<ChangeLayerOfChildren>().ResetLayer();

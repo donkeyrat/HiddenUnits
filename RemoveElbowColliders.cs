@@ -25,4 +25,16 @@ public class RemoveElbowColliders : MonoBehaviour
             }
         }
     }
+
+    public void AddBackColliders()
+    {
+        var joint = GetComponent<ConfigurableJoint>();
+        if (joint)
+        {
+            foreach (var col in joint.connectedBody.GetComponentsInChildren<Collider>())
+            {
+                col.gameObject.layer = 0;
+            }
+        }
+    }
 }

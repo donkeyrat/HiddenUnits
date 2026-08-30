@@ -20,33 +20,33 @@ namespace HiddenUnits
         
         public override void DoEffect(Transform hitTransform, Collision collision)
         {
-            var enemy = hitTransform.root.GetComponent<Unit>();
-            if (collision.rigidbody && enemy && enemy.Team != GetComponent<Weapon>().connectedData.unit.Team && !enemy.data.Dead)
+            if (hitTransform.GetComponent<Rigidbody>() && hitTransform.root.GetComponent<Unit>() && hitTransform.root.GetComponent<Unit>().Team != GetComponent<Weapon>().connectedData.unit.Team && !hitTransform.root.GetComponent<Unit>().data.Dead)
             {
+                
                 GameObject stolenWeapon = null;
                 var handType = HoldingHandler.HandType.Right;
+                var enemy = hitTransform.root.GetComponent<Unit>();
                 if (enemy.data.health > minimumHealthToSteal || enemy.data.Dead || Random.value > chance)
                 {
                     return;
                 }
-                stealEvent.Invoke();
-                var hold = enemy.GetComponentInChildren<HoldingHandler>();
-                if (hold)
+
+                if (enemy.holdingHandler && enemy.WeaponHandler)
                 {
-                    enemy.GetComponentInChildren<WeaponHandler>().fistRefernce = null;
-                    if (hold.rightObject)
+                    enemy.WeaponHandler.fistRefernce = null;
+                    if (enemy.holdingHandler.rightObject)
                     {
-                        stolenWeapon = hold.rightObject.gameObject;
+                        stolenWeapon = enemy.holdingHandler.rightObject.gameObject;
                         handType = HoldingHandler.HandType.Right;
-                        hold.LetGoOfWeapon(stolenWeapon);
-                        Destroy(hold.rightObject);
+                        enemy.holdingHandler.LetGoOfWeapon(stolenWeapon);
+                        //Destroy(hold.rightObject);
                     }
-                    else if (hold.leftObject)
+                    else if (enemy.holdingHandler.leftObject)
                     {
-                        stolenWeapon = hold.leftObject.gameObject;
+                        stolenWeapon = enemy.holdingHandler.leftObject.gameObject;
                         handType = HoldingHandler.HandType.Left;
-                        hold.LetGoOfWeapon(stolenWeapon);
-                        Destroy(hold.leftObject);
+                        enemy.holdingHandler.LetGoOfWeapon(stolenWeapon);
+                        //Destroy(hold.leftObject);
                     }
                 }
                 if (stolenWeapon != null)
@@ -57,16 +57,18 @@ namespace HiddenUnits
                         OwnUnit.WeaponHandler.fistRefernce = null;
                         OwnUnit.holdingHandler.LetGoOfWeapon(gameObject);
                         gameObject.AddComponent<RemoveAfterSeconds>().shrink = true;
-                        var w = OwnUnit.unitBlueprint.SetWeapon(OwnUnit, OwnUnit.Team, stolenWeapon, new PropItemData(), handType, OwnUnit.data.mainRig.rotation, new List<GameObject>());
-                        OwnUnit.holdingHandler.leftHandActivity = hold.leftHandActivity;
-                        if (w.GetComponent<ConfigurableJoint>())
+                        
+                        var newWeapon = OwnUnit.unitBlueprint.SetWeapon(OwnUnit, OwnUnit.Team, stolenWeapon, new PropItemData(), handType, OwnUnit.data.mainRig.rotation, []);
+                        OwnUnit.holdingHandler.leftHandActivity = enemy.holdingHandler.leftHandActivity;
+                        if (newWeapon.GetComponent<ConfigurableJoint>())
                         {
-                            foreach (var joint in w.GetComponentsInChildren<ConfigurableJoint>())
+                            foreach (var joint in newWeapon.GetComponentsInChildren<ConfigurableJoint>())
                             {
                                 Destroy(joint);
                             }
                         }
                         Destroy(stolenWeapon);
+                        stealEvent.Invoke();
                     }
                 }
             }

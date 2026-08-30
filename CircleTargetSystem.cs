@@ -5,7 +5,6 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
-using UnityEngine;
 
 namespace HiddenUnits {
 	
@@ -40,7 +39,7 @@ namespace HiddenUnits {
 			public ComponentDataArray<Direction> Directions;
 
 			[ReadOnly]
-			public ComponentDataArray<CircleTarget> CircleTargets;
+			public ComponentDataArray<HiddenUnits.CircleTarget> CircleTargets;
 
 			[ReadOnly]
 			public ComponentDataArray<HasTargetTag> HasTargetTags;
@@ -69,9 +68,9 @@ namespace HiddenUnits {
 				var e = Entities[index];
 				var component = Directions[index];
 				var circleTarget = CircleTargets[index];
-				var pathBlocked = PathBlocked[index];
+				var pathBlocked = CanSeeTargets[index];
 				var distanceToTarget = TargetDatas[index].DistanceToTarget;
-				if (distanceToTarget <= circleTarget.maxCircleDistance && distanceToTarget >= circleTarget.minCircleDistance && pathBlocked.pathBlocked == 0) {
+				if (distanceToTarget <= circleTarget.maxCircleDistance && distanceToTarget >= circleTarget.minCircleDistance && pathBlocked.CanSee == 1) {
 					
 					var initial = component.Value;
 					var better = new float3(initial.x, 0f, initial.z);
@@ -87,7 +86,7 @@ namespace HiddenUnits {
 			public ComponentDataArray<Direction> Directions;
 
 			[ReadOnly]
-			public ComponentDataArray<CircleTarget> CircleTargets;
+			public ComponentDataArray<HiddenUnits.CircleTarget> CircleTargets;
 
 			[ReadOnly]
 			public ComponentDataArray<HasTargetTag> HasTargetTags;

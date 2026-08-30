@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 
 namespace HiddenUnits 
 { 
@@ -9,10 +10,15 @@ namespace HiddenUnits
            Attach();
        }
 
-        public void Attach() 
+        public void Attach()
         {
-            if (!transform.parent.parent.GetComponent<TeamHolder>() || !transform.parent.parent.GetComponent<TeamHolder>().spawnerWeapon || !transform.parent.parent.GetComponent<TeamHolder>().spawnerWeapon.transform) return;
-            transform.SetParent(transform.parent.parent.GetComponent<TeamHolder>().spawnerWeapon.transform);
+            var teamHolders = transform.GetComponentsInParent<TeamHolder>();
+            if (teamHolders.Length <= 0) return;
+            
+            var teamHolderWithWeapon = teamHolders.Where(x => x.spawnerWeapon != null).ToArray();
+            if (teamHolderWithWeapon.Length <= 0) return;
+            
+            transform.SetParent(teamHolderWithWeapon[0].spawnerWeapon.transform);
         }
     }
 }

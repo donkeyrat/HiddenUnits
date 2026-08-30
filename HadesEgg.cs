@@ -5,8 +5,45 @@ using Landfall.TABS;
 
 namespace HiddenUnits {
 
-    public class HadesEgg : MonoBehaviour {
+    public class HadesEgg : MonoBehaviour
+    {
+        private float StartVolume;
+        
+        [HideInInspector]
+        public bool hasHatched;
+        
+        [HideInInspector]
+        public List<Unit> hitList = new();
 
+        public UnityEvent hatchEvent = new UnityEvent();
+
+        [Header("Particles")]
+        public ParticleSystem souls;
+        public ParticleSystemForceField soulField;
+        public float particleMultiplier = 0.05f;
+
+        [Header("Health")]
+        public float currentHealth;
+        public float requiredHealth = 777f;
+
+        [Header("Audio")]
+        public AudioSource eggLoop;
+        public float healthVolumeMultiplier = 0.5f;
+        public float audioLerpSpeed = 2f;
+
+        private void Start()
+        {
+            StartVolume = eggLoop.volume;
+        }
+
+        private void Update()
+        {
+            if (hasHatched)
+            {
+                eggLoop.volume = Mathf.Lerp(eggLoop.volume, 0f, Time.deltaTime * audioLerpSpeed);
+            }
+        }
+        
         public void AddHealth(float amount)
         {
             if (hasHatched) return;
@@ -23,27 +60,19 @@ namespace HiddenUnits {
             {
                 emit.rateOverTime = emit.rateOverTime.constant + amount * particleMultiplier;
             }
+
+            eggLoop.volume = StartVolume + currentHealth / requiredHealth * healthVolumeMultiplier;
         }
 
-        public void HatchEgg() {
-            
+        public void HatchEgg() 
+        {
             hatchEvent.Invoke();
             hasHatched = true;
         }
 
-        [HideInInspector]
-        public bool hasHatched;
-
-        public UnityEvent hatchEvent = new UnityEvent();
-
-        public ParticleSystem souls;
-        public ParticleSystemForceField soulField;
-        public float particleMultiplier = 0.05f;
-
-        public float currentHealth;
-        public float requiredHealth = 777f;
-
-        [HideInInspector]
-        public List<Unit> hitList = new();
+        public void KillEgg()
+        {
+            hasHatched = true;
+        }
     }
 }

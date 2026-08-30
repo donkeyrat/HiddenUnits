@@ -15,7 +15,7 @@ namespace HiddenUnits
             offset = GetComponentInParent<Holdable>().hl ? new Vector3(-offset.x, offset.y, offset.z) : offset;
         }
         
-        public void Update()
+        public void FixedUpdate()
         {
             DamageCounter += Time.deltaTime;
             if (currentState == ClubState.Idle && hoverTarget)
