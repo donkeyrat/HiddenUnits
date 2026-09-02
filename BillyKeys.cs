@@ -130,6 +130,7 @@ namespace HiddenUnits
             LoopSource.PlayOneShot(hitClip);
             unlockAllEvent.Invoke();
             StartCoroutine(ShrinkUnlockValue());
+            HUMain.CheckUnlockConditions();
         }
 
         public IEnumerator ShrinkUnlockValue()

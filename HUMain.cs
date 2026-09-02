@@ -12,6 +12,7 @@ using DM;
 using Landfall.TABS.GameMode;
 using LevelCreator;
 using TGCore;
+using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 
 namespace HiddenUnits 
@@ -110,6 +111,8 @@ namespace HiddenUnits
                 else if (lvl.name.Contains("HULevel"))
                 { 
                     allowed.AddRange(TGMain.landfallDb.GetFactions().ToList().Where(x => x.m_displayFaction));
+                    allowed.Add(steampunkFaction);
+                    allowed.Add(egyptFaction);
                 }
                 
                 if (lvl.name.Contains("MapEquals"))
@@ -138,15 +141,17 @@ namespace HiddenUnits
             //    audio.outputAudioMixerGroup = ServiceLocator.GetService<GameModeService>().AudioSettings.AudioMixer.outputAudioMixerGroup;
             //}
 
-            foreach (var unit in ContentDatabase.Instance().LandfallContentDatabase.GetUnitBlueprints().Where(unit => unit.name.Contains("Vampire")))
-            {
-                var originalAbilities = unit.objectsToSpawnAsChildren.ToList();
-                originalAbilities.Add(hiddenUnits.LoadAsset<GameObject>("Move_Vampire_Vampire"));
-                unit.objectsToSpawnAsChildren = originalAbilities.ToArray();
-            }
 
-
+            AudioMixer = Resources.FindObjectsOfTypeAll<AudioMixerGroup>()[0];
             var allGameObjects = hiddenUnits.LoadAllAssets<GameObject>();
+            foreach (var obj in allGameObjects.Where(x => x.GetComponentInChildren<AudioSource>()))
+            {
+                foreach (var audio in obj.GetComponentsInChildren<AudioSource>())
+                {
+                    audio.outputAudioMixerGroup = AudioMixer;
+                }
+            }
+            
             TGAddons.AddItems(hiddenUnits.LoadAllAssets<UnitBlueprint>(), factions,
                 hiddenUnits.LoadAllAssets<TABSCampaignAsset>(), hiddenUnits.LoadAllAssets<TABSCampaignLevelAsset>(),
                 hiddenUnits.LoadAllAssets<VoiceBundle>(), hiddenUnits.LoadAllAssets<FactionIcon>(),
@@ -157,14 +162,47 @@ namespace HiddenUnits
             TGMain.objectTables.Add(huMaps.LoadAsset<DMEditorObjectTable>("HUEditorObjectTable"));
         }
 
+        public static void CheckUnlockConditions()
+        {
+            var saveLoader = ServiceLocator.GetService<ISaveLoaderService>();
+
+            foreach (var unlockCondition in moddedConditions.m_unlockConditions)
+            {
+                if (saveLoader.HasUnlockedSecret(unlockCondition.m_unlock))
+                {
+                    continue;
+                }
+            
+                var allUnlocked = true;
+                foreach (var unlock in unlockCondition.m_conditionUnlocks)
+                {
+                    if (!saveLoader.HasUnlockedSecret(unlock))
+                    {
+                        allUnlocked = false;
+                    }
+                }
+
+                if (allUnlocked)
+                {
+                    saveLoader.UnlockSecret(unlockCondition.m_unlock);
+                    ServiceLocator.GetService<ModalPanel>().OpenUnlockPanel(unlockCondition.m_unlockDescription, unlockCondition.m_unlockImage);
+                }
+            }
+            
+        }
+
         public static bool InfiniteScalingEnabled => HULauncher.configInfiniteScalingEnabled.Value;
         
         public static bool EvilBeesEnabled => HULauncher.configEvilBeesEnabled.Value;
+        
+        public static bool EvilTrainEnabled => HULauncher.configEvilTrainEnabled.Value;
 
         public static AssetBundle hiddenUnits = AssetBundle.LoadFromMemory(Properties.Resources.hiddenunits);
 
         public static AssetBundle huMaps = AssetBundle.LoadFromMemory(Properties.Resources.humaps);
 
-        public static SecretUnlockConditions campaignUnlocker = hiddenUnits.LoadAsset<SecretUnlockConditions>("HUCampaignUnlocker");
+        public static SecretUnlockConditions moddedConditions = hiddenUnits.LoadAsset<SecretUnlockConditions>("HUConditionUnlocker");
+
+        public static AudioMixerGroup AudioMixer;
     }
 }

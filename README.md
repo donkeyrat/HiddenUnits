@@ -319,6 +319,60 @@ The mod's [**Github**](https://github.com/donkeyrat/HiddenUnits) is now the only
 * Fixed every other bug ever reported
 * Probably other changes I forgot about
 
+### 2.0.1
+* Fixed certain sounds bypassing volume settings
+* Fixed Seraphim effects looking weird with motion blur
+* Adjusted Steampunk lighting
+* Nerfed Automaton health slightly
+* Changed Sovereignity ability to work differently in the Unit Creator than on the Storm King
+* Adjusted Crab King's fighting style
+* Added a version of the Crab unit base without the ship for UCM users
+* Reduced mod file size
+* Added a Bug DLC setting for constant trains
+* Added smoke particles to trains
+
+### 2.0.2
+* Added Sanguinarian's projectile to the Unit Creator
+* Increased Vampire Hunter's price to 800
+* Buffed the Smokestack's accuracy and cooldown
+* Buffed the Iron Behemoth's air strike, bullet damage, and health
+* Nerfed the Powerminer's damage and armor health slightly
+* Fixed areas where you couldn't place units on the Steampunk map
+* Fixed missing Royal Scepter in the Unit Creator
+* Fixed Hidden Units campaign and Chicken Man Man not unlocking (will unlock once you re-launch if you got the necessary unlock pieces)
+* Fixed a gap in the geometry on the Steampunk map
+* Fixed Hephaestus armor appearing massive when a Fire Giant or Ice Giant wears it (it no longer shows visually)
+* Fixed Blaze unit base replacing the Angel unit base
+* Fixed Nile Queen's fire healing units
+* Fixed incorrectly named Butcher weapon and missing Butcher projectile in the Unit Creator
+
+### 2.0.3/2.0.4
+* Added Gorgon eyes to the Unit Creator
+* Fixed the problem with unlocking, for real this time!
+* Fixed Iron Behemoth hitting an invisible wall on Egypt 1
+* Fixed Serval Blade having a longer range and starting on cooldown
+* Fixed Gorgon breaking Settings menu
+
+### 2.0.5
+* Added bleed effect to the Butcher's Unit Creator melee weapons, reduced contact damage and increased cooldown
+* Increased Chicken Man Man price to 6000
+* Increased budget of most Hidden Units campaign levels
+* Made Chicken Man Man's summoned Chicken Men not count for win conditions
+* Slightly nerfed Butcher's bleed damage
+* Reduced Beekeeper's bee swarm targeting range
+
+### 2.0.6
+* Adjusted Steampunk map lighting 
+* Fixed Sanguinarian, Sage, and Swordcaster attacks not working after reviving
+* Fixed Box Cannon, Sage, Emperor, and Warhorn afterimage effects not working
+* Fixed several Storm King props not appearing in the Unit Creator
+* Fixed many props not fading from a correct distance with low LOD settings
+* Fixed Crab King glitching out when tased
+* Fixed Sanguinarian projectile in the Unit Creator never disappearing
+* Fixed Grieving Titan not using root ability
+* Fixed Thor's cape and Gorgon's snakes glitching out when they are frozen to death
+* Fixed Steampunk and Egypt factions not being available in the Hidden Units campaign
+* Fixed Chicken Man Man running out of Chicken Men
 
 ## Credits
 
@@ -326,27 +380,7 @@ This mod was created by Team Grad, an ambitious mod team that aims to improve th
 
 **BD - Coder/Unit Designer/Owner**
 
-**Terren - Modeler/Unit Designer/SFX Designer/Icon Artist/Concept Artist**
-
-**Kermate - Modeler**
-
-**Hambody - Icon Artist/Concept Artist**
-
-**Voup - Composer**
-
-**Grakalor - Quality Checker**
-
-**Doorknob - Icon Artist/Concept Artist**
-
-**StarFan - Translator**
-
-## Credits
-
-This mod was created by Team Grad, an ambitious mod team that aims to improve the game through adding a plethora of new content to Totally Accurate Battle Simulator!
-
-**BD - Coder/Unit Designer/Owner**
-
-**Terren - Modeler/Unit Designer/SFX Designer/Icon Artist/Concept Artist**
+**Terren - Modeler/Unit Designer/SFX Designer/Icon Artist/Concept Artist/Russian Translator**
 
 **Hambody - Icon Artist/Concept Artist**
 
@@ -354,15 +388,25 @@ This mod was created by Team Grad, an ambitious mod team that aims to improve th
 
 **Whisperjas - Composer**
 
+**Hyeong - Train Modeler**
+
 **Grakalor - Quality Checker/Balancer**
 
 **Doorknob - Icon Artist/Concept Artist**
 
-**StarFan - Translator**
+**StarFan - Chinese Translator**
+
+**Clubmaster - French Translator**
+
+**Tiago - Portugeuse Translator**
 
 ## Music
 
 The new music for the mod was composed by *Whisperjas*, a talented musician. You can view the tracks on Youtube below:
+
+[**Steampunk Placement**](https://www.youtube.com/watch?v=fOQHOUx0Wo0)
+
+[**Steampunk Battle**](https://www.youtube.com/watch?v=a2cQyybhkKo)
 
 [**Egypt Placement**](https://www.youtube.com/watch?v=sq79L46WuAw)
 
