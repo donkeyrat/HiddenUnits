@@ -373,6 +373,7 @@ The mod's [**Github**](https://github.com/donkeyrat/HiddenUnits) is now the only
 * Fixed Thor's cape and Gorgon's snakes glitching out when they are frozen to death
 * Fixed Steampunk and Egypt factions not being available in the Hidden Units campaign
 * Fixed Chicken Man Man running out of Chicken Men
+* Fixed missing collision on Steampunk pipe
 
 ## Credits
 
