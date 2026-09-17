@@ -13,7 +13,7 @@ using UnityEngine.UI;
 
 namespace HiddenUnits 
 {
-    [BepInPlugin("teamgrad.hiddenunits", "Hidden Units", "2.0.6")]
+    [BepInPlugin("teamgrad.hiddenunits", "Hidden Units", "2.0.7")]
     [BepInDependency("teamgrad.core")]
 	public class HULauncher : TGMod
 	{

@@ -375,6 +375,33 @@ The mod's [**Github**](https://github.com/donkeyrat/HiddenUnits) is now the only
 * Fixed Chicken Man Man running out of Chicken Men
 * Fixed missing collision on Steampunk pipe
 
+### 2.0.7
+* Added Soul projectile to the Unit Creator, spawns a Hades soul unit
+* Afterimage ability in the Unit Creator now clones the original unit instead of spawning samurai (the Emperor version can be accessed with UCM)
+* Witch Doctor's voodoo doll now lifts targeted units while they're being zombified (and the doll itself also flies up)
+* Defeated zombies now lose their color after death to better show that they're fully dead
+* Butcher's swinging sound has been swapped
+* The hot air balloon on the Steampunk map now remains stationary while in placement mode
+* The Mechanic on the hot air balloon in Cog Herring has been removed
+* Buffed Grieving Titan's health
+* Buffed Centaur's health and sword damage, nerfed arrow accuracy and damage
+* Buffed Crab King's health
+* Buffed Beekeeper bee damage, targeting radius, and duration
+* Fixed Storm King not having a green outline
+* Fixed Werewolves moving too much while idle
+* Fixed Vampire Hunter having weapons equipped on the wrong hands
+* Fixed The Queen's Royal Executioners being parryable by weaker parry abilities
+* Fixed missing models and materials on Egypt 1
+* Fixed Box Cannon emitting idle sound while dead
+* Fixed Iron Behemoth flying away while time is slowed
+* Fixed Trojan Chicken causing units to disappear and crashing the game
+* Fixed pants not applying properly to the Gorgon
+* Fixed Magnetic Rod running into walls more than it should on Steampunk map
+* Fixed Triton's trident disappearing if thrown into the void
+* Fixed Silver Crossbow and Reaving Axe having incorrect color wheels
+* Fixed Iron Behemoth and Tower breaking campaign budgets
+* Fixed dead Warhorn ghosts not disappearing
+
 ## Credits
 
 This mod was created by Team Grad, an ambitious mod team that aims to improve the game through adding a plethora of new content to Totally Accurate Battle Simulator!
