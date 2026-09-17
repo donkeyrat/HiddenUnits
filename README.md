@@ -401,6 +401,7 @@ The mod's [**Github**](https://github.com/donkeyrat/HiddenUnits) is now the only
 * Fixed Silver Crossbow and Reaving Axe having incorrect color wheels
 * Fixed Iron Behemoth and Tower breaking campaign budgets
 * Fixed dead Warhorn ghosts not disappearing
+* Fixed units with Unkillable ability breaking the game when frozen
 
 ## Credits
 
